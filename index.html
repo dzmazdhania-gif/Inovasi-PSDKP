@@ -6,7 +6,10 @@
 
     <title>Marine-Check Bali | Marine Utilization Monitoring</title>
 
-    <!-- LEAFLET -->
+    <!-- =====================================================
+         LEAFLET
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -14,13 +17,23 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- ESRI LEAFLET -->
+
+    <!-- =====================================================
+         ESRI LEAFLET
+    ====================================================== -->
+
     <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
 
-    <!-- TURF -->
+
+    <!-- =====================================================
+         TURF
+    ====================================================== -->
+
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
 
+
     <style>
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -39,6 +52,7 @@
             height: 100vh;
             width: 100vw;
         }
+
 
         /* =========================
            SIDEBAR
@@ -86,6 +100,7 @@
             margin-bottom: 12px;
         }
 
+
         /* =========================
            LAYER BUTTONS
         ========================= */
@@ -129,6 +144,7 @@
             background: #0f7183;
         }
 
+
         /* =========================
            DASHBOARD
         ========================= */
@@ -159,6 +175,7 @@
             color: #0f4c5c;
         }
 
+
         /* =========================
            DATA STATUS
         ========================= */
@@ -181,6 +198,7 @@
             color: #b7791f;
         }
 
+
         /* =========================
            DISCLAIMER
         ========================= */
@@ -194,6 +212,7 @@
             padding: 10px;
             margin-top: auto;
         }
+
 
         /* =========================
            MAIN
@@ -209,6 +228,7 @@
             width: 100%;
             height: 100%;
         }
+
 
         /* =========================
            MAP TITLE
@@ -236,6 +256,7 @@
             font-size: 11px;
             color: #6b7280;
         }
+
 
         /* =========================
            DETAIL PANEL
@@ -298,6 +319,7 @@
             word-break: break-word;
         }
 
+
         /* =========================
            STATUS BADGES
         ========================= */
@@ -330,6 +352,7 @@
             color: #3730a3;
         }
 
+
         /* =========================
            LEGEND
         ========================= */
@@ -361,6 +384,7 @@
             border-radius: 50%;
             margin-right: 7px;
         }
+
 
         /* =========================
            RESPONSIVE
@@ -400,20 +424,23 @@
                 max-height: 45vh;
             }
         }
+
     </style>
 </head>
+
 
 <body>
 
 <div id="app">
 
-    <!-- =========================
+    <!-- =====================================================
          SIDEBAR
-    ========================= -->
+    ====================================================== -->
 
     <aside id="sidebar">
 
         <div class="sidebar-header">
+
             <div class="brand">
                 Marine-Check Bali
             </div>
@@ -421,6 +448,7 @@
             <div class="subtitle">
                 Marine Utilization Monitoring & Spatial Screening
             </div>
+
         </div>
 
 
@@ -432,6 +460,7 @@
                 Map Layers
             </div>
 
+
             <button
                 class="layer-btn active"
                 id="btn-structures"
@@ -440,6 +469,7 @@
                 <span>Marine Structures</span>
                 <span class="layer-indicator"></span>
             </button>
+
 
             <button
                 class="layer-btn active"
@@ -450,6 +480,7 @@
                 <span class="layer-indicator"></span>
             </button>
 
+
             <button
                 class="layer-btn active"
                 id="btn-coastline"
@@ -458,6 +489,7 @@
                 <span>BIG Coastline</span>
                 <span class="layer-indicator"></span>
             </button>
+
 
             <button
                 class="layer-btn"
@@ -479,9 +511,11 @@
                 Screening Dashboard
             </div>
 
+
             <div class="metrics">
 
                 <div class="metric-card">
+
                     <div class="metric-label">
                         Total Structures
                     </div>
@@ -492,10 +526,12 @@
                     >
                         -
                     </div>
+
                 </div>
 
 
                 <div class="metric-card">
+
                     <div class="metric-label">
                         Matched
                     </div>
@@ -506,10 +542,12 @@
                     >
                         -
                     </div>
+
                 </div>
 
 
                 <div class="metric-card">
+
                     <div class="metric-label">
                         Review
                     </div>
@@ -520,10 +558,12 @@
                     >
                         -
                     </div>
+
                 </div>
 
 
                 <div class="metric-card">
+
                     <div class="metric-label">
                         Priority Verification
                     </div>
@@ -534,6 +574,7 @@
                     >
                         -
                     </div>
+
                 </div>
 
             </div>
@@ -587,9 +628,9 @@
     </aside>
 
 
-    <!-- =========================
-         MAIN MAP
-    ========================= -->
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
 
     <main id="main">
 
@@ -628,6 +669,7 @@
 
             </div>
 
+
             <div
                 class="detail-body"
                 id="detailBody"
@@ -657,25 +699,13 @@
     };
 
 
-    /*
-     * BIG Coastline MapServer
-     *
-     * Rendered directly using Esri Leaflet.
-     *
-     * This avoids downloading the entire Indonesia coastline
-     * as GeoJSON to the browser.
-     */
+    /* =========================================================
+       BIG SERVICES
+    ========================================================= */
 
     const BIG_COASTLINE_URL =
         "https://geoservices.big.go.id/rbi/rest/services/GARISPANTAI/GarisPantai_25K/MapServer";
 
-
-    /*
-     * BIG Administrative Boundary
-     *
-     * If your existing BIG admin service differs,
-     * replace this URL with the appropriate MapServer layer.
-     */
 
     const BIG_ADMIN_URL =
         "https://geoservices.big.go.id/rbi/rest/services/ADMINISTRASI/Administrasi_25K/MapServer";
@@ -700,7 +730,7 @@
 
 
     /* =========================================================
-       BASEMAPS
+       BASEMAP
     ========================================================= */
 
     const satellite = L.tileLayer(
@@ -709,10 +739,12 @@
         "World_Imagery/MapServer/tile/{z}/{y}/{x}",
 
         {
+
             maxZoom: 20,
 
             attribution:
                 "Tiles © Esri"
+
         }
 
     );
@@ -723,10 +755,12 @@
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
         {
+
             maxZoom: 19,
 
             attribution:
                 "&copy; OpenStreetMap contributors"
+
         }
 
     );
@@ -739,6 +773,16 @@
        LAYER GROUPS
     ========================================================= */
 
+    /*
+     * PENTING:
+     *
+     * Jangan membuat coastline di dalam object ini.
+     * Kita buat setelah map dan layer lokal siap.
+     *
+     * Dengan begitu kalau Esri Leaflet gagal,
+     * structures dan permits tetap berjalan.
+     */
+
     const layers = {
 
         structures:
@@ -747,25 +791,8 @@
         permits:
             L.layerGroup().addTo(map),
 
-        /*
-         * IMPORTANT:
-         *
-         * Coastline is NOT a normal LayerGroup anymore.
-         *
-         * It is an Esri Leaflet Dynamic Map Layer.
-         */
-
         coastline:
-            L.esri.dynamicMapLayer({
-
-                url: BIG_COASTLINE_URL,
-
-                opacity: 1,
-
-                attribution:
-                    "Garis Pantai © Badan Informasi Geospasial"
-
-            }).addTo(map),
+            null,
 
         admin:
             L.layerGroup()
@@ -774,19 +801,143 @@
 
 
     /* =========================================================
+       BIG COASTLINE
+    ========================================================= */
+
+    let coastlineLoaded = false;
+
+
+    function loadBIGCoastline() {
+
+        try {
+
+            /*
+             * Pastikan Esri Leaflet benar-benar tersedia.
+             */
+
+            if (
+                typeof L.esri === "undefined"
+            ) {
+
+                console.error(
+                    "Esri Leaflet tidak berhasil dimuat."
+                );
+
+                updateDataStatus();
+
+                return;
+
+            }
+
+
+            if (
+                typeof L.esri.dynamicMapLayer !== "function"
+            ) {
+
+                console.error(
+                    "L.esri.dynamicMapLayer tidak tersedia."
+                );
+
+                updateDataStatus();
+
+                return;
+
+            }
+
+
+            /*
+             * BIG coastline dibuat sebagai Dynamic Map Layer.
+             */
+
+            layers.coastline =
+                L.esri.dynamicMapLayer({
+
+                    url:
+                        BIG_COASTLINE_URL,
+
+                    opacity:
+                        1,
+
+                    attribution:
+                        "Garis Pantai © Badan Informasi Geospasial"
+
+                });
+
+
+            /*
+             * Tangkap error dari service BIG.
+             */
+
+            layers.coastline.on(
+                "requesterror",
+                function(error) {
+
+                    console.error(
+                        "BIG coastline request error:",
+                        error
+                    );
+
+                    coastlineLoaded = false;
+
+                    updateDataStatus();
+
+                }
+            );
+
+
+            /*
+             * Tambahkan coastline ke map.
+             */
+
+            layers.coastline.addTo(map);
+
+
+            coastlineLoaded = true;
+
+
+            updateDataStatus();
+
+
+            console.log(
+                "BIG coastline layer berhasil dibuat."
+            );
+
+        }
+
+        catch (error) {
+
+            /*
+             * Kalau coastline gagal,
+             * JANGAN menghentikan aplikasi.
+             */
+
+            console.error(
+                "BIG coastline error:",
+                error
+            );
+
+
+            layers.coastline =
+                null;
+
+
+            coastlineLoaded =
+                false;
+
+
+            updateDataStatus();
+
+        }
+
+    }
+
+
+    /* =========================================================
        ADMINISTRATIVE BOUNDARY
     ========================================================= */
 
     let adminGeoJSON = null;
 
-
-    /*
-     * This function uses the BIG REST query service
-     * for administrative boundaries.
-     *
-     * If your BIG administrative service uses a different
-     * layer structure, only this section needs adjustment.
-     */
 
     async function loadBIGAdmin() {
 
@@ -797,15 +948,20 @@
                 "/0/query?" +
                 new URLSearchParams({
 
-                    where: "WADMPR = 'Bali'",
+                    where:
+                        "WADMPR = 'Bali'",
 
-                    outFields: "*",
+                    outFields:
+                        "*",
 
-                    returnGeometry: "true",
+                    returnGeometry:
+                        "true",
 
-                    outSR: "4326",
+                    outSR:
+                        "4326",
 
-                    f: "geojson"
+                    f:
+                        "geojson"
 
                 });
 
@@ -817,7 +973,8 @@
             if (!response.ok) {
 
                 throw new Error(
-                    "HTTP " + response.status
+                    "HTTP " +
+                    response.status
                 );
 
             }
@@ -827,27 +984,49 @@
                 await response.json();
 
 
-            adminGeoJSON = L.geoJSON(
+            /*
+             * Kalau BIG mengembalikan error JSON,
+             * jangan sampai aplikasi berhenti.
+             */
 
-                data,
+            if (
+                data.error
+            ) {
 
-                {
+                throw new Error(
+                    data.error.message ||
+                    "BIG administrative service error"
+                );
 
-                    style: {
+            }
 
-                        color: "#555555",
 
-                        weight: 1.5,
+            adminGeoJSON =
+                L.geoJSON(
 
-                        opacity: 0.8,
+                    data,
 
-                        fillOpacity: 0
+                    {
+
+                        style: {
+
+                            color:
+                                "#555555",
+
+                            weight:
+                                1.5,
+
+                            opacity:
+                                0.8,
+
+                            fillOpacity:
+                                0
+
+                        }
 
                     }
 
-                }
-
-            );
+                );
 
 
             adminGeoJSON.addTo(
@@ -866,6 +1045,11 @@
                 error
             );
 
+
+            adminGeoJSON =
+                null;
+
+
             updateDataStatus();
 
         }
@@ -874,12 +1058,15 @@
 
 
     /* =========================================================
-       LOAD LOCAL GEOJSON
+       LOCAL GEOJSON
     ========================================================= */
 
-    let structuresGeoJSON = null;
+    let structuresGeoJSON =
+        null;
 
-    let permitsGeoJSON = null;
+
+    let permitsGeoJSON =
+        null;
 
 
     async function loadGeoJSON(
@@ -899,7 +1086,8 @@
             if (!response.ok) {
 
                 throw new Error(
-                    "HTTP " + response.status
+                    "HTTP " +
+                    response.status
                 );
 
             }
@@ -909,7 +1097,10 @@
                 await response.json();
 
 
-            if (layerName === "structures") {
+            if (
+                layerName ===
+                "structures"
+            ) {
 
                 structuresGeoJSON =
                     renderStructures(data);
@@ -917,7 +1108,10 @@
             }
 
 
-            if (layerName === "permits") {
+            if (
+                layerName ===
+                "permits"
+            ) {
 
                 permitsGeoJSON =
                     renderPermits(data);
@@ -934,10 +1128,11 @@
         catch (error) {
 
             console.error(
-                "Error loading",
+                "Error loading " +
                 filePath,
                 error
             );
+
 
             const status =
                 document.getElementById(
@@ -945,10 +1140,16 @@
                 );
 
 
-            status.innerHTML +=
-                `<div class="status-item status-warning">
-                    ⚠ Failed to load ${filePath}
-                </div>`;
+            status.innerHTML += `
+
+                <div class="status-item status-warning">
+
+                    ⚠ Failed to load
+                    ${filePath}
+
+                </div>
+
+            `;
 
         }
 
@@ -959,7 +1160,9 @@
        STRUCTURE STYLE
     ========================================================= */
 
-    function structureStyle(feature) {
+    function structureStyle(
+        feature
+    ) {
 
         const properties =
             feature.properties || {};
@@ -975,28 +1178,36 @@
             "#6b7280";
 
 
-        if (status === "matched") {
+        if (
+            status === "matched"
+        ) {
 
             color =
                 "#16a34a";
 
         }
 
-        else if (status === "partial") {
+        else if (
+            status === "partial"
+        ) {
 
             color =
                 "#f59e0b";
 
         }
 
-        else if (status === "outside") {
+        else if (
+            status === "outside"
+        ) {
 
             color =
                 "#dc2626";
 
         }
 
-        else if (status === "review") {
+        else if (
+            status === "review"
+        ) {
 
             color =
                 "#4f46e5";
@@ -1006,15 +1217,20 @@
 
         return {
 
-            color: color,
+            color:
+                color,
 
-            fillColor: color,
+            fillColor:
+                color,
 
-            weight: 1.5,
+            weight:
+                1.5,
 
-            opacity: 1,
+            opacity:
+                1,
 
-            fillOpacity: 0.65
+            fillOpacity:
+                0.65
 
         };
 
@@ -1025,7 +1241,9 @@
        RENDER STRUCTURES
     ========================================================= */
 
-    function renderStructures(data) {
+    function renderStructures(
+        data
+    ) {
 
         const geojson =
             L.geoJSON(
@@ -1040,29 +1258,35 @@
                             latlng
                         ) {
 
+                            const style =
+                                structureStyle(
+                                    feature
+                                );
+
+
                             return L.circleMarker(
 
                                 latlng,
 
                                 {
 
-                                    radius: 7,
+                                    radius:
+                                        7,
 
                                     color:
-                                        structureStyle(
-                                            feature
-                                        ).color,
+                                        style.color,
 
                                     fillColor:
-                                        structureStyle(
-                                            feature
-                                        ).fillColor,
+                                        style.fillColor,
 
-                                    weight: 1.5,
+                                    weight:
+                                        1.5,
 
-                                    opacity: 1,
+                                    opacity:
+                                        1,
 
-                                    fillOpacity: 0.75
+                                    fillOpacity:
+                                        0.75
 
                                 }
 
@@ -1082,14 +1306,20 @@
                         ) {
 
                             layer.on(
+
                                 "click",
+
                                 function() {
 
                                     showStructureDetail(
-                                        feature.properties || {}
+
+                                        feature.properties ||
+                                        {}
+
                                     );
 
                                 }
+
                             );
 
                         }
@@ -1117,15 +1347,20 @@
 
         return {
 
-            color: "#7c3aed",
+            color:
+                "#7c3aed",
 
-            weight: 2,
+            weight:
+                2,
 
-            opacity: 0.9,
+            opacity:
+                0.9,
 
-            fillColor: "#8b5cf6",
+            fillColor:
+                "#8b5cf6",
 
-            fillOpacity: 0.18
+            fillOpacity:
+                0.18
 
         };
 
@@ -1136,7 +1371,9 @@
        RENDER PERMITS
     ========================================================= */
 
-    function renderPermits(data) {
+    function renderPermits(
+        data
+    ) {
 
         const geojson =
             L.geoJSON(
@@ -1156,7 +1393,8 @@
                         ) {
 
                             const props =
-                                feature.properties || {};
+                                feature.properties ||
+                                {};
 
 
                             let popup =
@@ -1166,12 +1404,14 @@
                             Object.keys(
                                 props
                             ).forEach(
+
                                 function(key) {
 
                                     popup +=
                                         `<br><b>${key}</b>: ${props[key]}`;
 
                                 }
+
                             );
 
 
@@ -1218,7 +1458,8 @@
 
         const status =
             String(
-                properties.screening_status || "-"
+                properties.screening_status ||
+                "-"
             ).toLowerCase();
 
 
@@ -1226,21 +1467,27 @@
             "badge-review";
 
 
-        if (status === "matched") {
+        if (
+            status === "matched"
+        ) {
 
             badgeClass =
                 "badge-matched";
 
         }
 
-        else if (status === "partial") {
+        else if (
+            status === "partial"
+        ) {
 
             badgeClass =
                 "badge-partial";
 
         }
 
-        else if (status === "outside") {
+        else if (
+            status === "outside"
+        ) {
 
             badgeClass =
                 "badge-outside";
@@ -1309,11 +1556,13 @@
                 </div>
 
                 <div class="detail-value">
+
                     ${
                         properties.area_m2 !== undefined
-                            ? properties.area_m2 + " m²"
-                            : "-"
+                        ? properties.area_m2 + " m²"
+                        : "-"
                     }
+
                 </div>
 
             </div>
@@ -1327,7 +1576,9 @@
 
                 <div class="detail-value">
 
-                    <span class="badge ${badgeClass}">
+                    <span
+                        class="badge ${badgeClass}"
+                    >
                         ${properties.screening_status ?? "-"}
                     </span>
 
@@ -1403,7 +1654,9 @@
 
     function updateDashboard() {
 
-        if (!structuresGeoJSON) {
+        if (
+            !structuresGeoJSON
+        ) {
 
             return;
 
@@ -1431,17 +1684,20 @@
 
 
                 const props =
-                    layer.feature.properties || {};
+                    layer.feature.properties ||
+                    {};
 
 
                 const status =
                     String(
-                        props.screening_status || ""
+                        props.screening_status ||
+                        ""
                     ).toLowerCase();
 
 
                 if (
-                    status === "matched"
+                    status ===
+                    "matched"
                 ) {
 
                     matched++;
@@ -1450,8 +1706,13 @@
 
 
                 if (
-                    status === "review" ||
-                    status === "partial"
+
+                    status ===
+                    "review" ||
+
+                    status ===
+                    "partial"
+
                 ) {
 
                     review++;
@@ -1461,19 +1722,24 @@
 
                 const priorityValue =
                     String(
-                        props.priority || ""
+                        props.priority ||
+                        ""
                     ).toLowerCase();
 
 
                 if (
 
-                    priorityValue === "high" ||
+                    priorityValue ===
+                    "high" ||
 
-                    priorityValue === "1" ||
+                    priorityValue ===
+                    "1" ||
 
-                    priorityValue === "yes" ||
+                    priorityValue ===
+                    "yes" ||
 
-                    priorityValue === "priority"
+                    priorityValue ===
+                    "priority"
 
                 ) {
 
@@ -1524,15 +1790,20 @@
             );
 
 
-        let html = "";
+        let html =
+            "";
 
 
-        if (structuresGeoJSON) {
+        if (
+            structuresGeoJSON
+        ) {
 
             html += `
+
                 <div class="status-item status-ok">
                     ✓ Marine structures loaded
                 </div>
+
             `;
 
         }
@@ -1540,20 +1811,26 @@
         else {
 
             html += `
+
                 <div class="status-item status-warning">
                     ⚠ Marine structures not loaded
                 </div>
+
             `;
 
         }
 
 
-        if (permitsGeoJSON) {
+        if (
+            permitsGeoJSON
+        ) {
 
             html += `
+
                 <div class="status-item status-ok">
                     ✓ Permit / PKKPRL areas loaded
                 </div>
+
             `;
 
         }
@@ -1561,37 +1838,65 @@
         else {
 
             html += `
+
                 <div class="status-item status-warning">
                     ⚠ Permit areas not loaded
                 </div>
+
             `;
 
         }
 
 
-        /*
-         * Coastline is loaded as an Esri Leaflet layer.
-         *
-         * There is intentionally no coastlineGeoJSON variable.
-         */
-
-        if (layers.coastline) {
+        if (
+            coastlineLoaded
+        ) {
 
             html += `
+
                 <div class="status-item status-ok">
                     ✓ BIG coastline service
                 </div>
+
+            `;
+
+        }
+
+        else {
+
+            html += `
+
+                <div class="status-item status-warning">
+                    ⚠ BIG coastline unavailable
+                </div>
+
             `;
 
         }
 
 
-        if (adminGeoJSON) {
+        if (
+            adminGeoJSON
+        ) {
 
             html += `
+
                 <div class="status-item status-ok">
                     ✓ BIG administrative boundary
                 </div>
+
+            `;
+
+        }
+
+        else {
+
+            html += `
+
+                <div class="status-item status-warning">
+                    ⚠ BIG administrative boundary unavailable
+                </div>
+
             `;
 
         }
@@ -1617,7 +1922,8 @@
 
         const button =
             document.getElementById(
-                "btn-" + layerName
+                "btn-" +
+                layerName
             );
 
 
@@ -1636,6 +1942,7 @@
                 layer
             );
 
+
             button.classList.remove(
                 "active"
             );
@@ -1647,6 +1954,7 @@
             layer.addTo(
                 map
             );
+
 
             button.classList.add(
                 "active"
@@ -1663,9 +1971,11 @@
 
     const baseMaps = {
 
-        "Satellite": satellite,
+        "Satellite":
+            satellite,
 
-        "Street Map": streets
+        "Street Map":
+            streets
 
     };
 
@@ -1679,7 +1989,7 @@
             layers.permits,
 
         "BIG Coastline":
-            layers.coastline,
+            null,
 
         "Administrative Boundary":
             layers.admin
@@ -1687,19 +1997,21 @@
     };
 
 
-    L.control.layers(
+    const layerControl =
+        L.control.layers(
 
-        baseMaps,
+            baseMaps,
 
-        overlayMaps,
+            overlayMaps,
 
-        {
+            {
 
-            collapsed: true
+                collapsed:
+                    true
 
-        }
+            }
 
-    ).addTo(map);
+        ).addTo(map);
 
 
     /* =========================================================
@@ -1708,7 +2020,10 @@
 
     const legend =
         L.control({
-            position: "bottomright"
+
+            position:
+                "bottomright"
+
         });
 
 
@@ -1788,8 +2103,12 @@
 
 
     /* =========================================================
-       INITIAL DATA LOAD
+       INITIAL LOAD
     ========================================================= */
+
+    /*
+     * LOCAL DATA DULU
+     */
 
     loadGeoJSON(
         "structures",
@@ -1803,21 +2122,28 @@
     );
 
 
+    /*
+     * ADMINISTRATIVE BOUNDARY
+     */
+
     loadBIGAdmin();
 
 
     /*
-     * DO NOT call loadBIGCoastline().
+     * COASTLINE BIG
      *
-     * BIG coastline is already rendered through:
-     *
-     * L.esri.dynamicMapLayer()
-     *
+     * Dibuat TERAKHIR supaya kegagalan coastline
+     * tidak mematikan structures / permits.
      */
 
+    loadBIGCoastline();
+
+
+    /*
+     * Initial status
+     */
 
     updateDataStatus();
-
 
 </script>
 
