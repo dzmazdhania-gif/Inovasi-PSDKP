@@ -8,7 +8,6 @@
 
 <title>Marine-Check Bali | Marine Utilization Monitoring</title>
 
-<!-- LEAFLET -->
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -64,7 +63,6 @@ body {
 .brand-title {
     font-size: 20px;
     font-weight: 700;
-    letter-spacing: .2px;
 }
 
 .brand-subtitle {
@@ -516,10 +514,6 @@ body {
 
 <body>
 
-<!-- =====================================================
-     HEADER
-====================================================== -->
-
 <header class="header">
 
     <div class="brand">
@@ -580,8 +574,6 @@ body {
     </div>
 
 
-    <!-- SEARCH -->
-
     <div class="section">
 
         <div class="section-title">
@@ -597,8 +589,6 @@ body {
 
     </div>
 
-
-    <!-- LAYERS -->
 
     <div class="section">
 
@@ -624,7 +614,7 @@ body {
 
         <button
             id="btnCoastline"
-            class="layer-btn"
+            class="layer-btn active"
             onclick="toggleLayer('coastline')"
         >
             🏝️ Coastline
@@ -632,7 +622,7 @@ body {
 
         <button
             id="btnAdmin"
-            class="layer-btn"
+            class="layer-btn active"
             onclick="toggleLayer('admin')"
         >
             🗺️ Administrative Boundary
@@ -640,8 +630,6 @@ body {
 
     </div>
 
-
-    <!-- STATUS -->
 
     <div class="section">
 
@@ -671,8 +659,6 @@ body {
 
     </div>
 
-
-    <!-- OBSERVATION -->
 
     <div class="section">
 
@@ -710,8 +696,6 @@ body {
     </div>
 
 
-    <!-- DATA STATUS -->
-
     <div class="section">
 
         <div class="section-title">
@@ -727,8 +711,6 @@ body {
 
     </div>
 
-
-    <!-- DISCLAIMER -->
 
     <div class="section">
 
@@ -760,8 +742,6 @@ body {
 
 <main class="main">
 
-
-    <!-- DASHBOARD -->
 
     <div class="dashboard">
 
@@ -831,8 +811,6 @@ body {
     </div>
 
 
-    <!-- MAP -->
-
     <div class="map-card">
 
         <div class="map-header">
@@ -859,8 +837,6 @@ body {
 
         <div id="map"></div>
 
-
-        <!-- DETAIL PANEL -->
 
         <div
             id="detailPanel"
@@ -908,11 +884,6 @@ body {
 ====================================================== -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-<!-- =====================================================
-     TURF
-====================================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
 
@@ -979,10 +950,10 @@ const layers = {
         L.layerGroup().addTo(map),
 
     coastline:
-        L.layerGroup(),
+        L.layerGroup().addTo(map),
 
     admin:
-        L.layerGroup()
+        L.layerGroup().addTo(map)
 
 };
 
@@ -1003,27 +974,19 @@ const dataFiles = {
 
 
 /* =========================================================
-   BIG ONLINE SERVICES
+   BIG SERVICES
 ========================================================= */
-
-/*
-    BIG ADMINISTRATIVE BOUNDARY
-*/
 
 const BIG_ADMIN_URL =
     "https://geoservices.big.go.id/rbi/rest/services/Hosted/Wilayah_Administrasi_Kabupaten__Kota/FeatureServer/0/query";
 
-
-/*
-    BIG COASTLINE 1:25.000
-*/
 
 const BIG_COASTLINE_URL =
     "https://geoservices.big.go.id/rbi/rest/services/GARISPANTAI/GarisPantai_25K/MapServer/0/query";
 
 
 /* =========================================================
-   GEOJSON STORAGE
+   DATA STORAGE
 ========================================================= */
 
 let structureGeoJSON = null;
@@ -1036,7 +999,7 @@ let adminGeoJSON = null;
 
 
 /* =========================================================
-   STYLE STRUCTURES
+   STRUCTURE STYLE
 ========================================================= */
 
 function structureStyle(feature) {
@@ -1101,7 +1064,7 @@ function structureStyle(feature) {
 
 
 /* =========================================================
-   STYLE PERMIT
+   PERMIT STYLE
 ========================================================= */
 
 function permitStyle() {
@@ -1120,16 +1083,16 @@ function permitStyle() {
 
 
 /* =========================================================
-   STYLE COASTLINE
+   COASTLINE STYLE
 ========================================================= */
 
 function coastlineStyle() {
 
     return {
 
-        color: "#0ea5e9",
-        weight: 2,
-        fillOpacity: 0
+        color: "#00b7ff",
+        weight: 3,
+        opacity: 1
 
     };
 
@@ -1137,7 +1100,7 @@ function coastlineStyle() {
 
 
 /* =========================================================
-   STYLE ADMIN
+   ADMIN STYLE
 ========================================================= */
 
 function adminStyle() {
@@ -1146,6 +1109,7 @@ function adminStyle() {
 
         color: "#64748b",
         weight: 1,
+        opacity: .8,
         fillOpacity: 0,
         dashArray: "4 5"
 
@@ -1343,15 +1307,19 @@ function renderCoastline(data) {
     layers.coastline.clearLayers();
 
 
-    L.geoJSON(
-        data,
-        {
+    const coastlineLayer =
+        L.geoJSON(
+            data,
+            {
 
-            style:
-                coastlineStyle
+                style:
+                    coastlineStyle
 
-        }
-    ).addTo(
+            }
+        );
+
+
+    coastlineLayer.addTo(
         layers.coastline
     );
 
@@ -1381,12 +1349,19 @@ function renderAdmin(data) {
                     layer
                 ) {
 
+                    const p =
+                        feature.properties
+                        || {};
+
+
                     const name =
-                        feature.properties
-                        ?.namobj
+                        p.namobj
                         ||
-                        feature.properties
-                        ?.wadmkk
+                        p.NAMOBJ
+                        ||
+                        p.wadmkk
+                        ||
+                        p.WADMKK
                         ||
                         "Administrative Area";
 
@@ -1409,7 +1384,7 @@ function renderAdmin(data) {
 
 
 /* =========================================================
-   LOAD BIG ADMINISTRATION
+   LOAD BIG ADMIN
 ========================================================= */
 
 async function loadBIGAdmin() {
@@ -1459,9 +1434,7 @@ async function loadBIGAdmin() {
             await response.json();
 
 
-        if (
-            data.error
-        ) {
+        if (data.error) {
 
             throw new Error(
                 data.error.message
@@ -1511,18 +1484,6 @@ async function loadBIGCoastline() {
                 where:
                     "1=1",
 
-                geometry:
-                    "114.4,-9.0,115.8,-8.0",
-
-                geometryType:
-                    "esriGeometryEnvelope",
-
-                spatialRel:
-                    "esriSpatialRelIntersects",
-
-                inSR:
-                    "4326",
-
                 outFields:
                     "*",
 
@@ -1560,15 +1521,19 @@ async function loadBIGCoastline() {
             await response.json();
 
 
-        if (
-            data.error
-        ) {
+        if (data.error) {
 
             throw new Error(
                 data.error.message
             );
 
         }
+
+
+        console.log(
+            "BIG coastline loaded:",
+            data
+        );
 
 
         coastlineGeoJSON =
@@ -1599,7 +1564,7 @@ async function loadBIGCoastline() {
 
 
 /* =========================================================
-   TOGGLE LAYER
+   TOGGLE LAYERS
 ========================================================= */
 
 function toggleLayer(type) {
@@ -1698,6 +1663,9 @@ function updateDashboard() {
             if (
                 feature.properties
                 ?.priority === true
+                ||
+                feature.properties
+                ?.priority === "true"
             ) {
 
                 priority++;
@@ -1936,93 +1904,39 @@ function updateDataStatus() {
         );
 
 
-    const structureOK =
-        structureGeoJSON !== null;
+    const messages = [];
 
 
-    const permitOK =
-        permitGeoJSON !== null;
+    messages.push(
+        structureGeoJSON !== null
+            ? "✓ Marine structures"
+            : "✗ Marine structures"
+    );
 
 
-    const adminOK =
-        adminGeoJSON !== null;
+    messages.push(
+        permitGeoJSON !== null
+            ? "✓ Permit areas"
+            : "✗ Permit areas"
+    );
 
 
-    const coastlineOK =
-        coastlineGeoJSON !== null;
+    messages.push(
+        adminGeoJSON !== null
+            ? "✓ BIG administration"
+            : "✗ BIG administration"
+    );
 
 
-    let messages = [];
-
-
-    if (structureOK) {
-
-        messages.push(
-            "✓ Marine structures"
-        );
-
-    }
-    else {
-
-        messages.push(
-            "✗ Marine structures"
-        );
-
-    }
-
-
-    if (permitOK) {
-
-        messages.push(
-            "✓ Permit areas"
-        );
-
-    }
-    else {
-
-        messages.push(
-            "✗ Permit areas"
-        );
-
-    }
-
-
-    if (adminOK) {
-
-        messages.push(
-            "✓ BIG administration"
-        );
-
-    }
-    else {
-
-        messages.push(
-            "✗ BIG administration"
-        );
-
-    }
-
-
-    if (coastlineOK) {
-
-        messages.push(
-            "✓ BIG coastline"
-        );
-
-    }
-    else {
-
-        messages.push(
-            "✗ BIG coastline"
-        );
-
-    }
+    messages.push(
+        coastlineGeoJSON !== null
+            ? "✓ BIG coastline"
+            : "✗ BIG coastline"
+    );
 
 
     status.innerHTML =
-        messages.join(
-            "<br>"
-        );
+        messages.join("<br>");
 
 }
 
@@ -2083,17 +1997,9 @@ document
 
 
                         return (
-
-                            id.includes(
-                                query
-                            )
-
+                            id.includes(query)
                             ||
-
-                            name.includes(
-                                query
-                            )
-
+                            name.includes(query)
                         );
 
                     }
@@ -2102,24 +2008,37 @@ document
 
             if (result) {
 
-                const center =
-                    turf.centroid(
-                        result
+                try {
+
+                    const center =
+                        turf.centroid(
+                            result
+                        );
+
+
+                    const coordinates =
+                        center.geometry
+                        .coordinates;
+
+
+                    map.setView(
+                        [
+                            coordinates[1],
+                            coordinates[0]
+                        ],
+                        16
                     );
 
+                }
 
-                const coordinates =
-                    center.geometry
-                    .coordinates;
+                catch(error) {
 
+                    console.error(
+                        "Search zoom error:",
+                        error
+                    );
 
-                map.setView(
-                    [
-                        coordinates[1],
-                        coordinates[0]
-                    ],
-                    16
-                );
+                }
 
 
                 showDetail(
@@ -2161,6 +2080,17 @@ L.control.layers(
 
 
 /* =========================================================
+   SCALE
+========================================================= */
+
+L.control.scale({
+
+    imperial: false
+
+}).addTo(map);
+
+
+/* =========================================================
    INITIAL DATA LOAD
 ========================================================= */
 
@@ -2176,22 +2106,23 @@ loadGeoJSON(
 );
 
 
-/*
-    BIG ONLINE DATA
-*/
-
 loadBIGAdmin();
 
 loadBIGCoastline();
 
 
 /* =========================================================
-   SCALE
+   FORCE MAP RESIZE
 ========================================================= */
 
-L.control.scale({
-    imperial: false
-}).addTo(map);
+setTimeout(
+    function() {
+
+        map.invalidateSize();
+
+    },
+    500
+);
 
 </script>
 
