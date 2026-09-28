@@ -1,836 +1,607 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Marine-Check Bali | Marine Utilization Monitoring</title>
-
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: Inter, Arial, sans-serif;
-    background: #eef4f7;
-    color: #172b3a;
-}
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.header {
-    height: 76px;
-    background: linear-gradient(135deg, #063b4c, #087f8c);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    box-shadow: 0 4px 15px rgba(0,0,0,.15);
-    position: relative;
-    z-index: 1000;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-.brand-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.14);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-}
-
-.brand-title {
-    font-size: 20px;
-    font-weight: 700;
-}
-
-.brand-subtitle {
-    font-size: 11px;
-    opacity: .78;
-    margin-top: 3px;
-}
-
-.header-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    background: rgba(255,255,255,.12);
-    padding: 9px 13px;
-    border-radius: 20px;
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #68e08a;
-}
-
-/* =========================================================
-   LAYOUT
-========================================================= */
-
-.app {
-    display: grid;
-    grid-template-columns: 330px 1fr;
-    height: calc(100vh - 76px);
-}
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-.sidebar {
-    background: white;
-    border-right: 1px solid #dce7eb;
-    overflow-y: auto;
-    padding: 22px;
-}
-
-.section {
-    margin-bottom: 24px;
-}
-
-.section-title {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #58707c;
-    margin-bottom: 12px;
-}
-
-.description {
-    font-size: 12px;
-    line-height: 1.6;
-    color: #61727c;
-}
-
-/* =========================================================
-   BUTTON
-========================================================= */
-
-.layer-btn {
-    width: 100%;
-    border: 1px solid #d8e4e8;
-    background: #f8fbfc;
-    border-radius: 9px;
-    padding: 10px 12px;
-    margin-bottom: 7px;
-    text-align: left;
-    cursor: pointer;
-    color: #29414d;
-    font-size: 12px;
-    transition: .2s;
-}
-
-.layer-btn:hover {
-    border-color: #1496a8;
-    background: #eefbfc;
-}
-
-.layer-btn.active {
-    background: #e4f7f8;
-    border-color: #1496a8;
-    color: #056875;
-    font-weight: 600;
-}
-
-/* =========================================================
-   LEGEND
-========================================================= */
-
-.legend-row {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-bottom: 9px;
-    font-size: 12px;
-    color: #445963;
-}
-
-.legend-box {
-    width: 15px;
-    height: 15px;
-    border-radius: 4px;
-}
-
-.green {
-    background: #22c55e;
-}
-
-.orange {
-    background: #f59e0b;
-}
-
-.red {
-    background: #ef4444;
-}
-
-.blue {
-    background: #168aad;
-}
-
-/* =========================================================
-   INFO CARD
-========================================================= */
-
-.info-card {
-    background: #f5f9fa;
-    border: 1px solid #dce8ec;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 8px;
-}
-
-.info-label {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: #71848d;
-    letter-spacing: .7px;
-}
-
-.info-value {
-    font-size: 15px;
-    font-weight: 700;
-    margin-top: 3px;
-    color: #164555;
-}
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main {
-    padding: 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    min-width: 0;
-}
-
-/* =========================================================
-   DASHBOARD
-========================================================= */
-
-.dashboard {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-}
-
-.metric {
-    background: white;
-    border: 1px solid #dce7eb;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04);
-}
-
-.metric-label {
-    font-size: 10px;
-    color: #71848d;
-    text-transform: uppercase;
-    letter-spacing: .7px;
-}
-
-.metric-value {
-    font-size: 25px;
-    font-weight: 750;
-    margin-top: 4px;
-    color: #174858;
-}
-
-/* =========================================================
-   MAP
-========================================================= */
-
-.map-card {
-    flex: 1;
-    min-height: 0;
-    background: white;
-    border: 1px solid #dce7eb;
-    border-radius: 14px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 3px 12px rgba(0,0,0,.05);
-}
-
-.map-header {
-    height: 58px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 18px;
-    border-bottom: 1px solid #e3ecef;
-    background: rgba(255,255,255,.96);
-    position: relative;
-    z-index: 500;
-}
-
-.map-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #183d4b;
-}
-
-.map-subtitle {
-    font-size: 10px;
-    color: #73858d;
-    margin-top: 3px;
-}
-
-.map-badge {
-    background: #e7f6f7;
-    color: #087481;
-    border-radius: 20px;
-    padding: 7px 11px;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-#map {
-    width: 100%;
-    height: calc(100% - 58px);
-}
-
-/* =========================================================
-   DETAIL PANEL
-========================================================= */
-
-.detail-panel {
-    position: absolute;
-    right: 15px;
-    top: 73px;
-    width: 285px;
-    max-height: calc(100% - 88px);
-    overflow-y: auto;
-    background: rgba(255,255,255,.97);
-    border: 1px solid #dce7eb;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.15);
-    padding: 16px;
-    z-index: 600;
-    display: none;
-}
-
-.detail-panel.show {
-    display: block;
-}
-
-.detail-close {
-    float: right;
-    border: none;
-    background: #edf3f5;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-weight: bold;
-    color: #5a6d75;
-}
-
-.detail-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #174858;
-    margin-bottom: 14px;
-}
-
-.detail-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 7px 0;
-    border-bottom: 1px solid #edf2f3;
-    font-size: 11px;
-}
-
-.detail-row span:first-child {
-    color: #72858e;
-}
-
-.detail-row span:last-child {
-    font-weight: 600;
-    text-align: right;
-}
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-.status-badge {
-    display: inline-block;
-    padding: 7px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    margin-top: 12px;
-}
-
-.status-matched {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.status-partial {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.status-outside {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.status-review {
-    background: #e0f2fe;
-    color: #075985;
-}
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-.search-box {
-    width: 100%;
-    border: 1px solid #d6e2e6;
-    border-radius: 8px;
-    padding: 10px;
-    outline: none;
-    font-size: 12px;
-    margin-bottom: 10px;
-}
-
-.search-box:focus {
-    border-color: #1393a3;
-}
-
-/* =========================================================
-   DISCLAIMER
-========================================================= */
-
-.disclaimer {
-    font-size: 10px;
-    line-height: 1.55;
-    color: #71838b;
-    background: #fff9e9;
-    border: 1px solid #f1dfad;
-    border-radius: 9px;
-    padding: 11px;
-}
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.footer-note {
-    text-align: center;
-    font-size: 10px;
-    color: #8a9ba2;
-    padding: 3px 0;
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media(max-width:900px) {
-
-    .app {
-        grid-template-columns: 1fr;
-        height: auto;
-    }
-
-    .sidebar {
-        border-right: none;
-        border-bottom: 1px solid #dce7eb;
-    }
-
-    .main {
-        min-height: 700px;
-    }
-
-    .dashboard {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .header-status {
-        display: none;
-    }
-}
-
-@media(max-width:600px) {
-
-    .header {
-        padding: 0 15px;
-    }
-
-    .brand-title {
-        font-size: 16px;
-    }
-
-    .brand-subtitle {
-        display: none;
-    }
-
-    .dashboard {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .detail-panel {
-        left: 15px;
-        right: 15px;
-        width: auto;
-    }
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Marine-Check Bali | Marine Utilization Monitoring</title>
+
+    <!-- LEAFLET -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ESRI LEAFLET -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
+
+    <!-- TURF -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fa;
+            color: #1f2937;
+            overflow: hidden;
+        }
+
+        #app {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        #sidebar {
+            width: 330px;
+            background: #ffffff;
+            border-right: 1px solid #dbe2e8;
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 22px 20px 18px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .brand {
+            font-size: 21px;
+            font-weight: 700;
+            color: #0f4c5c;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .sidebar-section {
+            padding: 18px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 12px;
+        }
+
+        /* =========================
+           LAYER BUTTONS
+        ========================= */
+
+        .layer-btn {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #374151;
+            transition: 0.2s;
+        }
+
+        .layer-btn:hover {
+            background: #f3f8fa;
+            border-color: #8db7c1;
+        }
+
+        .layer-btn.active {
+            background: #e7f4f7;
+            border-color: #0f7183;
+            color: #0f4c5c;
+            font-weight: 600;
+        }
+
+        .layer-indicator {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .layer-btn.active .layer-indicator {
+            background: #0f7183;
+        }
+
+        /* =========================
+           DASHBOARD
+        ========================= */
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .metric-card {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 11px;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: #6b7280;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f4c5c;
+        }
+
+        /* =========================
+           DATA STATUS
+        ========================= */
+
+        .data-status {
+            font-size: 11px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        .status-item {
+            margin-bottom: 4px;
+        }
+
+        .status-ok {
+            color: #16803c;
+        }
+
+        .status-warning {
+            color: #b7791f;
+        }
+
+        /* =========================
+           DISCLAIMER
+        ========================= */
+
+        .disclaimer {
+            font-size: 10px;
+            color: #6b7280;
+            line-height: 1.5;
+            background: #f9fafb;
+            border-radius: 7px;
+            padding: 10px;
+            margin-top: auto;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        #main {
+            flex: 1;
+            position: relative;
+            min-width: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* =========================
+           MAP TITLE
+        ========================= */
+
+        .map-title {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 900;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 9px;
+            padding: 12px 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            pointer-events: none;
+        }
+
+        .map-title h1 {
+            font-size: 17px;
+            color: #0f4c5c;
+            margin-bottom: 3px;
+        }
+
+        .map-title p {
+            font-size: 11px;
+            color: #6b7280;
+        }
+
+        /* =========================
+           DETAIL PANEL
+        ========================= */
+
+        #detailPanel {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 300px;
+            max-height: calc(100vh - 30px);
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.18);
+            z-index: 900;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .detail-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-header h3 {
+            font-size: 14px;
+            color: #0f4c5c;
+        }
+
+        .close-detail {
+            border: none;
+            background: none;
+            font-size: 20px;
+            color: #6b7280;
+            cursor: pointer;
+        }
+
+        .detail-body {
+            padding: 14px 16px;
+        }
+
+        .detail-row {
+            margin-bottom: 10px;
+        }
+
+        .detail-label {
+            font-size: 10px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-size: 13px;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        /* =========================
+           STATUS BADGES
+        ========================= */
+
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .badge-matched {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-partial {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-outside {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-review {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* =========================
+           LEGEND
+        ========================= */
+
+        .legend {
+            background: rgba(255,255,255,0.95);
+            padding: 10px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            line-height: 18px;
+            color: #374151;
+            font-size: 11px;
+        }
+
+        .legend-title {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 7px;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 850px) {
+
+            #sidebar {
+                width: 270px;
+            }
+
+            #detailPanel {
+                width: 270px;
+            }
+        }
+
+        @media (max-width: 650px) {
+
+            #sidebar {
+                width: 230px;
+            }
+
+            .brand {
+                font-size: 17px;
+            }
+
+            .map-title {
+                left: 8px;
+                top: 8px;
+            }
+
+            #detailPanel {
+                width: calc(100% - 16px);
+                right: 8px;
+                top: auto;
+                bottom: 8px;
+                max-height: 45vh;
+            }
+        }
+    </style>
 </head>
-
 
 <body>
 
-<header class="header">
+<div id="app">
 
-    <div class="brand">
+    <!-- =========================
+         SIDEBAR
+    ========================= -->
 
-        <div class="brand-icon">
-            🌊
-        </div>
+    <aside id="sidebar">
 
-        <div>
-
-            <div class="brand-title">
-                MARINE-CHECK BALI
+        <div class="sidebar-header">
+            <div class="brand">
+                Marine-Check Bali
             </div>
 
-            <div class="brand-subtitle">
-                Satellite-Based Marine Utilization Monitoring
+            <div class="subtitle">
+                Marine Utilization Monitoring & Spatial Screening
+            </div>
+        </div>
+
+
+        <!-- LAYERS -->
+
+        <div class="sidebar-section">
+
+            <div class="section-title">
+                Map Layers
+            </div>
+
+            <button
+                class="layer-btn active"
+                id="btn-structures"
+                onclick="toggleLayer('structures')"
+            >
+                <span>Marine Structures</span>
+                <span class="layer-indicator"></span>
+            </button>
+
+            <button
+                class="layer-btn active"
+                id="btn-permits"
+                onclick="toggleLayer('permits')"
+            >
+                <span>Permit / PKKPRL Areas</span>
+                <span class="layer-indicator"></span>
+            </button>
+
+            <button
+                class="layer-btn active"
+                id="btn-coastline"
+                onclick="toggleLayer('coastline')"
+            >
+                <span>BIG Coastline</span>
+                <span class="layer-indicator"></span>
+            </button>
+
+            <button
+                class="layer-btn"
+                id="btn-admin"
+                onclick="toggleLayer('admin')"
+            >
+                <span>Administrative Boundary</span>
+                <span class="layer-indicator"></span>
+            </button>
+
+        </div>
+
+
+        <!-- DASHBOARD -->
+
+        <div class="sidebar-section">
+
+            <div class="section-title">
+                Screening Dashboard
+            </div>
+
+            <div class="metrics">
+
+                <div class="metric-card">
+                    <div class="metric-label">
+                        Total Structures
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="totalStructures"
+                    >
+                        -
+                    </div>
+                </div>
+
+
+                <div class="metric-card">
+                    <div class="metric-label">
+                        Matched
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="matchedStructures"
+                    >
+                        -
+                    </div>
+                </div>
+
+
+                <div class="metric-card">
+                    <div class="metric-label">
+                        Review
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="reviewStructures"
+                    >
+                        -
+                    </div>
+                </div>
+
+
+                <div class="metric-card">
+                    <div class="metric-label">
+                        Priority Verification
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="priorityStructures"
+                    >
+                        -
+                    </div>
+                </div>
+
             </div>
 
         </div>
 
-    </div>
 
-    <div class="header-status">
+        <!-- DATA STATUS -->
 
-        <span class="status-dot"></span>
+        <div class="sidebar-section">
 
-        Prototype Monitoring System
-
-    </div>
-
-</header>
-
-
-<div class="app">
-
-
-<!-- =====================================================
-     SIDEBAR
-====================================================== -->
-
-<aside class="sidebar">
-
-    <div class="section">
-
-        <div class="section-title">
-            About
-        </div>
-
-        <div class="description">
-
-            Prototype WebGIS untuk melakukan
-            screening awal pemanfaatan ruang laut
-            menggunakan data spasial dan citra
-            satelit.
-
-        </div>
-
-    </div>
-
-
-    <div class="section">
-
-        <div class="section-title">
-            Search
-        </div>
-
-        <input
-            id="searchInput"
-            class="search-box"
-            type="text"
-            placeholder="Search object ID / name..."
-        >
-
-    </div>
-
-
-    <div class="section">
-
-        <div class="section-title">
-            Monitoring Layers
-        </div>
-
-        <button
-            id="btnStructures"
-            class="layer-btn active"
-            onclick="toggleLayer('structures')"
-        >
-            🏗️ Marine Structures
-        </button>
-
-        <button
-            id="btnPermits"
-            class="layer-btn active"
-            onclick="toggleLayer('permits')"
-        >
-            📋 Permit / PKKPRL Areas
-        </button>
-
-        <button
-            id="btnCoastline"
-            class="layer-btn active"
-            onclick="toggleLayer('coastline')"
-        >
-            🏝️ Coastline
-        </button>
-
-        <button
-            id="btnAdmin"
-            class="layer-btn active"
-            onclick="toggleLayer('admin')"
-        >
-            🗺️ Administrative Boundary
-        </button>
-
-    </div>
-
-
-    <div class="section">
-
-        <div class="section-title">
-            Screening Status
-        </div>
-
-        <div class="legend-row">
-            <span class="legend-box green"></span>
-            Matched
-        </div>
-
-        <div class="legend-row">
-            <span class="legend-box orange"></span>
-            Partial Match / Review
-        </div>
-
-        <div class="legend-row">
-            <span class="legend-box red"></span>
-            Outside Permit Area
-        </div>
-
-        <div class="legend-row">
-            <span class="legend-box blue"></span>
-            Requires Verification
-        </div>
-
-    </div>
-
-
-    <div class="section">
-
-        <div class="section-title">
-            Observation
-        </div>
-
-        <div class="info-card">
-
-            <div class="info-label">
-                Latest Observation
+            <div class="section-title">
+                Data Status
             </div>
 
             <div
-                id="observationYear"
-                class="info-value"
+                class="data-status"
+                id="dataStatus"
             >
-                2026
+                <div class="status-item">
+                    Loading data...
+                </div>
             </div>
 
         </div>
 
-        <div class="info-card">
 
-            <div class="info-label">
-                Study Area
-            </div>
-
-            <div class="info-value">
-                Bali
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="section">
-
-        <div class="section-title">
-            Data Status
-        </div>
+        <!-- DISCLAIMER -->
 
         <div
-            id="dataStatus"
-            class="description"
+            class="sidebar-section"
+            style="border-bottom:none;"
         >
-            Loading spatial data...
-        </div>
 
-    </div>
+            <div class="disclaimer">
 
+                <strong>Disclaimer</strong><br>
 
-    <div class="section">
+                Spatial screening displayed in this application
+                is intended for preliminary monitoring and
+                visualization purposes only. It does not constitute
+                a legal determination of violation or permit status.
 
-        <div class="disclaimer">
+                Final verification requires official government
+                datasets, permit records, and/or field verification.
 
-            <strong>Important:</strong>
-
-            Hasil "Matched", "Outside",
-            atau "No Record" merupakan
-            hasil screening spasial terhadap
-            dataset yang digunakan.
-
-            Status tersebut bukan merupakan
-            penetapan pelanggaran atau keputusan
-            hukum dan tetap memerlukan verifikasi
-            terhadap data resmi serta pemeriksaan
-            lapangan.
-
-        </div>
-
-    </div>
-
-</aside>
-
-
-<!-- =====================================================
-     MAIN
-====================================================== -->
-
-<main class="main">
-
-
-    <div class="dashboard">
-
-        <div class="metric">
-
-            <div class="metric-label">
-                Marine Structures
-            </div>
-
-            <div
-                id="totalStructures"
-                class="metric-value"
-            >
-                0
             </div>
 
         </div>
 
-
-        <div class="metric">
-
-            <div class="metric-label">
-                Matched
-            </div>
-
-            <div
-                id="matchedCount"
-                class="metric-value"
-            >
-                0
-            </div>
-
-        </div>
+    </aside>
 
 
-        <div class="metric">
+    <!-- =========================
+         MAIN MAP
+    ========================= -->
 
-            <div class="metric-label">
-                Review
-            </div>
+    <main id="main">
 
-            <div
-                id="reviewCount"
-                class="metric-value"
-            >
-                0
-            </div>
+        <div class="map-title">
 
-        </div>
+            <h1>
+                Marine Utilization Monitoring
+            </h1>
 
-
-        <div class="metric">
-
-            <div class="metric-label">
-                Priority Verification
-            </div>
-
-            <div
-                id="priorityCount"
-                class="metric-value"
-            >
-                0
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="map-card">
-
-        <div class="map-header">
-
-            <div>
-
-                <div class="map-title">
-                    Marine Utilization Monitoring Map
-                </div>
-
-                <div class="map-subtitle">
-                    Spatial screening of marine structures
-                    against permit areas
-                </div>
-
-            </div>
-
-            <div class="map-badge">
-                BALI · PROTOTYPE
-            </div>
+            <p>
+                Bali Province
+            </p>
 
         </div>
 
@@ -838,1294 +609,1217 @@ body {
         <div id="map"></div>
 
 
-        <div
-            id="detailPanel"
-            class="detail-panel"
-        >
+        <!-- DETAIL PANEL -->
 
-            <button
-                class="detail-close"
-                onclick="closeDetail()"
-            >
-                ×
-            </button>
+        <div id="detailPanel">
 
-            <div class="detail-title">
-                Marine Utilization Record
-            </div>
+            <div class="detail-header">
 
-            <div id="detailContent">
+                <h3>
+                    Structure Details
+                </h3>
 
-                Click a marine structure
-                on the map.
+                <button
+                    class="close-detail"
+                    onclick="closeDetail()"
+                >
+                    ×
+                </button>
 
             </div>
+
+            <div
+                class="detail-body"
+                id="detailBody"
+            ></div>
 
         </div>
 
-    </div>
-
-
-    <div class="footer-note">
-
-        Marine-Check Bali · GIS & Remote Sensing
-        Prototype · For Spatial Screening & Verification Support
-
-    </div>
-
-
-</main>
+    </main>
 
 </div>
 
 
-<!-- =====================================================
-     LEAFLET
-====================================================== -->
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
-
-
 <script>
 
-/* =========================================================
-   MAP
-========================================================= */
+    /* =========================================================
+       CONFIGURATION
+    ========================================================= */
 
-const map = L.map("map", {
+    const dataFiles = {
 
-    center: [
-        -8.67,
-        115.21
-    ],
+        structures:
+            "./marine_structures.geojson",
 
-    zoom: 10,
+        permits:
+            "./permit_areas.geojson"
 
-    zoomControl: true
-
-});
+    };
 
 
-/* =========================================================
-   BASEMAP
-========================================================= */
+    /*
+     * BIG Coastline MapServer
+     *
+     * Rendered directly using Esri Leaflet.
+     *
+     * This avoids downloading the entire Indonesia coastline
+     * as GeoJSON to the browser.
+     */
 
-const streetMap =
-    L.tileLayer(
+    const BIG_COASTLINE_URL =
+        "https://geoservices.big.go.id/rbi/rest/services/GARISPANTAI/GarisPantai_25K/MapServer";
+
+
+    /*
+     * BIG Administrative Boundary
+     *
+     * If your existing BIG admin service differs,
+     * replace this URL with the appropriate MapServer layer.
+     */
+
+    const BIG_ADMIN_URL =
+        "https://geoservices.big.go.id/rbi/rest/services/ADMINISTRASI/Administrasi_25K/MapServer";
+
+
+    /* =========================================================
+       MAP INITIALIZATION
+    ========================================================= */
+
+    const map = L.map("map", {
+
+        center: [
+            -8.67,
+            115.21
+        ],
+
+        zoom: 10,
+
+        zoomControl: true
+
+    });
+
+
+    /* =========================================================
+       BASEMAPS
+    ========================================================= */
+
+    const satellite = L.tileLayer(
+
+        "https://server.arcgisonline.com/ArcGIS/rest/services/" +
+        "World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+        {
+            maxZoom: 20,
+
+            attribution:
+                "Tiles © Esri"
+        }
+
+    );
+
+
+    const streets = L.tileLayer(
+
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
         {
             maxZoom: 19,
+
             attribution:
                 "&copy; OpenStreetMap contributors"
         }
+
     );
 
 
-const satelliteMap =
-    L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-            maxZoom: 19,
-            attribution:
-                "Tiles &copy; Esri"
-        }
-    );
+    satellite.addTo(map);
 
 
-satelliteMap.addTo(map);
+    /* =========================================================
+       LAYER GROUPS
+    ========================================================= */
 
+    const layers = {
 
-/* =========================================================
-   LAYER GROUPS
-========================================================= */
+        structures:
+            L.layerGroup().addTo(map),
 
-const layers = {
+        permits:
+            L.layerGroup().addTo(map),
 
-    structures:
-        L.layerGroup().addTo(map),
+        /*
+         * IMPORTANT:
+         *
+         * Coastline is NOT a normal LayerGroup anymore.
+         *
+         * It is an Esri Leaflet Dynamic Map Layer.
+         */
 
-    permits:
-        L.layerGroup().addTo(map),
+        coastline:
+            L.esri.dynamicMapLayer({
 
-    coastline:
-        L.layerGroup().addTo(map),
+                url: BIG_COASTLINE_URL,
 
-    admin:
-        L.layerGroup().addTo(map)
+                opacity: 1,
 
-};
+                attribution:
+                    "Garis Pantai © Badan Informasi Geospasial"
 
+            }).addTo(map),
 
-/* =========================================================
-   LOCAL DATA
-========================================================= */
-
-const dataFiles = {
-
-    structures:
-        "./marine_structures.geojson",
-
-    permits:
-        "./permit_areas.geojson"
-
-};
-
-
-/* =========================================================
-   BIG SERVICES
-========================================================= */
-
-const BIG_ADMIN_URL =
-    "https://geoservices.big.go.id/rbi/rest/services/Hosted/Wilayah_Administrasi_Kabupaten__Kota/FeatureServer/0/query";
-
-
-const BIG_COASTLINE_URL =
-    "https://geoservices.big.go.id/rbi/rest/services/GARISPANTAI/GarisPantai_25K/MapServer/0/query";
-
-
-/* =========================================================
-   DATA STORAGE
-========================================================= */
-
-let structureGeoJSON = null;
-
-let permitGeoJSON = null;
-
-let coastlineGeoJSON = null;
-
-let adminGeoJSON = null;
-
-
-/* =========================================================
-   STRUCTURE STYLE
-========================================================= */
-
-function structureStyle(feature) {
-
-    const status =
-        feature.properties?.screening_status
-        || "review";
-
-
-    if (status === "matched") {
-
-        return {
-
-            color: "#166534",
-            fillColor: "#22c55e",
-            fillOpacity: .65,
-            weight: 2
-
-        };
-
-    }
-
-
-    if (status === "partial") {
-
-        return {
-
-            color: "#92400e",
-            fillColor: "#f59e0b",
-            fillOpacity: .70,
-            weight: 2
-
-        };
-
-    }
-
-
-    if (status === "outside") {
-
-        return {
-
-            color: "#991b1b",
-            fillColor: "#ef4444",
-            fillOpacity: .70,
-            weight: 2
-
-        };
-
-    }
-
-
-    return {
-
-        color: "#075985",
-        fillColor: "#168aad",
-        fillOpacity: .65,
-        weight: 2
+        admin:
+            L.layerGroup()
 
     };
 
-}
 
+    /* =========================================================
+       ADMINISTRATIVE BOUNDARY
+    ========================================================= */
 
-/* =========================================================
-   PERMIT STYLE
-========================================================= */
+    let adminGeoJSON = null;
 
-function permitStyle() {
 
-    return {
+    /*
+     * This function uses the BIG REST query service
+     * for administrative boundaries.
+     *
+     * If your BIG administrative service uses a different
+     * layer structure, only this section needs adjustment.
+     */
 
-        color: "#16a34a",
-        fillColor: "#22c55e",
-        fillOpacity: .12,
-        weight: 2,
-        dashArray: "6 5"
+    async function loadBIGAdmin() {
 
-    };
+        try {
 
-}
+            const url =
+                BIG_ADMIN_URL +
+                "/0/query?" +
+                new URLSearchParams({
 
+                    where: "WADMPR = 'Bali'",
 
-/* =========================================================
-   COASTLINE STYLE
-========================================================= */
+                    outFields: "*",
 
-function coastlineStyle() {
+                    returnGeometry: "true",
 
-    return {
+                    outSR: "4326",
 
-        color: "#00b7ff",
-        weight: 3,
-        opacity: 1
+                    f: "geojson"
 
-    };
+                });
 
-}
 
+            const response =
+                await fetch(url);
 
-/* =========================================================
-   ADMIN STYLE
-========================================================= */
 
-function adminStyle() {
+            if (!response.ok) {
 
-    return {
+                throw new Error(
+                    "HTTP " + response.status
+                );
 
-        color: "#64748b",
-        weight: 1,
-        opacity: .8,
-        fillOpacity: 0,
-        dashArray: "4 5"
+            }
 
-    };
 
-}
+            const data =
+                await response.json();
 
 
-/* =========================================================
-   LOAD LOCAL GEOJSON
-========================================================= */
+            adminGeoJSON = L.geoJSON(
 
-async function loadGeoJSON(type, url) {
+                data,
 
-    try {
+                {
 
-        const response =
-            await fetch(url);
+                    style: {
 
+                        color: "#555555",
 
-        if (!response.ok) {
+                        weight: 1.5,
 
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
+                        opacity: 0.8,
 
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (type === "structures") {
-
-            structureGeoJSON =
-                data;
-
-            renderStructures(data);
-
-        }
-
-
-        if (type === "permits") {
-
-            permitGeoJSON =
-                data;
-
-            renderPermits(data);
-
-        }
-
-
-        updateDataStatus();
-
-    }
-
-    catch(error) {
-
-        console.error(
-            "Could not load:",
-            type,
-            error
-        );
-
-        updateDataStatus();
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER STRUCTURES
-========================================================= */
-
-function renderStructures(data) {
-
-    layers.structures.clearLayers();
-
-
-    const geoLayer =
-        L.geoJSON(
-            data,
-            {
-
-                style:
-                    structureStyle,
-
-
-                onEachFeature:
-                    function(
-                        feature,
-                        layer
-                    ) {
-
-                        layer.on(
-                            "click",
-                            function() {
-
-                                showDetail(
-                                    feature
-                                );
-
-                            }
-                        );
-
-
-                        layer.bindTooltip(
-
-                            feature.properties
-                            ?.object_id
-                            ||
-                            "Marine Structure",
-
-                            {
-                                sticky: true
-                            }
-
-                        );
+                        fillOpacity: 0
 
                     }
 
-            }
-        );
-
-
-    geoLayer.addTo(
-        layers.structures
-    );
-
-
-    updateDashboard();
-
-}
-
-
-/* =========================================================
-   RENDER PERMITS
-========================================================= */
-
-function renderPermits(data) {
-
-    layers.permits.clearLayers();
-
-
-    L.geoJSON(
-        data,
-        {
-
-            style:
-                permitStyle,
-
-
-            onEachFeature:
-                function(
-                    feature,
-                    layer
-                ) {
-
-                    const name =
-                        feature.properties
-                        ?.name
-                        ||
-                        feature.properties
-                        ?.permit_id
-                        ||
-                        "Permit Area";
-
-
-                    layer.bindTooltip(
-                        name,
-                        {
-                            sticky: true
-                        }
-                    );
-
                 }
 
-        }
-    ).addTo(
-        layers.permits
-    );
-
-}
-
-
-/* =========================================================
-   RENDER COASTLINE
-========================================================= */
-
-function renderCoastline(data) {
-
-    layers.coastline.clearLayers();
-
-
-    const coastlineLayer =
-        L.geoJSON(
-            data,
-            {
-
-                style:
-                    coastlineStyle
-
-            }
-        );
-
-
-    coastlineLayer.addTo(
-        layers.coastline
-    );
-
-}
-
-
-/* =========================================================
-   RENDER ADMIN
-========================================================= */
-
-function renderAdmin(data) {
-
-    layers.admin.clearLayers();
-
-
-    L.geoJSON(
-        data,
-        {
-
-            style:
-                adminStyle,
-
-
-            onEachFeature:
-                function(
-                    feature,
-                    layer
-                ) {
-
-                    const p =
-                        feature.properties
-                        || {};
-
-
-                    const name =
-                        p.namobj
-                        ||
-                        p.NAMOBJ
-                        ||
-                        p.wadmkk
-                        ||
-                        p.WADMKK
-                        ||
-                        "Administrative Area";
-
-
-                    layer.bindTooltip(
-                        name,
-                        {
-                            sticky: true
-                        }
-                    );
-
-                }
-
-        }
-    ).addTo(
-        layers.admin
-    );
-
-}
-
-
-/* =========================================================
-   LOAD BIG ADMIN
-========================================================= */
-
-async function loadBIGAdmin() {
-
-    try {
-
-        const params =
-            new URLSearchParams({
-
-                where:
-                    "WADMPR = 'Bali'",
-
-                outFields:
-                    "*",
-
-                returnGeometry:
-                    "true",
-
-                outSR:
-                    "4326",
-
-                f:
-                    "geojson"
-
-            });
-
-
-        const response =
-            await fetch(
-                BIG_ADMIN_URL +
-                "?" +
-                params.toString()
             );
 
 
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
+            adminGeoJSON.addTo(
+                layers.admin
             );
+
+
+            updateDataStatus();
 
         }
 
+        catch (error) {
 
-        const data =
-            await response.json();
-
-
-        if (data.error) {
-
-            throw new Error(
-                data.error.message
+            console.error(
+                "BIG administrative boundary error:",
+                error
             );
 
+            updateDataStatus();
+
         }
-
-
-        adminGeoJSON =
-            data;
-
-
-        renderAdmin(
-            data
-        );
-
-
-        updateDataStatus();
 
     }
 
-    catch(error) {
 
-        console.error(
-            "BIG Administrative Boundary error:",
-            error
-        );
+    /* =========================================================
+       LOAD LOCAL GEOJSON
+    ========================================================= */
 
-        updateDataStatus();
+    let structuresGeoJSON = null;
 
-    }
-
-}
+    let permitsGeoJSON = null;
 
 
-/* =========================================================
-   LOAD BIG COASTLINE
-========================================================= */
+    async function loadGeoJSON(
 
-async function loadBIGCoastline() {
+        layerName,
 
-    try {
+        filePath
 
-        const params =
-            new URLSearchParams({
-
-                where:
-                    "1=1",
-
-                outFields:
-                    "*",
-
-                returnGeometry:
-                    "true",
-
-                outSR:
-                    "4326",
-
-                f:
-                    "geojson"
-
-            });
-
-
-        const response =
-            await fetch(
-                BIG_COASTLINE_URL +
-                "?" +
-                params.toString()
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        if (data.error) {
-
-            throw new Error(
-                data.error.message
-            );
-
-        }
-
-
-        console.log(
-            "BIG coastline loaded:",
-            data
-        );
-
-
-        coastlineGeoJSON =
-            data;
-
-
-        renderCoastline(
-            data
-        );
-
-
-        updateDataStatus();
-
-    }
-
-    catch(error) {
-
-        console.error(
-            "BIG Coastline error:",
-            error
-        );
-
-        updateDataStatus();
-
-    }
-
-}
-
-
-/* =========================================================
-   TOGGLE LAYERS
-========================================================= */
-
-function toggleLayer(type) {
-
-    const button =
-        document.getElementById(
-            "btn" +
-            type.charAt(0).toUpperCase() +
-            type.slice(1)
-        );
-
-
-    if (
-        map.hasLayer(
-            layers[type]
-        )
     ) {
 
-        map.removeLayer(
-            layers[type]
-        );
+        try {
 
-        button.classList.remove(
-            "active"
-        );
-
-    }
-
-    else {
-
-        layers[type].addTo(
-            map
-        );
-
-        button.classList.add(
-            "active"
-        );
-
-    }
-
-}
+            const response =
+                await fetch(filePath);
 
 
-/* =========================================================
-   DASHBOARD
-========================================================= */
+            if (!response.ok) {
 
-function updateDashboard() {
+                throw new Error(
+                    "HTTP " + response.status
+                );
 
-    if (!structureGeoJSON) {
-
-        return;
-
-    }
+            }
 
 
-    const features =
-        structureGeoJSON.features
-        || [];
+            const data =
+                await response.json();
 
 
-    let matched = 0;
+            if (layerName === "structures") {
 
-    let review = 0;
+                structuresGeoJSON =
+                    renderStructures(data);
 
-    let priority = 0;
+            }
 
 
-    features.forEach(
-        feature => {
+            if (layerName === "permits") {
+
+                permitsGeoJSON =
+                    renderPermits(data);
+
+            }
+
+
+            updateDashboard();
+
+            updateDataStatus();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Error loading",
+                filePath,
+                error
+            );
 
             const status =
-                feature.properties
-                ?.screening_status;
+                document.getElementById(
+                    "dataStatus"
+                );
 
 
-            if (
-                status === "matched"
-            ) {
-
-                matched++;
-
-            }
-
-
-            if (
-                status === "partial" ||
-                status === "outside"
-            ) {
-
-                review++;
-
-            }
-
-
-            if (
-                feature.properties
-                ?.priority === true
-                ||
-                feature.properties
-                ?.priority === "true"
-            ) {
-
-                priority++;
-
-            }
+            status.innerHTML +=
+                `<div class="status-item status-warning">
+                    ⚠ Failed to load ${filePath}
+                </div>`;
 
         }
-    );
-
-
-    document
-        .getElementById(
-            "totalStructures"
-        )
-        .textContent =
-        features.length;
-
-
-    document
-        .getElementById(
-            "matchedCount"
-        )
-        .textContent =
-        matched;
-
-
-    document
-        .getElementById(
-            "reviewCount"
-        )
-        .textContent =
-        review;
-
-
-    document
-        .getElementById(
-            "priorityCount"
-        )
-        .textContent =
-        priority;
-
-}
-
-
-/* =========================================================
-   DETAIL PANEL
-========================================================= */
-
-function showDetail(feature) {
-
-    const p =
-        feature.properties
-        || {};
-
-
-    const objectID =
-        p.object_id
-        || "—";
-
-
-    const name =
-        p.name
-        || "Marine Structure";
-
-
-    const type =
-        p.type
-        || "Not specified";
-
-
-    const date =
-        p.detection_date
-        || "—";
-
-
-    const area =
-        p.area_m2
-        ? Number(
-            p.area_m2
-        ).toLocaleString(
-            "en-US"
-        ) + " m²"
-        : "—";
-
-
-    const status =
-        p.screening_status
-        || "review";
-
-
-    let statusText =
-        "Requires Verification";
-
-
-    let statusClass =
-        "status-review";
-
-
-    if (
-        status === "matched"
-    ) {
-
-        statusText =
-            "Matched";
-
-        statusClass =
-            "status-matched";
 
     }
 
 
-    if (
-        status === "partial"
-    ) {
+    /* =========================================================
+       STRUCTURE STYLE
+    ========================================================= */
 
-        statusText =
-            "Partial Match";
+    function structureStyle(feature) {
 
-        statusClass =
-            "status-partial";
+        const properties =
+            feature.properties || {};
+
+
+        const status =
+            String(
+                properties.screening_status || ""
+            ).toLowerCase();
+
+
+        let color =
+            "#6b7280";
+
+
+        if (status === "matched") {
+
+            color =
+                "#16a34a";
+
+        }
+
+        else if (status === "partial") {
+
+            color =
+                "#f59e0b";
+
+        }
+
+        else if (status === "outside") {
+
+            color =
+                "#dc2626";
+
+        }
+
+        else if (status === "review") {
+
+            color =
+                "#4f46e5";
+
+        }
+
+
+        return {
+
+            color: color,
+
+            fillColor: color,
+
+            weight: 1.5,
+
+            opacity: 1,
+
+            fillOpacity: 0.65
+
+        };
 
     }
 
 
-    if (
-        status === "outside"
-    ) {
+    /* =========================================================
+       RENDER STRUCTURES
+    ========================================================= */
 
-        statusText =
-            "Outside Permit Area";
+    function renderStructures(data) {
 
-        statusClass =
-            "status-outside";
+        const geojson =
+            L.geoJSON(
+
+                data,
+
+                {
+
+                    pointToLayer:
+                        function(
+                            feature,
+                            latlng
+                        ) {
+
+                            return L.circleMarker(
+
+                                latlng,
+
+                                {
+
+                                    radius: 7,
+
+                                    color:
+                                        structureStyle(
+                                            feature
+                                        ).color,
+
+                                    fillColor:
+                                        structureStyle(
+                                            feature
+                                        ).fillColor,
+
+                                    weight: 1.5,
+
+                                    opacity: 1,
+
+                                    fillOpacity: 0.75
+
+                                }
+
+                            );
+
+                        },
+
+
+                    style:
+                        structureStyle,
+
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            layer.on(
+                                "click",
+                                function() {
+
+                                    showStructureDetail(
+                                        feature.properties || {}
+                                    );
+
+                                }
+                            );
+
+                        }
+
+                }
+
+            );
+
+
+        geojson.addTo(
+            layers.structures
+        );
+
+
+        return geojson;
 
     }
 
 
-    const permit =
-        p.permit_id
-        || "No matching record";
+    /* =========================================================
+       PERMIT STYLE
+    ========================================================= */
+
+    function permitStyle() {
+
+        return {
+
+            color: "#7c3aed",
+
+            weight: 2,
+
+            opacity: 0.9,
+
+            fillColor: "#8b5cf6",
+
+            fillOpacity: 0.18
+
+        };
+
+    }
 
 
-    const change =
-        p.change_status
-        || "Not available";
+    /* =========================================================
+       RENDER PERMITS
+    ========================================================= */
+
+    function renderPermits(data) {
+
+        const geojson =
+            L.geoJSON(
+
+                data,
+
+                {
+
+                    style:
+                        permitStyle,
 
 
-    document
-        .getElementById(
-            "detailContent"
-        )
-        .innerHTML = `
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            const props =
+                                feature.properties || {};
+
+
+                            let popup =
+                                "<strong>Permit / PKKPRL Area</strong>";
+
+
+                            Object.keys(
+                                props
+                            ).forEach(
+                                function(key) {
+
+                                    popup +=
+                                        `<br><b>${key}</b>: ${props[key]}`;
+
+                                }
+                            );
+
+
+                            layer.bindPopup(
+                                popup
+                            );
+
+                        }
+
+                }
+
+            );
+
+
+        geojson.addTo(
+            layers.permits
+        );
+
+
+        return geojson;
+
+    }
+
+
+    /* =========================================================
+       STRUCTURE DETAIL
+    ========================================================= */
+
+    function showStructureDetail(
+        properties
+    ) {
+
+        const panel =
+            document.getElementById(
+                "detailPanel"
+            );
+
+
+        const body =
+            document.getElementById(
+                "detailBody"
+            );
+
+
+        const status =
+            String(
+                properties.screening_status || "-"
+            ).toLowerCase();
+
+
+        let badgeClass =
+            "badge-review";
+
+
+        if (status === "matched") {
+
+            badgeClass =
+                "badge-matched";
+
+        }
+
+        else if (status === "partial") {
+
+            badgeClass =
+                "badge-partial";
+
+        }
+
+        else if (status === "outside") {
+
+            badgeClass =
+                "badge-outside";
+
+        }
+
+
+        body.innerHTML = `
 
             <div class="detail-row">
-                <span>Object ID</span>
-                <span>${objectID}</span>
+
+                <div class="detail-label">
+                    Object ID
+                </div>
+
+                <div class="detail-value">
+                    ${properties.object_id ?? "-"}
+                </div>
+
             </div>
+
 
             <div class="detail-row">
-                <span>Name</span>
-                <span>${name}</span>
+
+                <div class="detail-label">
+                    Name
+                </div>
+
+                <div class="detail-value">
+                    ${properties.name ?? "-"}
+                </div>
+
             </div>
+
 
             <div class="detail-row">
-                <span>Type</span>
-                <span>${type}</span>
+
+                <div class="detail-label">
+                    Type
+                </div>
+
+                <div class="detail-value">
+                    ${properties.type ?? "-"}
+                </div>
+
             </div>
+
 
             <div class="detail-row">
-                <span>Detection</span>
-                <span>${date}</span>
+
+                <div class="detail-label">
+                    Detection Date
+                </div>
+
+                <div class="detail-value">
+                    ${properties.detection_date ?? "-"}
+                </div>
+
             </div>
+
 
             <div class="detail-row">
-                <span>Estimated Area</span>
-                <span>${area}</span>
+
+                <div class="detail-label">
+                    Area
+                </div>
+
+                <div class="detail-value">
+                    ${
+                        properties.area_m2 !== undefined
+                            ? properties.area_m2 + " m²"
+                            : "-"
+                    }
+                </div>
+
             </div>
+
 
             <div class="detail-row">
-                <span>Permit Record</span>
-                <span>${permit}</span>
+
+                <div class="detail-label">
+                    Screening Status
+                </div>
+
+                <div class="detail-value">
+
+                    <span class="badge ${badgeClass}">
+                        ${properties.screening_status ?? "-"}
+                    </span>
+
+                </div>
+
             </div>
+
 
             <div class="detail-row">
-                <span>Temporal Change</span>
-                <span>${change}</span>
+
+                <div class="detail-label">
+                    Permit ID
+                </div>
+
+                <div class="detail-value">
+                    ${properties.permit_id ?? "-"}
+                </div>
+
             </div>
 
-            <div class="
-                status-badge
-                ${statusClass}
-            ">
-                ${statusText}
+
+            <div class="detail-row">
+
+                <div class="detail-label">
+                    Change Status
+                </div>
+
+                <div class="detail-value">
+                    ${properties.change_status ?? "-"}
+                </div>
+
+            </div>
+
+
+            <div class="detail-row">
+
+                <div class="detail-label">
+                    Priority
+                </div>
+
+                <div class="detail-value">
+                    ${properties.priority ?? "-"}
+                </div>
+
             </div>
 
         `;
 
 
-    document
-        .getElementById(
-            "detailPanel"
-        )
-        .classList.add(
-            "show"
-        );
-
-}
-
-
-/* =========================================================
-   CLOSE DETAIL
-========================================================= */
-
-function closeDetail() {
-
-    document
-        .getElementById(
-            "detailPanel"
-        )
-        .classList.remove(
-            "show"
-        );
-
-}
-
-
-/* =========================================================
-   DATA STATUS
-========================================================= */
-
-function updateDataStatus() {
-
-    const status =
-        document.getElementById(
-            "dataStatus"
-        );
-
-
-    const messages = [];
-
-
-    messages.push(
-        structureGeoJSON !== null
-            ? "✓ Marine structures"
-            : "✗ Marine structures"
-    );
-
-
-    messages.push(
-        permitGeoJSON !== null
-            ? "✓ Permit areas"
-            : "✗ Permit areas"
-    );
-
-
-    messages.push(
-        adminGeoJSON !== null
-            ? "✓ BIG administration"
-            : "✗ BIG administration"
-    );
-
-
-    messages.push(
-        coastlineGeoJSON !== null
-            ? "✓ BIG coastline"
-            : "✗ BIG coastline"
-    );
-
-
-    status.innerHTML =
-        messages.join("<br>");
-
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-document
-    .getElementById(
-        "searchInput"
-    )
-    .addEventListener(
-        "input",
-        function() {
-
-            const query =
-                this.value
-                .toLowerCase()
-                .trim();
-
-
-            if (
-                !structureGeoJSON ||
-                !query
-            ) {
-
-                return;
-
-            }
-
-
-            const result =
-                structureGeoJSON
-                .features
-                .find(
-                    feature => {
-
-                        const p =
-                            feature.properties
-                            || {};
-
-
-                        const id =
-                            String(
-                                p.object_id
-                                || ""
-                            )
-                            .toLowerCase();
-
-
-                        const name =
-                            String(
-                                p.name
-                                || ""
-                            )
-                            .toLowerCase();
-
-
-                        return (
-                            id.includes(query)
-                            ||
-                            name.includes(query)
-                        );
-
-                    }
-                );
-
-
-            if (result) {
-
-                try {
-
-                    const center =
-                        turf.centroid(
-                            result
-                        );
-
-
-                    const coordinates =
-                        center.geometry
-                        .coordinates;
-
-
-                    map.setView(
-                        [
-                            coordinates[1],
-                            coordinates[0]
-                        ],
-                        16
-                    );
-
-                }
-
-                catch(error) {
-
-                    console.error(
-                        "Search zoom error:",
-                        error
-                    );
-
-                }
-
-
-                showDetail(
-                    result
-                );
-
-            }
-
-        }
-    );
-
-
-/* =========================================================
-   BASEMAP CONTROL
-========================================================= */
-
-L.control.layers(
-
-    {
-
-        "Satellite":
-            satelliteMap,
-
-        "Street Map":
-            streetMap
-
-    },
-
-    null,
-
-    {
-
-        collapsed:
-            true
+        panel.style.display =
+            "block";
 
     }
 
-).addTo(map);
+
+    /* =========================================================
+       CLOSE DETAIL
+    ========================================================= */
+
+    function closeDetail() {
+
+        document.getElementById(
+            "detailPanel"
+        ).style.display =
+            "none";
+
+    }
 
 
-/* =========================================================
-   SCALE
-========================================================= */
+    /* =========================================================
+       DASHBOARD
+    ========================================================= */
 
-L.control.scale({
+    function updateDashboard() {
 
-    imperial: false
+        if (!structuresGeoJSON) {
 
-}).addTo(map);
+            return;
 
-
-/* =========================================================
-   INITIAL DATA LOAD
-========================================================= */
-
-loadGeoJSON(
-    "structures",
-    dataFiles.structures
-);
+        }
 
 
-loadGeoJSON(
-    "permits",
-    dataFiles.permits
-);
+        let total =
+            0;
+
+        let matched =
+            0;
+
+        let review =
+            0;
+
+        let priority =
+            0;
 
 
-loadBIGAdmin();
+        structuresGeoJSON.eachLayer(
 
-loadBIGCoastline();
+            function(layer) {
+
+                total++;
 
 
-/* =========================================================
-   FORCE MAP RESIZE
-========================================================= */
+                const props =
+                    layer.feature.properties || {};
 
-setTimeout(
-    function() {
 
-        map.invalidateSize();
+                const status =
+                    String(
+                        props.screening_status || ""
+                    ).toLowerCase();
 
-    },
-    500
-);
+
+                if (
+                    status === "matched"
+                ) {
+
+                    matched++;
+
+                }
+
+
+                if (
+                    status === "review" ||
+                    status === "partial"
+                ) {
+
+                    review++;
+
+                }
+
+
+                const priorityValue =
+                    String(
+                        props.priority || ""
+                    ).toLowerCase();
+
+
+                if (
+
+                    priorityValue === "high" ||
+
+                    priorityValue === "1" ||
+
+                    priorityValue === "yes" ||
+
+                    priorityValue === "priority"
+
+                ) {
+
+                    priority++;
+
+                }
+
+            }
+
+        );
+
+
+        document.getElementById(
+            "totalStructures"
+        ).textContent =
+            total;
+
+
+        document.getElementById(
+            "matchedStructures"
+        ).textContent =
+            matched;
+
+
+        document.getElementById(
+            "reviewStructures"
+        ).textContent =
+            review;
+
+
+        document.getElementById(
+            "priorityStructures"
+        ).textContent =
+            priority;
+
+    }
+
+
+    /* =========================================================
+       DATA STATUS
+    ========================================================= */
+
+    function updateDataStatus() {
+
+        const status =
+            document.getElementById(
+                "dataStatus"
+            );
+
+
+        let html = "";
+
+
+        if (structuresGeoJSON) {
+
+            html += `
+                <div class="status-item status-ok">
+                    ✓ Marine structures loaded
+                </div>
+            `;
+
+        }
+
+        else {
+
+            html += `
+                <div class="status-item status-warning">
+                    ⚠ Marine structures not loaded
+                </div>
+            `;
+
+        }
+
+
+        if (permitsGeoJSON) {
+
+            html += `
+                <div class="status-item status-ok">
+                    ✓ Permit / PKKPRL areas loaded
+                </div>
+            `;
+
+        }
+
+        else {
+
+            html += `
+                <div class="status-item status-warning">
+                    ⚠ Permit areas not loaded
+                </div>
+            `;
+
+        }
+
+
+        /*
+         * Coastline is loaded as an Esri Leaflet layer.
+         *
+         * There is intentionally no coastlineGeoJSON variable.
+         */
+
+        if (layers.coastline) {
+
+            html += `
+                <div class="status-item status-ok">
+                    ✓ BIG coastline service
+                </div>
+            `;
+
+        }
+
+
+        if (adminGeoJSON) {
+
+            html += `
+                <div class="status-item status-ok">
+                    ✓ BIG administrative boundary
+                </div>
+            `;
+
+        }
+
+
+        status.innerHTML =
+            html;
+
+    }
+
+
+    /* =========================================================
+       LAYER TOGGLE
+    ========================================================= */
+
+    function toggleLayer(
+        layerName
+    ) {
+
+        const layer =
+            layers[layerName];
+
+
+        const button =
+            document.getElementById(
+                "btn-" + layerName
+            );
+
+
+        if (!layer) {
+
+            return;
+
+        }
+
+
+        if (
+            map.hasLayer(layer)
+        ) {
+
+            map.removeLayer(
+                layer
+            );
+
+            button.classList.remove(
+                "active"
+            );
+
+        }
+
+        else {
+
+            layer.addTo(
+                map
+            );
+
+            button.classList.add(
+                "active"
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       BASEMAP CONTROL
+    ========================================================= */
+
+    const baseMaps = {
+
+        "Satellite": satellite,
+
+        "Street Map": streets
+
+    };
+
+
+    const overlayMaps = {
+
+        "Marine Structures":
+            layers.structures,
+
+        "Permit / PKKPRL Areas":
+            layers.permits,
+
+        "BIG Coastline":
+            layers.coastline,
+
+        "Administrative Boundary":
+            layers.admin
+
+    };
+
+
+    L.control.layers(
+
+        baseMaps,
+
+        overlayMaps,
+
+        {
+
+            collapsed: true
+
+        }
+
+    ).addTo(map);
+
+
+    /* =========================================================
+       LEGEND
+    ========================================================= */
+
+    const legend =
+        L.control({
+            position: "bottomright"
+        });
+
+
+    legend.onAdd =
+        function() {
+
+            const div =
+                L.DomUtil.create(
+                    "div",
+                    "legend"
+                );
+
+
+            div.innerHTML = `
+
+                <div class="legend-title">
+                    Screening Status
+                </div>
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-dot"
+                        style="background:#16a34a"
+                    ></span>
+
+                    Matched
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-dot"
+                        style="background:#f59e0b"
+                    ></span>
+
+                    Partial
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-dot"
+                        style="background:#dc2626"
+                    ></span>
+
+                    Outside
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <span
+                        class="legend-dot"
+                        style="background:#4f46e5"
+                    ></span>
+
+                    Review
+
+                </div>
+
+            `;
+
+
+            return div;
+
+        };
+
+
+    legend.addTo(map);
+
+
+    /* =========================================================
+       INITIAL DATA LOAD
+    ========================================================= */
+
+    loadGeoJSON(
+        "structures",
+        dataFiles.structures
+    );
+
+
+    loadGeoJSON(
+        "permits",
+        dataFiles.permits
+    );
+
+
+    loadBIGAdmin();
+
+
+    /*
+     * DO NOT call loadBIGCoastline().
+     *
+     * BIG coastline is already rendered through:
+     *
+     * L.esri.dynamicMapLayer()
+     *
+     */
+
+
+    updateDataStatus();
+
 
 </script>
 
 </body>
-
 </html>
