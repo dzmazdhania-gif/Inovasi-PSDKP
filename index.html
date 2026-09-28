@@ -1,0 +1,2575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Marine-Check Bali | Marine Utilization Monitoring</title>
+
+<!-- LEAFLET -->
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+/* =========================================================
+   GLOBAL
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+
+    font-family:
+        Inter,
+        Arial,
+        sans-serif;
+
+    background:
+        #eef4f7;
+
+    color:
+        #172b3a;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+
+    height: 76px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #063b4c,
+            #087f8c
+        );
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+        0 28px;
+
+    box-shadow:
+        0 4px 15px
+        rgba(0,0,0,.15);
+
+    position:
+        relative;
+
+    z-index: 1000;
+}
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+}
+
+.brand-icon {
+
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.14);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 22px;
+}
+
+.brand-title {
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    letter-spacing:
+        .2px;
+}
+
+.brand-subtitle {
+
+    font-size: 11px;
+
+    opacity: .78;
+
+    margin-top: 3px;
+}
+
+.header-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 12px;
+
+    background:
+        rgba(255,255,255,.12);
+
+    padding:
+        9px 13px;
+
+    border-radius: 20px;
+}
+
+.status-dot {
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background:
+        #68e08a;
+}
+
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.app {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        330px 1fr;
+
+    height:
+        calc(100vh - 76px);
+}
+
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+
+    background:
+        white;
+
+    border-right:
+        1px solid #dce7eb;
+
+    overflow-y:
+        auto;
+
+    padding:
+        22px;
+}
+
+.section {
+
+    margin-bottom:
+        24px;
+}
+
+.section-title {
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        1px;
+
+    color:
+        #58707c;
+
+    margin-bottom:
+        12px;
+}
+
+.description {
+
+    font-size:
+        12px;
+
+    line-height:
+        1.6;
+
+    color:
+        #61727c;
+}
+
+
+/* =========================================================
+   FILTER BUTTONS
+========================================================= */
+
+.layer-btn {
+
+    width: 100%;
+
+    border:
+        1px solid #d8e4e8;
+
+    background:
+        #f8fbfc;
+
+    border-radius:
+        9px;
+
+    padding:
+        10px 12px;
+
+    margin-bottom:
+        7px;
+
+    text-align:
+        left;
+
+    cursor:
+        pointer;
+
+    color:
+        #29414d;
+
+    font-size:
+        12px;
+
+    transition:
+        .2s;
+}
+
+.layer-btn:hover {
+
+    border-color:
+        #1496a8;
+
+    background:
+        #eefbfc;
+}
+
+.layer-btn.active {
+
+    background:
+        #e4f7f8;
+
+    border-color:
+        #1496a8;
+
+    color:
+        #056875;
+
+    font-weight:
+        600;
+}
+
+
+/* =========================================================
+   STATUS LEGEND
+========================================================= */
+
+.legend-row {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    margin-bottom:
+        9px;
+
+    font-size:
+        12px;
+
+    color:
+        #445963;
+}
+
+.legend-box {
+
+    width:
+        15px;
+
+    height:
+        15px;
+
+    border-radius:
+        4px;
+}
+
+.green {
+    background:
+        #22c55e;
+}
+
+.orange {
+    background:
+        #f59e0b;
+}
+
+.red {
+    background:
+        #ef4444;
+}
+
+.blue {
+    background:
+        #168aad;
+}
+
+
+/* =========================================================
+   INFO CARD
+========================================================= */
+
+.info-card {
+
+    background:
+        #f5f9fa;
+
+    border:
+        1px solid #dce8ec;
+
+    border-radius:
+        10px;
+
+    padding:
+        12px;
+
+    margin-bottom:
+        8px;
+}
+
+.info-label {
+
+    font-size:
+        10px;
+
+    text-transform:
+        uppercase;
+
+    color:
+        #71848d;
+
+    letter-spacing:
+        .7px;
+}
+
+.info-value {
+
+    font-size:
+        15px;
+
+    font-weight:
+        700;
+
+    margin-top:
+        3px;
+
+    color:
+        #164555;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+
+    padding:
+        18px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        15px;
+
+    min-width:
+        0;
+}
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+.dashboard {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap:
+        12px;
+}
+
+.metric {
+
+    background:
+        white;
+
+    border:
+        1px solid #dce7eb;
+
+    border-radius:
+        12px;
+
+    padding:
+        15px;
+
+    box-shadow:
+        0 2px 8px
+        rgba(0,0,0,.04);
+}
+
+.metric-label {
+
+    font-size:
+        10px;
+
+    color:
+        #71848d;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        .7px;
+}
+
+.metric-value {
+
+    font-size:
+        25px;
+
+    font-weight:
+        750;
+
+    margin-top:
+        4px;
+
+    color:
+        #174858;
+}
+
+
+/* =========================================================
+   MAP CARD
+========================================================= */
+
+.map-card {
+
+    flex:
+        1;
+
+    min-height:
+        0;
+
+    background:
+        white;
+
+    border:
+        1px solid #dce7eb;
+
+    border-radius:
+        14px;
+
+    overflow:
+        hidden;
+
+    position:
+        relative;
+
+    box-shadow:
+        0 3px 12px
+        rgba(0,0,0,.05);
+}
+
+.map-header {
+
+    height:
+        58px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 18px;
+
+    border-bottom:
+        1px solid #e3ecef;
+
+    background:
+        rgba(255,255,255,.96);
+
+    position:
+        relative;
+
+    z-index:
+        500;
+}
+
+.map-title {
+
+    font-size:
+        15px;
+
+    font-weight:
+        700;
+
+    color:
+        #183d4b;
+}
+
+.map-subtitle {
+
+    font-size:
+        10px;
+
+    color:
+        #73858d;
+
+    margin-top:
+        3px;
+}
+
+.map-badge {
+
+    background:
+        #e7f6f7;
+
+    color:
+        #087481;
+
+    border-radius:
+        20px;
+
+    padding:
+        7px 11px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+}
+
+#map {
+
+    width:
+        100%;
+
+    height:
+        calc(100% - 58px);
+}
+
+
+/* =========================================================
+   DETAIL PANEL
+========================================================= */
+
+.detail-panel {
+
+    position:
+        absolute;
+
+    right:
+        15px;
+
+    top:
+        73px;
+
+    width:
+        285px;
+
+    max-height:
+        calc(100% - 88px);
+
+    overflow-y:
+        auto;
+
+    background:
+        rgba(255,255,255,.97);
+
+    border:
+        1px solid #dce7eb;
+
+    border-radius:
+        12px;
+
+    box-shadow:
+        0 8px 30px
+        rgba(0,0,0,.15);
+
+    padding:
+        16px;
+
+    z-index:
+        600;
+
+    display:
+        none;
+}
+
+.detail-panel.show {
+
+    display:
+        block;
+}
+
+.detail-close {
+
+    float:
+        right;
+
+    border:
+        none;
+
+    background:
+        #edf3f5;
+
+    width:
+        26px;
+
+    height:
+        26px;
+
+    border-radius:
+        50%;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        bold;
+
+    color:
+        #5a6d75;
+}
+
+.detail-title {
+
+    font-size:
+        15px;
+
+    font-weight:
+        700;
+
+    color:
+        #174858;
+
+    margin-bottom:
+        14px;
+}
+
+.detail-row {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    padding:
+        7px 0;
+
+    border-bottom:
+        1px solid #edf2f3;
+
+    font-size:
+        11px;
+}
+
+.detail-row span:first-child {
+
+    color:
+        #72858e;
+}
+
+.detail-row span:last-child {
+
+    font-weight:
+        600;
+
+    text-align:
+        right;
+}
+
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+.status-badge {
+
+    display:
+        inline-block;
+
+    padding:
+        7px 10px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    margin-top:
+        12px;
+}
+
+.status-matched {
+
+    background:
+        #dcfce7;
+
+    color:
+        #166534;
+}
+
+.status-partial {
+
+    background:
+        #fef3c7;
+
+    color:
+        #92400e;
+}
+
+.status-outside {
+
+    background:
+        #fee2e2;
+
+    color:
+        #991b1b;
+}
+
+.status-review {
+
+    background:
+        #e0f2fe;
+
+    color:
+        #075985;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search-box {
+
+    width:
+        100%;
+
+    border:
+        1px solid #d6e2e6;
+
+    border-radius:
+        8px;
+
+    padding:
+        10px;
+
+    outline:
+        none;
+
+    font-size:
+        12px;
+
+    margin-bottom:
+        10px;
+}
+
+.search-box:focus {
+
+    border-color:
+        #1393a3;
+}
+
+
+/* =========================================================
+   DISCLAIMER
+========================================================= */
+
+.disclaimer {
+
+    font-size:
+        10px;
+
+    line-height:
+        1.55;
+
+    color:
+        #71838b;
+
+    background:
+        #fff9e9;
+
+    border:
+        1px solid #f1dfad;
+
+    border-radius:
+        9px;
+
+    padding:
+        11px;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer-note {
+
+    text-align:
+        center;
+
+    font-size:
+        10px;
+
+    color:
+        #8a9ba2;
+
+    padding:
+        3px 0;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:900px) {
+
+    .app {
+
+        grid-template-columns:
+            1fr;
+
+        height:
+            auto;
+    }
+
+    .sidebar {
+
+        border-right:
+            none;
+
+        border-bottom:
+            1px solid #dce7eb;
+    }
+
+    .main {
+
+        min-height:
+            700px;
+    }
+
+    .dashboard {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .header-status {
+
+        display:
+            none;
+    }
+}
+
+@media(max-width:600px) {
+
+    .header {
+
+        padding:
+            0 15px;
+    }
+
+    .brand-title {
+
+        font-size:
+            16px;
+    }
+
+    .brand-subtitle {
+
+        display:
+            none;
+    }
+
+    .dashboard {
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .detail-panel {
+
+        left:
+            15px;
+
+        right:
+            15px;
+
+        width:
+            auto;
+    }
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     HEADER
+====================================================== -->
+
+<header class="header">
+
+    <div class="brand">
+
+        <div class="brand-icon">
+            🌊
+        </div>
+
+        <div>
+
+            <div class="brand-title">
+                MARINE-CHECK BALI
+            </div>
+
+            <div class="brand-subtitle">
+                Satellite-Based Marine Utilization Monitoring
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="header-status">
+
+        <span class="status-dot"></span>
+
+        Prototype Monitoring System
+
+    </div>
+
+</header>
+
+
+
+<div class="app">
+
+
+<!-- =====================================================
+     SIDEBAR
+====================================================== -->
+
+<aside class="sidebar">
+
+
+    <!-- DESCRIPTION -->
+
+    <div class="section">
+
+        <div class="section-title">
+            About
+        </div>
+
+        <div class="description">
+
+            Prototype WebGIS untuk melakukan
+            screening awal pemanfaatan ruang laut
+            menggunakan data spasial dan citra
+            satelit.
+
+        </div>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Search
+        </div>
+
+        <input
+            id="searchInput"
+            class="search-box"
+            type="text"
+            placeholder="Search object ID / name..."
+        >
+
+    </div>
+
+
+    <!-- MAP LAYERS -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Monitoring Layers
+        </div>
+
+
+        <button
+            id="btnStructures"
+            class="layer-btn active"
+            onclick="toggleLayer('structures')"
+        >
+            🏗️ Marine Structures
+        </button>
+
+
+        <button
+            id="btnPermits"
+            class="layer-btn active"
+            onclick="toggleLayer('permits')"
+        >
+            📋 Permit / PKKPRL Areas
+        </button>
+
+
+        <button
+            id="btnCoastline"
+            class="layer-btn"
+            onclick="toggleLayer('coastline')"
+        >
+            🏝️ Coastline
+        </button>
+
+
+        <button
+            id="btnAdmin"
+            class="layer-btn"
+            onclick="toggleLayer('admin')"
+        >
+            🗺️ Administrative Boundary
+        </button>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Screening Status
+        </div>
+
+
+        <div class="legend-row">
+
+            <span class="legend-box green"></span>
+
+            Matched
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <span class="legend-box orange"></span>
+
+            Partial Match / Review
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <span class="legend-box red"></span>
+
+            Outside Permit Area
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <span class="legend-box blue"></span>
+
+            Requires Verification
+
+        </div>
+
+    </div>
+
+
+    <!-- SELECTED YEAR -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Observation
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-label">
+                Latest Observation
+            </div>
+
+            <div
+                id="observationYear"
+                class="info-value"
+            >
+                2026
+            </div>
+
+        </div>
+
+
+        <div class="info-card">
+
+            <div class="info-label">
+                Study Area
+            </div>
+
+            <div class="info-value">
+                Bali
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DATA STATUS -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Data Status
+        </div>
+
+        <div
+            id="dataStatus"
+            class="description"
+        >
+            Loading spatial data...
+
+        </div>
+
+    </div>
+
+
+    <!-- DISCLAIMER -->
+
+    <div class="section">
+
+        <div class="disclaimer">
+
+            <strong>Important:</strong>
+
+            Hasil "Matched", "Outside",
+            atau "No Record" merupakan
+            hasil screening spasial terhadap
+            dataset yang digunakan.
+
+            Status tersebut bukan merupakan
+            penetapan pelanggaran atau keputusan
+            hukum dan tetap memerlukan verifikasi
+            terhadap data resmi serta pemeriksaan
+            lapangan.
+
+        </div>
+
+    </div>
+
+
+</aside>
+
+
+
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<main class="main">
+
+
+    <!-- DASHBOARD -->
+
+    <div class="dashboard">
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                Marine Structures
+            </div>
+
+            <div
+                id="totalStructures"
+                class="metric-value"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                Matched
+            </div>
+
+            <div
+                id="matchedCount"
+                class="metric-value"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                Review
+            </div>
+
+            <div
+                id="reviewCount"
+                class="metric-value"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="metric">
+
+            <div class="metric-label">
+                Priority Verification
+            </div>
+
+            <div
+                id="priorityCount"
+                class="metric-value"
+            >
+                0
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- MAP -->
+
+    <div class="map-card">
+
+
+        <div class="map-header">
+
+            <div>
+
+                <div class="map-title">
+                    Marine Utilization Monitoring Map
+                </div>
+
+                <div class="map-subtitle">
+                    Spatial screening of marine structures
+                    against permit areas
+                </div>
+
+            </div>
+
+
+            <div class="map-badge">
+
+                BALI · PROTOTYPE
+
+            </div>
+
+        </div>
+
+
+        <div id="map"></div>
+
+
+        <!-- DETAIL PANEL -->
+
+        <div
+            id="detailPanel"
+            class="detail-panel"
+        >
+
+            <button
+                class="detail-close"
+                onclick="closeDetail()"
+            >
+                ×
+            </button>
+
+
+            <div class="detail-title">
+                Marine Utilization Record
+            </div>
+
+
+            <div id="detailContent">
+
+                Click a marine structure
+                on the map.
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="footer-note">
+
+        Marine-Check Bali · GIS & Remote Sensing
+        Prototype · For Spatial Screening & Verification Support
+
+    </div>
+
+
+</main>
+
+</div>
+
+
+
+<!-- =====================================================
+     LEAFLET
+====================================================== -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<!-- =====================================================
+     TURF
+====================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+
+
+
+<script>
+
+/* =========================================================
+   MAP
+========================================================= */
+
+const map = L.map("map", {
+
+    center: [
+        -8.67,
+        115.21
+    ],
+
+    zoom: 11,
+
+    zoomControl: true
+
+});
+
+
+/* =========================================================
+   BASEMAPS
+========================================================= */
+
+const streetMap =
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            attribution:
+                "&copy; OpenStreetMap contributors"
+        }
+    );
+
+
+const satelliteMap =
+    L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+            maxZoom: 19,
+            attribution:
+                "Tiles &copy; Esri"
+        }
+    );
+
+
+/* Satellite default */
+
+satelliteMap.addTo(map);
+
+
+
+/* =========================================================
+   LAYER GROUPS
+========================================================= */
+
+const layers = {
+
+    structures:
+        L.layerGroup().addTo(map),
+
+    permits:
+        L.layerGroup().addTo(map),
+
+    coastline:
+        L.layerGroup(),
+
+    admin:
+        L.layerGroup()
+
+};
+
+
+
+/* =========================================================
+   DATA
+========================================================= */
+
+/*
+    IMPORTANT
+
+    Replace these files with your actual
+    GeoJSON datasets.
+
+    Do NOT represent synthetic data
+    as official KKP data.
+*/
+
+const dataFiles = {
+
+    structures:
+        "./data/marine_structures.geojson",
+
+    permits:
+        "./data/permit_areas.geojson",
+
+    coastline:
+        "./data/coastline.geojson",
+
+    admin:
+        "./data/administrative_bali.geojson"
+
+};
+
+
+
+/* =========================================================
+   GEOJSON STORAGE
+========================================================= */
+
+let structureGeoJSON = null;
+
+let permitGeoJSON = null;
+
+let coastlineGeoJSON = null;
+
+let adminGeoJSON = null;
+
+
+
+/* =========================================================
+   STYLE
+========================================================= */
+
+function structureStyle(feature) {
+
+    const status =
+        feature.properties?.screening_status
+        || "review";
+
+
+    if (
+        status === "matched"
+    ) {
+
+        return {
+
+            color:
+                "#166534",
+
+            fillColor:
+                "#22c55e",
+
+            fillOpacity:
+                .65,
+
+            weight:
+                2
+
+        };
+
+    }
+
+
+    if (
+        status === "partial"
+    ) {
+
+        return {
+
+            color:
+                "#92400e",
+
+            fillColor:
+                "#f59e0b",
+
+            fillOpacity:
+                .70,
+
+            weight:
+                2
+
+        };
+
+    }
+
+
+    if (
+        status === "outside"
+    ) {
+
+        return {
+
+            color:
+                "#991b1b",
+
+            fillColor:
+                "#ef4444",
+
+            fillOpacity:
+                .70,
+
+            weight:
+                2
+
+        };
+
+    }
+
+
+    return {
+
+        color:
+            "#075985",
+
+        fillColor:
+            "#168aad",
+
+        fillOpacity:
+            .65,
+
+        weight:
+            2
+
+    };
+
+}
+
+
+
+function permitStyle() {
+
+    return {
+
+        color:
+            "#16a34a",
+
+        fillColor:
+            "#22c55e",
+
+        fillOpacity:
+            .12,
+
+        weight:
+            2,
+
+        dashArray:
+            "6 5"
+
+    };
+
+}
+
+
+
+function coastlineStyle() {
+
+    return {
+
+        color:
+            "#0ea5e9",
+
+        weight:
+            2,
+
+        fillOpacity:
+            0
+
+    };
+
+}
+
+
+
+function adminStyle() {
+
+    return {
+
+        color:
+            "#64748b",
+
+        weight:
+            1,
+
+        fillOpacity:
+            0,
+
+        dashArray:
+            "4 5"
+
+    };
+
+}
+
+
+
+/* =========================================================
+   LOAD GEOJSON
+========================================================= */
+
+async function loadGeoJSON(
+    type,
+    url
+) {
+
+    try {
+
+        const response =
+            await fetch(
+                url
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            type ===
+            "structures"
+        ) {
+
+            structureGeoJSON =
+                data;
+
+            renderStructures(
+                data
+            );
+
+        }
+
+
+        if (
+            type ===
+            "permits"
+        ) {
+
+            permitGeoJSON =
+                data;
+
+            renderPermits(
+                data
+            );
+
+        }
+
+
+        if (
+            type ===
+            "coastline"
+        ) {
+
+            coastlineGeoJSON =
+                data;
+
+            renderCoastline(
+                data
+            );
+
+        }
+
+
+        if (
+            type ===
+            "admin"
+        ) {
+
+            adminGeoJSON =
+                data;
+
+            renderAdmin(
+                data
+            );
+
+        }
+
+
+        updateDataStatus();
+
+
+    }
+
+    catch(error) {
+
+        console.warn(
+            "Could not load:",
+            type,
+            error
+        );
+
+        updateDataStatus();
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RENDER STRUCTURES
+========================================================= */
+
+function renderStructures(
+    data
+) {
+
+    layers.structures.clearLayers();
+
+
+    const geoLayer =
+        L.geoJSON(
+            data,
+            {
+
+                style:
+                    structureStyle,
+
+
+                onEachFeature:
+                    function(
+                        feature,
+                        layer
+                    ) {
+
+                        layer.on(
+                            "click",
+                            function() {
+
+                                showDetail(
+                                    feature
+                                );
+
+                            }
+                        );
+
+
+                        layer.bindTooltip(
+
+                            feature
+                            .properties
+                            ?.object_id
+                            ||
+                            "Marine Structure",
+
+                            {
+
+                                sticky:
+                                    true
+
+                            }
+
+                        );
+
+                    }
+
+            }
+        );
+
+
+    geoLayer.addTo(
+        layers.structures
+    );
+
+
+    updateDashboard();
+
+}
+
+
+
+/* =========================================================
+   RENDER PERMITS
+========================================================= */
+
+function renderPermits(
+    data
+) {
+
+    layers.permits.clearLayers();
+
+
+    L.geoJSON(
+        data,
+        {
+
+            style:
+                permitStyle,
+
+
+            onEachFeature:
+                function(
+                    feature,
+                    layer
+                ) {
+
+                    const name =
+                        feature
+                        .properties
+                        ?.name
+                        ||
+                        "Permit Area";
+
+
+                    layer.bindTooltip(
+                        name,
+                        {
+                            sticky:
+                                true
+                        }
+                    );
+
+                }
+
+        }
+    ).addTo(
+        layers.permits
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER COASTLINE
+========================================================= */
+
+function renderCoastline(
+    data
+) {
+
+    layers.coastline.clearLayers();
+
+
+    L.geoJSON(
+        data,
+        {
+
+            style:
+                coastlineStyle
+
+        }
+    ).addTo(
+        layers.coastline
+    );
+
+}
+
+
+
+/* =========================================================
+   RENDER ADMIN
+========================================================= */
+
+function renderAdmin(
+    data
+) {
+
+    layers.admin.clearLayers();
+
+
+    L.geoJSON(
+        data,
+        {
+
+            style:
+                adminStyle
+
+        }
+    ).addTo(
+        layers.admin
+    );
+
+}
+
+
+
+/* =========================================================
+   TOGGLE LAYER
+========================================================= */
+
+function toggleLayer(
+    type
+) {
+
+    const button =
+        document.getElementById(
+            "btn" +
+            type.charAt(0).toUpperCase() +
+            type.slice(1)
+        );
+
+
+    if (
+        map.hasLayer(
+            layers[type]
+        )
+    ) {
+
+        map.removeLayer(
+            layers[type]
+        );
+
+        button.classList.remove(
+            "active"
+        );
+
+    }
+
+    else {
+
+        layers[type].addTo(
+            map
+        );
+
+        button.classList.add(
+            "active"
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function updateDashboard() {
+
+    if (
+        !structureGeoJSON
+    ) {
+
+        return;
+
+    }
+
+
+    const features =
+        structureGeoJSON.features
+        || [];
+
+
+    let matched =
+        0;
+
+    let review =
+        0;
+
+    let priority =
+        0;
+
+
+    features.forEach(
+        feature => {
+
+            const status =
+                feature.properties
+                ?.screening_status;
+
+
+            if (
+                status ===
+                "matched"
+            ) {
+
+                matched++;
+
+            }
+
+
+            if (
+                status ===
+                "partial" ||
+                status ===
+                "outside"
+            ) {
+
+                review++;
+
+            }
+
+
+            if (
+                feature.properties
+                ?.priority ===
+                true
+            ) {
+
+                priority++;
+
+            }
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "totalStructures"
+        )
+        .textContent =
+        features.length;
+
+
+    document
+        .getElementById(
+            "matchedCount"
+        )
+        .textContent =
+        matched;
+
+
+    document
+        .getElementById(
+            "reviewCount"
+        )
+        .textContent =
+        review;
+
+
+    document
+        .getElementById(
+            "priorityCount"
+        )
+        .textContent =
+        priority;
+
+}
+
+
+
+/* =========================================================
+   DETAIL PANEL
+========================================================= */
+
+function showDetail(
+    feature
+) {
+
+    const p =
+        feature.properties
+        || {};
+
+
+    const objectID =
+        p.object_id
+        || "—";
+
+
+    const name =
+        p.name
+        || "Marine Structure";
+
+
+    const type =
+        p.type
+        || "Not specified";
+
+
+    const date =
+        p.detection_date
+        || "—";
+
+
+    const area =
+        p.area_m2
+        ? Number(
+            p.area_m2
+        ).toLocaleString(
+            "en-US"
+        ) + " m²"
+        : "—";
+
+
+    const status =
+        p.screening_status
+        || "review";
+
+
+    let statusText =
+        "Requires Verification";
+
+    let statusClass =
+        "status-review";
+
+
+    if (
+        status ===
+        "matched"
+    ) {
+
+        statusText =
+            "Matched";
+
+        statusClass =
+            "status-matched";
+
+    }
+
+
+    if (
+        status ===
+        "partial"
+    ) {
+
+        statusText =
+            "Partial Match";
+
+        statusClass =
+            "status-partial";
+
+    }
+
+
+    if (
+        status ===
+        "outside"
+    ) {
+
+        statusText =
+            "Outside Permit Area";
+
+        statusClass =
+            "status-outside";
+
+    }
+
+
+    const permit =
+        p.permit_id
+        || "No matching record";
+
+
+    const change =
+        p.change_status
+        || "Not available";
+
+
+    document
+        .getElementById(
+            "detailContent"
+        )
+        .innerHTML = `
+
+            <div class="detail-row">
+                <span>Object ID</span>
+                <span>${objectID}</span>
+            </div>
+
+            <div class="detail-row">
+                <span>Name</span>
+                <span>${name}</span>
+            </div>
+
+            <div class="detail-row">
+                <span>Type</span>
+                <span>${type}</span>
+            </div>
+
+            <div class="detail-row">
+                <span>Detection</span>
+                <span>${date}</span>
+            </div>
+
+            <div class="detail-row">
+                <span>Estimated Area</span>
+                <span>${area}</span>
+            </div>
+
+            <div class="detail-row">
+                <span>Permit Record</span>
+                <span>${permit}</span>
+            </div>
+
+            <div class="detail-row">
+                <span>Temporal Change</span>
+                <span>${change}</span>
+            </div>
+
+            <div class="
+                status-badge
+                ${statusClass}
+            ">
+                ${statusText}
+            </div>
+
+        `;
+
+
+    document
+        .getElementById(
+            "detailPanel"
+        )
+        .classList.add(
+            "show"
+        );
+
+}
+
+
+
+function closeDetail() {
+
+    document
+        .getElementById(
+            "detailPanel"
+        )
+        .classList.remove(
+            "show"
+        );
+
+}
+
+
+
+/* =========================================================
+   DATA STATUS
+========================================================= */
+
+function updateDataStatus() {
+
+    const status =
+        document.getElementById(
+            "dataStatus"
+        );
+
+
+    const structureOK =
+        structureGeoJSON !== null;
+
+
+    const permitOK =
+        permitGeoJSON !== null;
+
+
+    if (
+        structureOK &&
+        permitOK
+    ) {
+
+        status.innerHTML =
+
+            "✓ Marine structure and permit " +
+            "datasets loaded.";
+
+    }
+
+    else {
+
+        status.innerHTML =
+
+            "Waiting for spatial datasets. " +
+            "Add GeoJSON files to the " +
+            "<strong>data/</strong> folder.";
+
+    }
+
+}
+
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+document
+    .getElementById(
+        "searchInput"
+    )
+    .addEventListener(
+        "input",
+        function() {
+
+            const query =
+                this.value
+                .toLowerCase()
+                .trim();
+
+
+            if (
+                !structureGeoJSON ||
+                !query
+            ) {
+
+                return;
+
+            }
+
+
+            const result =
+                structureGeoJSON
+                .features
+                .find(
+                    feature => {
+
+                        const p =
+                            feature
+                            .properties
+                            || {};
+
+
+                        const id =
+                            String(
+                                p.object_id
+                                || ""
+                            )
+                            .toLowerCase();
+
+
+                        const name =
+                            String(
+                                p.name
+                                || ""
+                            )
+                            .toLowerCase();
+
+
+                        return (
+
+                            id.includes(
+                                query
+                            )
+
+                            ||
+
+                            name.includes(
+                                query
+                            )
+
+                        );
+
+                    }
+                );
+
+
+            if (
+                result
+            ) {
+
+                const center =
+                    turf.centroid(
+                        result
+                    );
+
+
+                const coordinates =
+                    center.geometry
+                    .coordinates;
+
+
+                map.setView(
+                    [
+                        coordinates[1],
+                        coordinates[0]
+                    ],
+                    16
+                );
+
+
+                showDetail(
+                    result
+                );
+
+            }
+
+        }
+    );
+
+
+
+/* =========================================================
+   BASEMAP CONTROL
+========================================================= */
+
+L.control.layers(
+
+    {
+
+        "Satellite":
+            satelliteMap,
+
+        "Street Map":
+            streetMap
+
+    },
+
+    null,
+
+    {
+
+        collapsed:
+            true
+
+    }
+
+).addTo(
+    map
+);
+
+
+
+/* =========================================================
+   INITIAL DATA LOAD
+========================================================= */
+
+loadGeoJSON(
+    "structures",
+    dataFiles.structures
+);
+
+
+loadGeoJSON(
+    "permits",
+    dataFiles.permits
+);
+
+
+loadGeoJSON(
+    "coastline",
+    dataFiles.coastline
+);
+
+
+loadGeoJSON(
+    "admin",
+    dataFiles.admin
+);
+
+
+
+/* =========================================================
+   MAP SCALE
+========================================================= */
+
+L.control.scale({
+    imperial: false
+}).addTo(
+    map
+);
+
+</script>
+
+
+</body>
+
+</html>
