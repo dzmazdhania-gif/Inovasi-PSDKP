@@ -1,0 +1,26 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "permit_id": "DEMO-001",
+        "name": "Demo Permit Area",
+        "activity": "Marine Tourism",
+        "status": "Active"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [115.2095, -8.6695],
+            [115.2115, -8.6695],
+            [115.2115, -8.6715],
+            [115.2095, -8.6715],
+            [115.2095, -8.6695]
+          ]
+        ]
+      }
+    }
+  ]
+}
