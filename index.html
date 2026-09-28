@@ -708,7 +708,7 @@
 
 
     const BIG_ADMIN_URL =
-        "https://geoservices.big.go.id/rbi/rest/services/ADMINISTRASI/Administrasi_25K/MapServer";
+        "https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/BATAS_WILAYAH/MapServer/12";
 
 
     /* =========================================================
@@ -805,15 +805,6 @@
     };
 
 
-    /*
-     * IMPORTANT:
-     *
-     * BIG Coastline TIDAK dimasukkan di sini.
-     *
-     * Karena coastline adalah DynamicMapLayer dari Esri Leaflet.
-     * Sidebar akan mengontrol coastline secara langsung.
-     */
-
     const overlayMaps = {
 
         "Marine Structures":
@@ -828,21 +819,17 @@
     };
 
 
-    const layerControl =
-        L.control.layers(
+    L.control.layers(
 
-            baseMaps,
+        baseMaps,
 
-            overlayMaps,
+        overlayMaps,
 
-            {
+        {
+            collapsed: true
+        }
 
-                collapsed:
-                    true
-
-            }
-
-        ).addTo(map);
+    ).addTo(map);
 
 
     /* =========================================================
@@ -857,53 +844,17 @@
 
         try {
 
-            /*
-             * Pastikan Esri Leaflet tersedia.
-             */
-
             if (
-                typeof L.esri === "undefined"
-            ) {
-
-                console.error(
-                    "Esri Leaflet tidak berhasil dimuat."
-                );
-
-                coastlineLoaded =
-                    false;
-
-                updateDataStatus();
-
-                return;
-
-            }
-
-
-            /*
-             * Pastikan Dynamic Map Layer tersedia.
-             */
-
-            if (
+                typeof L.esri === "undefined" ||
                 typeof L.esri.dynamicMapLayer !== "function"
             ) {
 
-                console.error(
-                    "L.esri.dynamicMapLayer tidak tersedia."
+                throw new Error(
+                    "Esri Leaflet dynamicMapLayer tidak tersedia."
                 );
-
-                coastlineLoaded =
-                    false;
-
-                updateDataStatus();
-
-                return;
 
             }
 
-
-            /*
-             * Buat BIG Coastline.
-             */
 
             const coastline =
                 L.esri.dynamicMapLayer({
@@ -920,13 +871,26 @@
                 });
 
 
-            /*
-             * Tangkap error request.
-             */
+            coastline.on(
+                "load",
+                function () {
+
+                    coastlineLoaded =
+                        true;
+
+                    updateDataStatus();
+
+                    console.log(
+                        "✓ BIG coastline berhasil dimuat."
+                    );
+
+                }
+            );
+
 
             coastline.on(
                 "requesterror",
-                function(error) {
+                function (error) {
 
                     console.error(
                         "BIG coastline request error:",
@@ -942,31 +906,11 @@
             );
 
 
-            /*
-             * Simpan ke object layers.
-             */
-
             layers.coastline =
                 coastline;
 
 
-            /*
-             * Tambahkan ke map.
-             */
-
             coastline.addTo(map);
-
-
-            coastlineLoaded =
-                true;
-
-
-            updateDataStatus();
-
-
-            console.log(
-                "BIG coastline berhasil dibuat."
-            );
 
         }
 
@@ -977,14 +921,11 @@
                 error
             );
 
-
             layers.coastline =
                 null;
 
-
             coastlineLoaded =
                 false;
-
 
             updateDataStatus();
 
@@ -1001,93 +942,99 @@
         null;
 
 
-    async function loadBIGAdmin() {
+    function loadBIGAdmin() {
 
         try {
 
-            const url =
-                BIG_ADMIN_URL +
-                "/0/query?" +
-                new URLSearchParams({
+            if (
+                typeof L.esri === "undefined" ||
+                typeof L.esri.featureLayer !== "function"
+            ) {
+
+                throw new Error(
+                    "Esri Leaflet featureLayer tidak tersedia."
+                );
+
+            }
+
+
+            const admin =
+                L.esri.featureLayer({
+
+                    url:
+                        BIG_ADMIN_URL,
 
                     where:
-                        "WADMPR = 'Bali'",
+                        "wadmpr = 'Bali'",
 
-                    outFields:
-                        "*",
+                    style:
+                        function () {
 
-                    returnGeometry:
-                        "true",
+                            return {
 
-                    outSR:
-                        "4326",
+                                color:
+                                    "#00ffff",
 
-                    f:
-                        "geojson"
+                                weight:
+                                    3,
+
+                                opacity:
+                                    1,
+
+                                fillColor:
+                                    "#00ffff",
+
+                                fillOpacity:
+                                    0.03
+
+                            };
+
+                        },
+
+                    attribution:
+                        "Batas Administrasi © Badan Informasi Geospasial"
 
                 });
 
 
-            const response =
-                await fetch(url);
+            admin.on(
+                "load",
+                function () {
+
+                    console.log(
+                        "✓ BIG administrative boundary Bali berhasil dimuat."
+                    );
+
+                    updateDataStatus();
+
+                }
+            );
 
 
-            if (!response.ok) {
+            admin.on(
+                "requesterror",
+                function (error) {
 
-                throw new Error(
-                    "HTTP " +
-                    response.status
-                );
+                    console.error(
+                        "BIG administrative boundary request error:",
+                        error
+                    );
 
-            }
+                    adminGeoJSON =
+                        null;
 
+                    updateDataStatus();
 
-            const data =
-                await response.json();
-
-
-            if (
-                data.error
-            ) {
-
-                throw new Error(
-                    data.error.message ||
-                    "BIG administrative service error"
-                );
-
-            }
+                }
+            );
 
 
             adminGeoJSON =
-                L.geoJSON(
-
-                    data,
-
-                    {
-
-                        style: {
-
-                            color:
-                                "#555555",
-
-                            weight:
-                                1.5,
-
-                            opacity:
-                                0.8,
-
-                            fillOpacity:
-                                0
-
-                        }
-
-                    }
-
-                );
+                admin;
 
 
-            adminGeoJSON.addTo(
-                layers.admin
+            layers.admin.addLayer(
+                adminGeoJSON
             );
 
 
@@ -1102,10 +1049,8 @@
                 error
             );
 
-
             adminGeoJSON =
                 null;
-
 
             updateDataStatus();
 
@@ -1622,13 +1567,11 @@
                 </div>
 
                 <div class="detail-value">
-
                     ${
                         properties.area_m2 !== undefined
                         ? properties.area_m2 + " m²"
                         : "-"
                     }
-
                 </div>
 
             </div>
@@ -1772,13 +1715,8 @@
 
 
                 if (
-
-                    status ===
-                    "review" ||
-
-                    status ===
-                    "partial"
-
+                    status === "review" ||
+                    status === "partial"
                 ) {
 
                     review++;
@@ -1794,19 +1732,10 @@
 
 
                 if (
-
-                    priorityValue ===
-                    "high" ||
-
-                    priorityValue ===
-                    "1" ||
-
-                    priorityValue ===
-                    "yes" ||
-
-                    priorityValue ===
-                    "priority"
-
+                    priorityValue === "high" ||
+                    priorityValue === "1" ||
+                    priorityValue === "yes" ||
+                    priorityValue === "priority"
                 ) {
 
                     priority++;
@@ -1865,11 +1794,9 @@
         ) {
 
             html += `
-
                 <div class="status-item status-ok">
                     ✓ Marine structures loaded
                 </div>
-
             `;
 
         }
@@ -1877,11 +1804,9 @@
         else {
 
             html += `
-
                 <div class="status-item status-warning">
                     ⚠ Marine structures not loaded
                 </div>
-
             `;
 
         }
@@ -1892,11 +1817,9 @@
         ) {
 
             html += `
-
                 <div class="status-item status-ok">
                     ✓ Permit / PKKPRL areas loaded
                 </div>
-
             `;
 
         }
@@ -1904,11 +1827,9 @@
         else {
 
             html += `
-
                 <div class="status-item status-warning">
                     ⚠ Permit areas not loaded
                 </div>
-
             `;
 
         }
@@ -1919,11 +1840,9 @@
         ) {
 
             html += `
-
                 <div class="status-item status-ok">
                     ✓ BIG coastline service
                 </div>
-
             `;
 
         }
@@ -1931,11 +1850,9 @@
         else {
 
             html += `
-
                 <div class="status-item status-warning">
                     ⚠ BIG coastline unavailable
                 </div>
-
             `;
 
         }
@@ -1946,11 +1863,9 @@
         ) {
 
             html += `
-
                 <div class="status-item status-ok">
                     ✓ BIG administrative boundary
                 </div>
-
             `;
 
         }
@@ -1958,11 +1873,9 @@
         else {
 
             html += `
-
                 <div class="status-item status-warning">
                     ⚠ BIG administrative boundary unavailable
                 </div>
-
             `;
 
         }
@@ -1992,11 +1905,6 @@
                 layerName
             );
 
-
-        /*
-         * Kalau layer belum tersedia,
-         * jangan lakukan apa-apa.
-         */
 
         if (!layer) {
 
@@ -2133,10 +2041,6 @@
        INITIAL LOAD
     ========================================================= */
 
-    /*
-     * LOCAL DATA
-     */
-
     loadGeoJSON(
         "structures",
         dataFiles.structures
@@ -2149,23 +2053,11 @@
     );
 
 
-    /*
-     * BIG ADMINISTRATIVE BOUNDARY
-     */
-
     loadBIGAdmin();
 
 
-    /*
-     * BIG COASTLINE
-     */
-
     loadBIGCoastline();
 
-
-    /*
-     * INITIAL STATUS
-     */
 
     updateDataStatus();
 
