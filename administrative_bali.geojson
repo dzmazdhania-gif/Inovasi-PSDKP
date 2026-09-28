@@ -1,0 +1,23 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bali - Demo Boundary"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [114.9, -8.1],
+            [115.8, -8.1],
+            [115.8, -8.9],
+            [114.9, -8.9],
+            [114.9, -8.1]
+          ]
+        ]
+      }
+    }
+  ]
+}
