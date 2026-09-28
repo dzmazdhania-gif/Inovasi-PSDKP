@@ -1,0 +1,31 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "object_id": "MC-001",
+        "name": "Demo Marine Structure A",
+        "type": "Jetty",
+        "detection_date": "2026-08-15",
+        "area_m2": 1240,
+        "screening_status": "matched",
+        "permit_id": "DEMO-001",
+        "change_status": "No significant change",
+        "priority": false
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [115.2100, -8.6700],
+            [115.2110, -8.6700],
+            [115.2110, -8.6710],
+            [115.2100, -8.6710],
+            [115.2100, -8.6700]
+          ]
+        ]
+      }
+    }
+  ]
+}
