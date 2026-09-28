@@ -773,16 +773,6 @@
        LAYER GROUPS
     ========================================================= */
 
-    /*
-     * PENTING:
-     *
-     * Jangan membuat coastline di dalam object ini.
-     * Kita buat setelah map dan layer lokal siap.
-     *
-     * Dengan begitu kalau Esri Leaflet gagal,
-     * structures dan permits tetap berjalan.
-     */
-
     const layers = {
 
         structures:
@@ -801,10 +791,66 @@
 
 
     /* =========================================================
+       BASEMAP CONTROL
+    ========================================================= */
+
+    const baseMaps = {
+
+        "Satellite":
+            satellite,
+
+        "Street Map":
+            streets
+
+    };
+
+
+    /*
+     * IMPORTANT:
+     *
+     * BIG Coastline TIDAK dimasukkan di sini.
+     *
+     * Karena coastline adalah DynamicMapLayer dari Esri Leaflet.
+     * Sidebar akan mengontrol coastline secara langsung.
+     */
+
+    const overlayMaps = {
+
+        "Marine Structures":
+            layers.structures,
+
+        "Permit / PKKPRL Areas":
+            layers.permits,
+
+        "Administrative Boundary":
+            layers.admin
+
+    };
+
+
+    const layerControl =
+        L.control.layers(
+
+            baseMaps,
+
+            overlayMaps,
+
+            {
+
+                collapsed:
+                    true
+
+            }
+
+        ).addTo(map);
+
+
+    /* =========================================================
        BIG COASTLINE
     ========================================================= */
 
-    let coastlineLoaded = false;
+    let coastlineLoaded =
+        false;
 
 
     function loadBIGCoastline() {
@@ -812,7 +858,7 @@
         try {
 
             /*
-             * Pastikan Esri Leaflet benar-benar tersedia.
+             * Pastikan Esri Leaflet tersedia.
              */
 
             if (
@@ -823,20 +869,8 @@
                     "Esri Leaflet tidak berhasil dimuat."
                 );
 
-                updateDataStatus();
-
-                return;
-
-            }
-
-
-            if (
-                typeof L.esri.dynamicMapLayer !== "function"
-            ) {
-
-                console.error(
-                    "L.esri.dynamicMapLayer tidak tersedia."
-                );
+                coastlineLoaded =
+                    false;
 
                 updateDataStatus();
 
@@ -846,10 +880,32 @@
 
 
             /*
-             * BIG coastline dibuat sebagai Dynamic Map Layer.
+             * Pastikan Dynamic Map Layer tersedia.
              */
 
-            layers.coastline =
+            if (
+                typeof L.esri.dynamicMapLayer !== "function"
+            ) {
+
+                console.error(
+                    "L.esri.dynamicMapLayer tidak tersedia."
+                );
+
+                coastlineLoaded =
+                    false;
+
+                updateDataStatus();
+
+                return;
+
+            }
+
+
+            /*
+             * Buat BIG Coastline.
+             */
+
+            const coastline =
                 L.esri.dynamicMapLayer({
 
                     url:
@@ -865,10 +921,10 @@
 
 
             /*
-             * Tangkap error dari service BIG.
+             * Tangkap error request.
              */
 
-            layers.coastline.on(
+            coastline.on(
                 "requesterror",
                 function(error) {
 
@@ -877,7 +933,8 @@
                         error
                     );
 
-                    coastlineLoaded = false;
+                    coastlineLoaded =
+                        false;
 
                     updateDataStatus();
 
@@ -886,30 +943,34 @@
 
 
             /*
-             * Tambahkan coastline ke map.
+             * Simpan ke object layers.
              */
 
-            layers.coastline.addTo(map);
+            layers.coastline =
+                coastline;
 
 
-            coastlineLoaded = true;
+            /*
+             * Tambahkan ke map.
+             */
+
+            coastline.addTo(map);
+
+
+            coastlineLoaded =
+                true;
 
 
             updateDataStatus();
 
 
             console.log(
-                "BIG coastline layer berhasil dibuat."
+                "BIG coastline berhasil dibuat."
             );
 
         }
 
         catch (error) {
-
-            /*
-             * Kalau coastline gagal,
-             * JANGAN menghentikan aplikasi.
-             */
 
             console.error(
                 "BIG coastline error:",
@@ -936,7 +997,8 @@
        ADMINISTRATIVE BOUNDARY
     ========================================================= */
 
-    let adminGeoJSON = null;
+    let adminGeoJSON =
+        null;
 
 
     async function loadBIGAdmin() {
@@ -983,11 +1045,6 @@
             const data =
                 await response.json();
 
-
-            /*
-             * Kalau BIG mengembalikan error JSON,
-             * jangan sampai aplikasi berhenti.
-             */
 
             if (
                 data.error
@@ -1165,12 +1222,14 @@
     ) {
 
         const properties =
-            feature.properties || {};
+            feature.properties ||
+            {};
 
 
         const status =
             String(
-                properties.screening_status || ""
+                properties.screening_status ||
+                ""
             ).toLowerCase();
 
 
@@ -1179,7 +1238,8 @@
 
 
         if (
-            status === "matched"
+            status ===
+            "matched"
         ) {
 
             color =
@@ -1188,7 +1248,8 @@
         }
 
         else if (
-            status === "partial"
+            status ===
+            "partial"
         ) {
 
             color =
@@ -1197,7 +1258,8 @@
         }
 
         else if (
-            status === "outside"
+            status ===
+            "outside"
         ) {
 
             color =
@@ -1206,7 +1268,8 @@
         }
 
         else if (
-            status === "review"
+            status ===
+            "review"
         ) {
 
             color =
@@ -1468,7 +1531,8 @@
 
 
         if (
-            status === "matched"
+            status ===
+            "matched"
         ) {
 
             badgeClass =
@@ -1477,7 +1541,8 @@
         }
 
         else if (
-            status === "partial"
+            status ===
+            "partial"
         ) {
 
             badgeClass =
@@ -1486,7 +1551,8 @@
         }
 
         else if (
-            status === "outside"
+            status ===
+            "outside"
         ) {
 
             badgeClass =
@@ -1927,7 +1993,17 @@
             );
 
 
+        /*
+         * Kalau layer belum tersedia,
+         * jangan lakukan apa-apa.
+         */
+
         if (!layer) {
+
+            console.warn(
+                "Layer belum tersedia:",
+                layerName
+            );
 
             return;
 
@@ -1963,55 +2039,6 @@
         }
 
     }
-
-
-    /* =========================================================
-       BASEMAP CONTROL
-    ========================================================= */
-
-    const baseMaps = {
-
-        "Satellite":
-            satellite,
-
-        "Street Map":
-            streets
-
-    };
-
-
-    const overlayMaps = {
-
-        "Marine Structures":
-            layers.structures,
-
-        "Permit / PKKPRL Areas":
-            layers.permits,
-
-        "BIG Coastline":
-            null,
-
-        "Administrative Boundary":
-            layers.admin
-
-    };
-
-
-    const layerControl =
-        L.control.layers(
-
-            baseMaps,
-
-            overlayMaps,
-
-            {
-
-                collapsed:
-                    true
-
-            }
-
-        ).addTo(map);
 
 
     /* =========================================================
@@ -2107,7 +2134,7 @@
     ========================================================= */
 
     /*
-     * LOCAL DATA DULU
+     * LOCAL DATA
      */
 
     loadGeoJSON(
@@ -2123,24 +2150,21 @@
 
 
     /*
-     * ADMINISTRATIVE BOUNDARY
+     * BIG ADMINISTRATIVE BOUNDARY
      */
 
     loadBIGAdmin();
 
 
     /*
-     * COASTLINE BIG
-     *
-     * Dibuat TERAKHIR supaya kegagalan coastline
-     * tidak mematikan structures / permits.
+     * BIG COASTLINE
      */
 
     loadBIGCoastline();
 
 
     /*
-     * Initial status
+     * INITIAL STATUS
      */
 
     updateDataStatus();
