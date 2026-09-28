@@ -795,23 +795,19 @@
     ========================================================= */
 
     /*
-       IMPORTANT:
-
-       BIG Coastline lama:
-       GARISPANTAI/GarisPantai_25K/MapServer
-
-       tidak digunakan karena service tersebut tidak
-       mengekspos sublayer untuk dynamicMapLayer.
-
-       BIG Coastline yang digunakan:
-       BASEMAP/Rupabumi_Indonesia/MapServer/21
+       BIG Rupabumi Indonesia
 
        Layer 21:
        Garis Pantai Indonesia
+
+       Coastline menggunakan dynamicMapLayer
+       agar geometry garis pantai diproses
+       oleh server BIG.
+
     */
 
     const BIG_COASTLINE_URL =
-        "https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer/21";
+        "https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer";
 
 
     const BIG_ADMIN_URL =
@@ -962,51 +958,32 @@
 
             if (
                 typeof L.esri === "undefined" ||
-                typeof L.esri.featureLayer !== "function"
+                typeof L.esri.dynamicMapLayer !== "function"
             ) {
 
                 throw new Error(
-                    "Esri Leaflet featureLayer tidak tersedia."
+                    "Esri Leaflet dynamicMapLayer tidak tersedia."
                 );
 
             }
 
 
             /*
-                BIG layer 21:
-
-                Garis Pantai Indonesia
+                BIG Rupabumi Indonesia
+                Layer 21 = Garis Pantai Indonesia
             */
 
             const coastline =
-                L.esri.featureLayer({
+                L.esri.dynamicMapLayer({
 
                     url:
                         BIG_COASTLINE_URL,
 
-                    where:
-                        "1=1",
+                    layers:
+                        [21],
 
-                    style:
-                        function () {
-
-                            return {
-
-                                color:
-                                    "#00a9e8",
-
-                                weight:
-                                    3,
-
-                                opacity:
-                                    1,
-
-                                fillOpacity:
-                                    0
-
-                            };
-
-                        },
+                    opacity:
+                        1,
 
                     attribution:
                         "Garis Pantai © Badan Informasi Geospasial"
@@ -1042,14 +1019,14 @@
 
                 function (error) {
 
+                    coastlineLoaded =
+                        false;
+
+
                     console.error(
                         "BIG coastline request error:",
                         error
                     );
-
-
-                    coastlineLoaded =
-                        false;
 
 
                     updateDataStatus();
@@ -1066,11 +1043,6 @@
             coastline.addTo(map);
 
 
-            /*
-                Pastikan tombol sidebar
-                tetap menunjukkan active.
-            */
-
             const button =
                 document.getElementById(
                     "btn-coastline"
@@ -1086,7 +1058,12 @@
             }
 
 
+            console.log(
+                "✓ BIG Coastline Layer 21 ditambahkan."
+            );
+
         }
+
 
         catch (error) {
 
@@ -1240,6 +1217,7 @@
             updateDataStatus();
 
         }
+
 
         catch (error) {
 
