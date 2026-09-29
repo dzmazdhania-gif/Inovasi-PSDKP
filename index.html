@@ -1,356 +1,682 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Marine-Check Bali | Marine Utilization Monitoring</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <!-- Leaflet -->
+    <title>
+        Marine-Check Bali | Marine Utilization Monitoring
+    </title>
+
+
+    <!-- =================================================
+         LEAFLET
+    ================================================== -->
+
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
+    >
+
+
+    <!-- =================================================
+         ESRI LEAFLET
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.css"
+    >
+
+
+    <!-- =================================================
+         STYLE
+    ================================================== -->
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
+
         body {
             margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
             background: #f4f7f9;
             color: #263238;
         }
 
+
+        /* =============================================
+           MAP
+        ============================================= */
+
         #map {
+
             position: absolute;
+
             top: 0;
             left: 330px;
             right: 0;
             bottom: 0;
+
         }
 
-        /* =========================
+
+        /* =============================================
            SIDEBAR
-        ========================= */
+        ============================================= */
 
         #sidebar {
+
             position: absolute;
+
             z-index: 1000;
+
             top: 0;
             left: 0;
+
             width: 330px;
             height: 100vh;
+
             overflow-y: auto;
+
             background: white;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+
+            box-shadow:
+                2px 0 12px
+                rgba(0,0,0,0.15);
+
         }
+
+
+        /* =============================================
+           HEADER
+        ============================================= */
 
         .header {
+
             padding: 22px 20px;
+
             background: #0b3954;
+
             color: white;
+
         }
+
 
         .header h1 {
+
             margin: 0;
+
             font-size: 21px;
+
         }
+
 
         .header p {
+
             margin: 7px 0 0;
+
             font-size: 12px;
-            opacity: 0.85;
+
             line-height: 1.5;
+
+            opacity: 0.85;
+
         }
+
+
+        /* =============================================
+           SECTION
+        ============================================= */
 
         .section {
+
             padding: 16px 18px;
-            border-bottom: 1px solid #e5e5e5;
+
+            border-bottom:
+                1px solid #e5e5e5;
+
         }
+
 
         .section-title {
+
             font-size: 12px;
+
             font-weight: bold;
+
             text-transform: uppercase;
+
             color: #607d8b;
+
             margin-bottom: 10px;
+
             letter-spacing: 0.5px;
+
         }
 
-        /* =========================
+
+        /* =============================================
            SEARCH
-        ========================= */
+        ============================================= */
 
         #searchBox {
+
             width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #cfd8dc;
+
+            padding:
+                10px 12px;
+
+            border:
+                1px solid #cfd8dc;
+
             border-radius: 7px;
+
             outline: none;
+
             font-size: 13px;
+
         }
+
 
         #searchBox:focus {
-            border-color: #0b7285;
+
+            border-color:
+                #0b7285;
+
         }
 
-        /* =========================
+
+        /* =============================================
            DASHBOARD
-        ========================= */
+        ============================================= */
 
         .metrics {
+
             display: grid;
-            grid-template-columns: 1fr 1fr;
+
+            grid-template-columns:
+                1fr 1fr;
+
             gap: 8px;
+
         }
+
 
         .metric {
+
             padding: 12px;
+
             background: #f5f8fa;
+
             border-radius: 7px;
-            border: 1px solid #e1e8eb;
+
+            border:
+                1px solid #e1e8eb;
+
         }
+
 
         .metric-value {
+
             font-size: 20px;
+
             font-weight: bold;
+
             color: #0b3954;
+
         }
+
 
         .metric-label {
+
             font-size: 10px;
+
             color: #607d8b;
+
             margin-top: 3px;
+
         }
 
-        /* =========================
-           LAYER BUTTONS
-        ========================= */
+
+        /* =============================================
+           LAYER BUTTON
+        ============================================= */
 
         .layer-button {
+
             width: 100%;
+
             text-align: left;
-            padding: 10px 12px;
+
+            padding:
+                10px 12px;
+
             margin-bottom: 7px;
-            border: 1px solid #d7e0e4;
+
+            border:
+                1px solid #d7e0e4;
+
             background: white;
+
             border-radius: 7px;
+
             cursor: pointer;
+
             font-size: 12px;
+
             transition: 0.2s;
+
         }
+
 
         .layer-button:hover {
-            background: #f2f7f9;
+
+            background:
+                #f2f7f9;
+
         }
+
 
         .layer-button.active {
-            background: #e5f3f5;
-            border-color: #0b7285;
-            color: #075b68;
+
+            background:
+                #e5f3f5;
+
+            border-color:
+                #0b7285;
+
+            color:
+                #075b68;
+
             font-weight: bold;
+
         }
 
-        /* =========================
+
+        /* =============================================
            STATUS
-        ========================= */
+        ============================================= */
 
         .status-row {
+
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
+
+            justify-content:
+                space-between;
+
+            align-items:
+                center;
+
+            padding:
+                6px 0;
+
             font-size: 11px;
+
         }
+
 
         .status-dot {
-            display: inline-block;
+
+            display:
+                inline-block;
+
             width: 8px;
             height: 8px;
+
             border-radius: 50%;
+
             margin-right: 6px;
+
         }
+
 
         .loaded {
-            background: #2e7d32;
+
+            background:
+                #2e7d32;
+
         }
+
 
         .missing {
-            background: #c62828;
+
+            background:
+                #c62828;
+
         }
 
-        /* =========================
+
+        /* =============================================
            LEGEND
-        ========================= */
+        ============================================= */
 
         .legend-item {
+
             display: flex;
-            align-items: center;
+
+            align-items:
+                center;
+
             font-size: 11px;
+
             margin: 7px 0;
+
         }
+
 
         .legend-symbol {
+
             width: 14px;
             height: 14px;
+
             border-radius: 50%;
+
             margin-right: 8px;
-            border: 2px solid white;
-            box-shadow: 0 0 2px rgba(0,0,0,0.4);
+
+            border:
+                2px solid white;
+
+            box-shadow:
+                0 0 2px
+                rgba(0,0,0,0.4);
+
         }
+
 
         .legend-symbol.square {
+
             border-radius: 2px;
+
         }
 
-        /* =========================
+
+        .legend-line {
+
+            width: 22px;
+
+            height: 3px;
+
+            margin-right: 8px;
+
+        }
+
+
+        /* =============================================
            DISCLAIMER
-        ========================= */
+        ============================================= */
 
         .disclaimer {
+
             font-size: 10px;
+
             line-height: 1.5;
-            color: #607d8b;
-            background: #f8fafb;
+
+            color:
+                #607d8b;
+
+            background:
+                #f8fafb;
+
         }
 
-        /* =========================
+
+        /* =============================================
            POPUP
-        ========================= */
+        ============================================= */
 
         .popup {
+
             min-width: 280px;
-            max-width: 350px;
+
+            max-width: 360px;
+
         }
+
 
         .popup-title {
+
             font-size: 16px;
+
             font-weight: bold;
-            color: #0b3954;
+
+            color:
+                #0b3954;
+
             margin-bottom: 3px;
+
         }
+
 
         .popup-subtitle {
+
             font-size: 11px;
-            color: #607d8b;
+
+            color:
+                #607d8b;
+
             margin-bottom: 12px;
+
         }
+
 
         .popup-section {
-            border-top: 1px solid #e4e9ec;
+
+            border-top:
+                1px solid #e4e9ec;
+
             padding-top: 8px;
+
             margin-top: 8px;
+
         }
+
 
         .popup-section-title {
+
             font-size: 10px;
+
             font-weight: bold;
-            color: #607d8b;
-            text-transform: uppercase;
+
+            color:
+                #607d8b;
+
+            text-transform:
+                uppercase;
+
             margin-bottom: 5px;
+
         }
+
 
         .popup-row {
+
             display: flex;
-            justify-content: space-between;
+
+            justify-content:
+                space-between;
+
             gap: 10px;
+
             padding: 3px 0;
+
             font-size: 11px;
+
         }
+
 
         .popup-label {
-            color: #607d8b;
+
+            color:
+                #607d8b;
+
         }
+
 
         .popup-value {
+
             text-align: right;
+
             font-weight: 600;
+
         }
+
+
+        /* =============================================
+           BADGES
+        ============================================= */
 
         .badge {
+
             display: inline-block;
-            padding: 3px 7px;
+
+            padding:
+                3px 7px;
+
             border-radius: 10px;
+
             font-size: 9px;
+
             font-weight: bold;
+
         }
+
 
         .badge-yes {
-            background: #e8f5e9;
-            color: #2e7d32;
+
+            background:
+                #e8f5e9;
+
+            color:
+                #2e7d32;
+
         }
+
 
         .badge-no {
-            background: #eceff1;
-            color: #455a64;
+
+            background:
+                #eceff1;
+
+            color:
+                #455a64;
+
         }
+
 
         .badge-unknown {
-            background: #fff3e0;
-            color: #e65100;
+
+            background:
+                #fff3e0;
+
+            color:
+                #e65100;
+
         }
 
-        .badge-review {
-            background: #fff8e1;
-            color: #f57f17;
-        }
 
         .badge-matched {
-            background: #e8f5e9;
-            color: #2e7d32;
+
+            background:
+                #e8f5e9;
+
+            color:
+                #2e7d32;
+
         }
 
-        /* =========================
+
+        /* =============================================
            MOBILE
-        ========================= */
+        ============================================= */
 
         @media (max-width: 800px) {
 
             #sidebar {
+
                 width: 280px;
+
             }
 
+
             #map {
+
                 left: 280px;
+
             }
+
         }
+
 
         @media (max-width: 600px) {
 
             #sidebar {
+
                 width: 100%;
+
                 height: 45vh;
+
                 bottom: 0;
+
                 top: auto;
+
             }
 
+
             #map {
+
                 left: 0;
+
                 top: 0;
+
                 bottom: 45vh;
+
             }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<!-- =========================
+
+<!-- =====================================================
      SIDEBAR
-========================= -->
+====================================================== -->
 
 <div id="sidebar">
 
+
+    <!-- HEADER -->
+
     <div class="header">
-        <h1>Marine-Check Bali</h1>
+
+        <h1>
+            Marine-Check Bali
+        </h1>
+
         <p>
-            Marine Utilization Monitoring &
-            Spatial Screening
+            Marine Utilization Monitoring
+            & Spatial Screening
         </p>
+
     </div>
+
 
     <!-- SEARCH -->
 
@@ -368,6 +694,7 @@
 
     </div>
 
+
     <!-- DASHBOARD -->
 
     <div class="section">
@@ -376,63 +703,87 @@
             Screening Dashboard
         </div>
 
+
         <div class="metrics">
 
+
             <div class="metric">
+
                 <div
                     class="metric-value"
                     id="totalBusiness"
-                >0</div>
+                >
+                    0
+                </div>
 
                 <div class="metric-label">
                     Coastal Businesses
                 </div>
+
             </div>
 
+
             <div class="metric">
+
                 <div
                     class="metric-value"
                     id="marineBusiness"
-                >0</div>
+                >
+                    0
+                </div>
 
                 <div class="metric-label">
                     Marine Use
                 </div>
+
             </div>
 
+
             <div class="metric">
+
                 <div
                     class="metric-value"
                     id="structureBusiness"
-                >0</div>
+                >
+                    0
+                </div>
 
                 <div class="metric-label">
                     With Structure
                 </div>
+
             </div>
 
+
             <div class="metric">
+
                 <div
                     class="metric-value"
                     id="permitBusiness"
-                >0</div>
+                >
+                    0
+                </div>
 
                 <div class="metric-label">
                     Permit Matched
                 </div>
+
             </div>
+
 
         </div>
 
     </div>
 
-    <!-- LAYERS -->
+
+    <!-- DATA LAYERS -->
 
     <div class="section">
 
         <div class="section-title">
             Data Layers
         </div>
+
 
         <button
             class="layer-button active"
@@ -441,12 +792,14 @@
             🏨 Coastal Businesses
         </button>
 
+
         <button
             class="layer-button active"
             onclick="toggleLayer('structures', this)"
         >
             ⚓ Marine Structures
         </button>
+
 
         <button
             class="layer-button active"
@@ -455,23 +808,26 @@
             📋 Permit Areas
         </button>
 
+
         <button
             class="layer-button active"
             onclick="toggleLayer('coastline', this)"
         >
-            🌊 BIG Coastline
+            🌊 BIG Garis Pantai
         </button>
+
 
         <button
             class="layer-button active"
             onclick="toggleLayer('administrative', this)"
         >
-            🗺 Administrative Boundary
+            🗺 BIG Batas Administrasi
         </button>
 
     </div>
 
-    <!-- DATA STATUS -->
+
+    <!-- STATUS -->
 
     <div class="section">
 
@@ -479,77 +835,108 @@
             Data Status
         </div>
 
+
         <div class="status-row">
+
             <span>
+
                 <span
                     class="status-dot"
                     id="status-businesses"
                 ></span>
+
                 Coastal Businesses
+
             </span>
 
             <span id="text-businesses">
                 Loading
             </span>
+
         </div>
 
+
         <div class="status-row">
+
             <span>
+
                 <span
                     class="status-dot"
                     id="status-structures"
                 ></span>
+
                 Marine Structures
+
             </span>
 
             <span id="text-structures">
                 Loading
             </span>
+
         </div>
 
+
         <div class="status-row">
+
             <span>
+
                 <span
                     class="status-dot"
                     id="status-permits"
                 ></span>
+
                 Permit Areas
+
             </span>
 
             <span id="text-permits">
                 Loading
             </span>
+
         </div>
 
+
         <div class="status-row">
+
             <span>
+
                 <span
                     class="status-dot"
                     id="status-coastline"
                 ></span>
-                Coastline
+
+                BIG Garis Pantai
+
             </span>
 
             <span id="text-coastline">
                 Loading
             </span>
+
         </div>
 
+
         <div class="status-row">
+
             <span>
+
                 <span
                     class="status-dot"
                     id="status-administrative"
                 ></span>
-                Administrative
+
+                BIG Administrasi
+
             </span>
 
             <span id="text-administrative">
                 Loading
             </span>
+
         </div>
 
     </div>
+
 
     <!-- LEGEND -->
 
@@ -559,127 +946,189 @@
             Legend
         </div>
 
+
         <div class="legend-item">
 
             <span
                 class="legend-symbol"
-                style="background:#1565c0;"
+                style="
+                    background:#1565c0;
+                "
             ></span>
 
             Coastal Business
 
         </div>
 
+
         <div class="legend-item">
 
             <span
                 class="legend-symbol"
-                style="background:#ef6c00;"
+                style="
+                    background:#ef6c00;
+                "
             ></span>
 
             Marine Structure
 
         </div>
 
+
         <div class="legend-item">
 
             <span
                 class="legend-symbol square"
-                style="background:#43a047;"
+                style="
+                    background:#43a047;
+                "
             ></span>
 
             Permit Area
 
         </div>
 
+
         <div class="legend-item">
 
             <span
-                class="legend-symbol"
-                style="background:#8e24aa;"
+                class="legend-line"
+                style="
+                    background:#00acc1;
+                "
             ></span>
 
-            Administrative Area
+            BIG Garis Pantai
+
+        </div>
+
+
+        <div class="legend-item">
+
+            <span
+                class="legend-line"
+                style="
+                    background:#8e24aa;
+                "
+            ></span>
+
+            BIG Administrasi
 
         </div>
 
     </div>
 
+
     <!-- DISCLAIMER -->
 
     <div class="section disclaimer">
 
-        <strong>Disclaimer</strong><br><br>
-
-        This WebGIS is intended for preliminary
-        spatial screening and visualization of
-        marine utilization.
+        <strong>
+            Disclaimer
+        </strong>
 
         <br><br>
 
-        A missing permit match does not necessarily
-        indicate that a business or activity is
-        operating without a permit.
+        This WebGIS is intended for
+        preliminary spatial screening
+        and visualization of marine
+        utilization.
 
         <br><br>
 
-        Permit information should be verified
-        against authoritative government records.
+        A missing permit match does not
+        necessarily indicate that a
+        business or activity is operating
+        without a permit.
+
+        <br><br>
+
+        Permit information should be
+        verified against authoritative
+        government records.
 
     </div>
 
 </div>
 
 
-<!-- =========================
+<!-- =====================================================
      MAP
-========================= -->
+====================================================== -->
 
 <div id="map"></div>
 
 
-<!-- Leaflet -->
+<!-- =====================================================
+     JAVASCRIPT LIBRARIES
+====================================================== -->
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+
+<script
+    src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"
+></script>
 
 
 <script>
+
 
 /* =====================================================
    1. MAP
 ===================================================== */
 
 const map = L.map("map", {
-    center: [-8.67, 115.21],
+
+    center: [
+        -8.67,
+        115.21
+    ],
+
     zoom: 10
+
 });
 
 
 /* =====================================================
-   2. BASEMAPS
+   2. BASEMAP
 ===================================================== */
 
 const satellite = L.tileLayer(
+
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
     {
+
         attribution:
             "Tiles © Esri"
+
     }
+
 );
 
+
 const osm = L.tileLayer(
+
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
     {
+
         attribution:
             "&copy; OpenStreetMap contributors"
+
     }
+
 );
+
 
 satellite.addTo(map);
 
 
 /* =====================================================
-   3. LAYER GROUPS
+   3. LOCAL LAYER GROUPS
 ===================================================== */
 
 const layers = {
@@ -703,7 +1152,7 @@ const layers = {
 
 
 /* =====================================================
-   4. GEOJSON FILES
+   4. LOCAL DATA FILES
 ===================================================== */
 
 const dataFiles = {
@@ -715,68 +1164,111 @@ const dataFiles = {
         "./marine_structures.geojson",
 
     permits:
-        "./permit_areas.geojson",
-
-    coastline:
-        "./coastline.geojson",
-
-    administrative:
-        "./administrative_bali.geojson"
+        "./permit_areas.geojson"
 
 };
 
 
 /* =====================================================
-   5. STATUS
+   5. BIG RBI SERVICE
 ===================================================== */
 
-function setStatus(
-    layerName,
-    success
-) {
-
-    const dot =
-        document.getElementById(
-            "status-" + layerName
-        );
-
-    const text =
-        document.getElementById(
-            "text-" + layerName
-        );
-
-    if (success) {
-
-        dot.classList.add("loaded");
-        dot.classList.remove("missing");
-
-        text.innerText = "Loaded";
-
-    } else {
-
-        dot.classList.add("missing");
-        dot.classList.remove("loaded");
-
-        text.innerText = "Not available";
-
-    }
-
-}
+const BIG_RBI_URL =
+    "https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer";
 
 
 /* =====================================================
-   6. HELPERS
+   6. BIG GARIS PANTAI
+      Layer 21
+===================================================== */
+
+const bigCoastline =
+    L.esri.dynamicMapLayer({
+
+        url:
+            BIG_RBI_URL,
+
+        layers: [
+            21
+        ],
+
+        opacity: 1,
+
+        attribution:
+            "Garis Pantai © Badan Informasi Geospasial"
+
+    });
+
+
+bigCoastline.addTo(
+    layers.coastline
+);
+
+
+/* =====================================================
+   7. BIG ADMINISTRASI
+      Layer 12
+===================================================== */
+
+const bigAdministrative =
+    L.esri.dynamicMapLayer({
+
+        url:
+            BIG_RBI_URL,
+
+        layers: [
+            12
+        ],
+
+        opacity: 0.8,
+
+        attribution:
+            "Batas Administrasi © Badan Informasi Geospasial"
+
+    });
+
+
+bigAdministrative.addTo(
+    layers.administrative
+);
+
+
+/* =====================================================
+   8. BIG STATUS
+===================================================== */
+
+setStatus(
+    "coastline",
+    true
+);
+
+
+setStatus(
+    "administrative",
+    true
+);
+
+
+/* =====================================================
+   9. SAFE VALUE
 ===================================================== */
 
 function safeValue(
+
     value,
+
     fallback = "Unknown"
+
 ) {
 
     if (
+
         value === undefined ||
+
         value === null ||
+
         value === ""
+
     ) {
 
         return fallback;
@@ -788,81 +1280,117 @@ function safeValue(
 }
 
 
-function badge(
-    value
-) {
+/* =====================================================
+   10. BADGE
+===================================================== */
+
+function badge(value) {
 
     const v =
-        String(value || "")
-        .toUpperCase();
+        String(
+            value || ""
+        ).toUpperCase();
+
 
     if (
+
         v === "YES" ||
+
         v === "MATCHED"
+
     ) {
 
         return `
-            <span class="badge badge-yes">
+
+            <span
+                class="badge badge-yes"
+            >
                 ${value}
             </span>
+
         `;
 
     }
+
 
     if (
+
         v === "NO"
+
     ) {
 
         return `
-            <span class="badge badge-no">
+
+            <span
+                class="badge badge-no"
+            >
                 ${value}
             </span>
+
         `;
 
     }
+
 
     return `
-        <span class="badge badge-unknown">
+
+        <span
+            class="badge badge-unknown"
+        >
             ${safeValue(value)}
         </span>
+
     `;
 
 }
 
 
 /* =====================================================
-   7. BUSINESS POPUP
+   11. BUSINESS POPUP
 ===================================================== */
 
 function businessPopup(
     properties
 ) {
 
-    const p = properties || {};
+    const p =
+        properties || {};
+
 
     return `
 
         <div class="popup">
 
+
             <div class="popup-title">
+
                 ${safeValue(
                     p.business_name,
                     "Unnamed Business"
                 )}
+
             </div>
 
+
             <div class="popup-subtitle">
+
                 ${safeValue(
                     p.business_type
                 )}
+
             </div>
 
+
+            <!-- BUSINESS -->
 
             <div class="popup-section">
 
                 <div class="popup-section-title">
+
                     Business Information
+
                 </div>
+
 
                 <div class="popup-row">
 
@@ -871,10 +1399,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-                        ${safeValue(p.category)}
+
+                        ${safeValue(
+                            p.category
+                        )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -883,10 +1416,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-                        ${safeValue(p.address)}
+
+                        ${safeValue(
+                            p.address
+                        )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -895,7 +1433,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-                        ${safeValue(p.regency)}
+
+                        ${safeValue(
+                            p.regency
+                        )}
+
                     </span>
 
                 </div>
@@ -903,11 +1445,16 @@ function businessPopup(
             </div>
 
 
+            <!-- MARINE -->
+
             <div class="popup-section">
 
                 <div class="popup-section-title">
+
                     Marine Utilization
+
                 </div>
+
 
                 <div class="popup-row">
 
@@ -925,6 +1472,7 @@ function businessPopup(
 
                 </div>
 
+
                 <div class="popup-row">
 
                     <span class="popup-label">
@@ -932,12 +1480,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.marine_use_type
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -958,11 +1509,16 @@ function businessPopup(
             </div>
 
 
+            <!-- STRUCTURE -->
+
             <div class="popup-section">
 
                 <div class="popup-section-title">
+
                     Marine Structure
+
                 </div>
+
 
                 <div class="popup-row">
 
@@ -980,6 +1536,7 @@ function businessPopup(
 
                 </div>
 
+
                 <div class="popup-row">
 
                     <span class="popup-label">
@@ -987,12 +1544,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.structure_type
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1011,6 +1571,7 @@ function businessPopup(
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1033,11 +1594,16 @@ function businessPopup(
             </div>
 
 
+            <!-- PERMIT -->
+
             <div class="popup-section">
 
                 <div class="popup-section-title">
+
                     Permit Screening
+
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1055,6 +1621,7 @@ function businessPopup(
 
                 </div>
 
+
                 <div class="popup-row">
 
                     <span class="popup-label">
@@ -1062,12 +1629,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.permit_id
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1076,12 +1646,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.permit_type
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1090,9 +1663,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.permit_status
                         )}
+
                     </span>
 
                 </div>
@@ -1100,11 +1675,16 @@ function businessPopup(
             </div>
 
 
+            <!-- VERIFICATION -->
+
             <div class="popup-section">
 
                 <div class="popup-section-title">
+
                     Verification
+
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1125,11 +1705,16 @@ function businessPopup(
             </div>
 
 
+            <!-- SOURCE -->
+
             <div class="popup-section">
 
                 <div class="popup-section-title">
+
                     Data Source
+
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1138,12 +1723,15 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.source
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1152,14 +1740,17 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.data_date
                         )}
+
                     </span>
 
                 </div>
 
             </div>
+
 
         </div>
 
@@ -1169,27 +1760,33 @@ function businessPopup(
 
 
 /* =====================================================
-   8. STRUCTURE POPUP
+   12. STRUCTURE POPUP
 ===================================================== */
 
 function structurePopup(
     properties
 ) {
 
-    const p = properties || {};
+    const p =
+        properties || {};
+
 
     return `
 
         <div class="popup">
 
             <div class="popup-title">
+
                 ${safeValue(
                     p.name,
                     "Marine Structure"
                 )}
+
             </div>
 
+
             <div class="popup-section">
+
 
                 <div class="popup-row">
 
@@ -1198,12 +1795,15 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.object_id
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1212,12 +1812,15 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.type
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1237,6 +1840,7 @@ function structurePopup(
 
                 </div>
 
+
                 <div class="popup-row">
 
                     <span class="popup-label">
@@ -1244,12 +1848,15 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.detection_date
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1258,12 +1865,15 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.screening_status
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1272,12 +1882,15 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.priority
                         )}
+
                     </span>
 
                 </div>
+
 
             </div>
 
@@ -1289,24 +1902,30 @@ function structurePopup(
 
 
 /* =====================================================
-   9. PERMIT POPUP
+   13. PERMIT POPUP
 ===================================================== */
 
 function permitPopup(
     properties
 ) {
 
-    const p = properties || {};
+    const p =
+        properties || {};
+
 
     return `
 
         <div class="popup">
 
             <div class="popup-title">
+
                 Permit Area
+
             </div>
 
+
             <div class="popup-section">
+
 
                 <div class="popup-row">
 
@@ -1315,12 +1934,15 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.permit_id
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1329,12 +1951,15 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.permit_type
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1343,12 +1968,15 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.holder_name
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1357,12 +1985,15 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.permit_status
                         )}
+
                     </span>
 
                 </div>
+
 
                 <div class="popup-row">
 
@@ -1371,12 +2002,15 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
+
                         ${safeValue(
                             p.source
                         )}
+
                     </span>
 
                 </div>
+
 
             </div>
 
@@ -1388,21 +2022,27 @@ function permitPopup(
 
 
 /* =====================================================
-   10. GENERIC POPUP
+   14. GENERIC POPUP
 ===================================================== */
 
 function genericPopup(
     properties
 ) {
 
-    const p = properties || {};
+    const p =
+        properties || {};
+
 
     let html = `
+
         <div class="popup">
+
             <div class="popup-title">
                 Spatial Data
             </div>
+
     `;
+
 
     Object.keys(p)
         .slice(0, 12)
@@ -1414,13 +2054,18 @@ function genericPopup(
                     <div class="popup-row">
 
                         <span class="popup-label">
+
                             ${key}
+
                         </span>
 
+
                         <span class="popup-value">
+
                             ${safeValue(
                                 p[key]
                             )}
+
                         </span>
 
                     </div>
@@ -1430,7 +2075,11 @@ function genericPopup(
             }
         );
 
-    html += "</div>";
+
+    html += `
+        </div>
+    `;
+
 
     return html;
 
@@ -1438,100 +2087,7 @@ function genericPopup(
 
 
 /* =====================================================
-   11. STYLE FUNCTIONS
-===================================================== */
-
-function businessStyle() {
-
-    return {
-
-        radius: 8,
-
-        fillColor: "#1565c0",
-
-        color: "#ffffff",
-
-        weight: 2,
-
-        opacity: 1,
-
-        fillOpacity: 0.9
-
-    };
-
-}
-
-
-function structureStyle() {
-
-    return {
-
-        color: "#ef6c00",
-
-        weight: 3,
-
-        opacity: 0.9,
-
-        fillColor: "#ef6c00",
-
-        fillOpacity: 0.7
-
-    };
-
-}
-
-
-function permitStyle() {
-
-    return {
-
-        color: "#43a047",
-
-        weight: 2,
-
-        fillColor: "#43a047",
-
-        fillOpacity: 0.18
-
-    };
-
-}
-
-
-function coastlineStyle() {
-
-    return {
-
-        color: "#00acc1",
-
-        weight: 2,
-
-        opacity: 1
-
-    };
-
-}
-
-
-function administrativeStyle() {
-
-    return {
-
-        color: "#8e24aa",
-
-        weight: 1,
-
-        fillColor: "#8e24aa",
-
-        fillOpacity: 0.03
-
-    };
-
-}
-
-
-/* =====================================================
-   12. LOAD GEOJSON
+   15. LOAD GEOJSON
 ===================================================== */
 
 async function loadGeoJSON(
@@ -1540,10 +2096,12 @@ async function loadGeoJSON(
 
     try {
 
+
         const response =
             await fetch(
                 dataFiles[layerName]
             );
+
 
         if (!response.ok) {
 
@@ -1553,6 +2111,7 @@ async function loadGeoJSON(
 
         }
 
+
         const data =
             await response.json();
 
@@ -1560,209 +2119,219 @@ async function loadGeoJSON(
         let geoLayer;
 
 
-        /* =========================
+        /* =============================================
            BUSINESSES
-        ========================= */
+        ============================================= */
 
         if (
-            layerName === "businesses"
+            layerName ===
+            "businesses"
         ) {
 
-            geoLayer = L.geoJSON(
-                data,
-                {
 
-                    pointToLayer:
-                        function(
-                            feature,
-                            latlng
-                        ) {
+            geoLayer =
+                L.geoJSON(
+                    data,
+                    {
 
-                            return L.circleMarker(
-                                latlng,
-                                businessStyle()
-                            );
+                        pointToLayer:
+                            function(
+                                feature,
+                                latlng
+                            ) {
 
-                        },
+                                return L.circleMarker(
 
-                    onEachFeature:
-                        function(
-                            feature,
-                            layer
-                        ) {
+                                    latlng,
 
-                            layer.bindPopup(
-                                businessPopup(
-                                    feature.properties
-                                )
-                            );
+                                    {
 
-                        }
+                                        radius: 8,
 
-                }
-            );
+                                        fillColor:
+                                            "#1565c0",
+
+                                        color:
+                                            "#ffffff",
+
+                                        weight: 2,
+
+                                        fillOpacity:
+                                            0.9
+
+                                    }
+
+                                );
+
+                            },
+
+
+                        onEachFeature:
+                            function(
+                                feature,
+                                layer
+                            ) {
+
+                                layer.bindPopup(
+
+                                    businessPopup(
+                                        feature.properties
+                                    )
+
+                                );
+
+                            }
+
+                    }
+                );
 
         }
 
 
-        /* =========================
+        /* =============================================
            STRUCTURES
-        ========================= */
+        ============================================= */
 
         else if (
-            layerName === "structures"
+            layerName ===
+            "structures"
         ) {
 
-            geoLayer = L.geoJSON(
-                data,
-                {
 
-                    pointToLayer:
-                        function(
-                            feature,
-                            latlng
-                        ) {
+            geoLayer =
+                L.geoJSON(
+                    data,
+                    {
 
-                            return L.circleMarker(
-                                latlng,
-                                {
-                                    radius: 7,
+                        pointToLayer:
+                            function(
+                                feature,
+                                latlng
+                            ) {
+
+                                return L.circleMarker(
+
+                                    latlng,
+
+                                    {
+
+                                        radius: 7,
+
+                                        fillColor:
+                                            "#ef6c00",
+
+                                        color:
+                                            "#ffffff",
+
+                                        weight: 2,
+
+                                        fillOpacity:
+                                            0.9
+
+                                    }
+
+                                );
+
+                            },
+
+
+                        style:
+                            function() {
+
+                                return {
+
+                                    color:
+                                        "#ef6c00",
+
+                                    weight: 3,
+
                                     fillColor:
                                         "#ef6c00",
-                                    color:
-                                        "#ffffff",
-                                    weight: 2,
+
                                     fillOpacity:
-                                        0.9
-                                }
-                            );
+                                        0.7
 
-                        },
+                                };
 
-                    style:
-                        structureStyle,
+                            },
 
-                    onEachFeature:
-                        function(
-                            feature,
-                            layer
-                        ) {
 
-                            layer.bindPopup(
-                                structurePopup(
-                                    feature.properties
-                                )
-                            );
+                        onEachFeature:
+                            function(
+                                feature,
+                                layer
+                            ) {
 
-                        }
+                                layer.bindPopup(
 
-                }
-            );
+                                    structurePopup(
+                                        feature.properties
+                                    )
+
+                                );
+
+                            }
+
+                    }
+                );
 
         }
 
 
-        /* =========================
+        /* =============================================
            PERMITS
-        ========================= */
+        ============================================= */
 
         else if (
-            layerName === "permits"
+            layerName ===
+            "permits"
         ) {
 
-            geoLayer = L.geoJSON(
-                data,
-                {
 
-                    style:
-                        permitStyle,
+            geoLayer =
+                L.geoJSON(
+                    data,
+                    {
 
-                    onEachFeature:
-                        function(
-                            feature,
-                            layer
-                        ) {
+                        style:
+                            function() {
 
-                            layer.bindPopup(
-                                permitPopup(
-                                    feature.properties
-                                )
-                            );
+                                return {
 
-                        }
+                                    color:
+                                        "#43a047",
 
-                }
-            );
+                                    weight: 2,
 
-        }
+                                    fillColor:
+                                        "#43a047",
 
+                                    fillOpacity:
+                                        0.18
 
-        /* =========================
-           COASTLINE
-        ========================= */
+                                };
 
-        else if (
-            layerName === "coastline"
-        ) {
-
-            geoLayer = L.geoJSON(
-                data,
-                {
-
-                    style:
-                        coastlineStyle,
-
-                    onEachFeature:
-                        function(
-                            feature,
-                            layer
-                        ) {
-
-                            layer.bindPopup(
-                                genericPopup(
-                                    feature.properties
-                                )
-                            );
-
-                        }
-
-                }
-            );
-
-        }
+                            },
 
 
-        /* =========================
-           ADMINISTRATIVE
-        ========================= */
+                        onEachFeature:
+                            function(
+                                feature,
+                                layer
+                            ) {
 
-        else if (
-            layerName === "administrative"
-        ) {
+                                layer.bindPopup(
 
-            geoLayer = L.geoJSON(
-                data,
-                {
+                                    permitPopup(
+                                        feature.properties
+                                    )
 
-                    style:
-                        administrativeStyle,
+                                );
 
-                    onEachFeature:
-                        function(
-                            feature,
-                            layer
-                        ) {
+                            }
 
-                            layer.bindPopup(
-                                genericPopup(
-                                    feature.properties
-                                )
-                            );
-
-                        }
-
-                }
-            );
+                    }
+                );
 
         }
 
@@ -1789,10 +2358,12 @@ async function loadGeoJSON(
 
     catch (error) {
 
+
         console.warn(
             layerName,
             error
         );
+
 
         setStatus(
             layerName,
@@ -1805,68 +2376,149 @@ async function loadGeoJSON(
 
 
 /* =====================================================
-   13. LOAD ALL DATA
+   16. LOAD LOCAL DATA
 ===================================================== */
 
 loadGeoJSON(
     "businesses"
 );
 
+
 loadGeoJSON(
     "structures"
 );
+
 
 loadGeoJSON(
     "permits"
 );
 
-loadGeoJSON(
-    "coastline"
-);
 
-loadGeoJSON(
-    "administrative"
-);
+/* =====================================================
+   17. STATUS FUNCTION
+===================================================== */
+
+function setStatus(
+    layerName,
+    success
+) {
+
+
+    const dot =
+        document.getElementById(
+            "status-" +
+            layerName
+        );
+
+
+    const text =
+        document.getElementById(
+            "text-" +
+            layerName
+        );
+
+
+    if (!dot || !text) {
+
+        return;
+
+    }
+
+
+    if (success) {
+
+
+        dot.classList.add(
+            "loaded"
+        );
+
+
+        dot.classList.remove(
+            "missing"
+        );
+
+
+        text.innerText =
+            "Loaded";
+
+
+    } else {
+
+
+        dot.classList.add(
+            "missing"
+        );
+
+
+        dot.classList.remove(
+            "loaded"
+        );
+
+
+        text.innerText =
+            "Not available";
+
+    }
+
+}
 
 
 /* =====================================================
-   14. DASHBOARD
+   18. DASHBOARD
 ===================================================== */
 
 function updateDashboard() {
 
-    let total = 0;
-    let marine = 0;
-    let structure = 0;
-    let permit = 0;
+
+    let total =
+        0;
+
+    let marine =
+        0;
+
+    let structure =
+        0;
+
+    let permit =
+        0;
 
 
     layers.businesses.eachLayer(
-        function(layerGroup) {
+
+        function(layer) {
+
 
             if (
-                !layerGroup.getLayers
+                !layer.eachLayer
             ) {
 
                 return;
 
             }
 
-            layerGroup.eachLayer(
-                function(layer) {
+
+            layer.eachLayer(
+
+                function(featureLayer) {
+
 
                     const p =
-                        layer.feature?.properties ||
-                        {};
+                        featureLayer
+                            .feature
+                            ?.properties
+                        || {};
+
 
                     total++;
 
 
                     if (
+
                         String(
                             p.marine_use
                         ).toUpperCase()
                         === "YES"
+
                     ) {
 
                         marine++;
@@ -1875,10 +2527,12 @@ function updateDashboard() {
 
 
                     if (
+
                         String(
                             p.marine_structure
                         ).toUpperCase()
                         === "YES"
+
                     ) {
 
                         structure++;
@@ -1887,14 +2541,19 @@ function updateDashboard() {
 
 
                     if (
-                        String(
-                            p.permit_match
-                        ).toUpperCase()
-                        === "MATCHED" ||
+
                         String(
                             p.permit_match
                         ).toUpperCase()
                         === "YES"
+
+                        ||
+
+                        String(
+                            p.permit_match
+                        ).toUpperCase()
+                        === "MATCHED"
+
                     ) {
 
                         permit++;
@@ -1902,33 +2561,42 @@ function updateDashboard() {
                     }
 
                 }
+
             );
 
         }
+
     );
 
 
     document.getElementById(
         "totalBusiness"
-    ).innerText = total;
+    ).innerText =
+        total;
+
 
     document.getElementById(
         "marineBusiness"
-    ).innerText = marine;
+    ).innerText =
+        marine;
+
 
     document.getElementById(
         "structureBusiness"
-    ).innerText = structure;
+    ).innerText =
+        structure;
+
 
     document.getElementById(
         "permitBusiness"
-    ).innerText = permit;
+    ).innerText =
+        permit;
 
 }
 
 
 /* =====================================================
-   15. TOGGLE LAYERS
+   19. TOGGLE LAYER
 ===================================================== */
 
 function toggleLayer(
@@ -1936,25 +2604,33 @@ function toggleLayer(
     button
 ) {
 
+
     if (
+
         map.hasLayer(
             layers[layerName]
         )
+
     ) {
+
 
         map.removeLayer(
             layers[layerName]
         );
 
+
         button.classList.remove(
             "active"
         );
 
+
     } else {
+
 
         map.addLayer(
             layers[layerName]
         );
+
 
         button.classList.add(
             "active"
@@ -1966,14 +2642,19 @@ function toggleLayer(
 
 
 /* =====================================================
-   16. SEARCH
+   20. SEARCH
 ===================================================== */
 
 document
-    .getElementById("searchBox")
+    .getElementById(
+        "searchBox"
+    )
     .addEventListener(
+
         "input",
+
         function() {
+
 
             const query =
                 this.value
@@ -1988,14 +2669,32 @@ document
             }
 
 
-            let found = false;
+            let found =
+                false;
 
+
+            /* =========================================
+               SEARCH BUSINESS
+            ========================================= */
 
             layers.businesses.eachLayer(
+
                 function(group) {
 
+
+                    if (
+                        !group.eachLayer
+                    ) {
+
+                        return;
+
+                    }
+
+
                     group.eachLayer(
+
                         function(layer) {
+
 
                             if (found) {
 
@@ -2005,66 +2704,116 @@ document
 
 
                             const p =
-                                layer.feature?.properties ||
-                                {};
+                                layer
+                                    .feature
+                                    ?.properties
+                                || {};
+
 
                             const name =
                                 String(
-                                    p.business_name ||
-                                    ""
-                                ).toLowerCase();
+                                    p.business_name
+                                    || ""
+                                )
+                                .toLowerCase();
+
 
                             const type =
                                 String(
-                                    p.business_type ||
-                                    ""
-                                ).toLowerCase();
+                                    p.business_type
+                                    || ""
+                                )
+                                .toLowerCase();
+
 
                             const category =
                                 String(
-                                    p.category ||
-                                    ""
-                                ).toLowerCase();
+                                    p.category
+                                    || ""
+                                )
+                                .toLowerCase();
 
 
                             if (
-                                name.includes(query) ||
-                                type.includes(query) ||
-                                category.includes(query)
+
+                                name.includes(
+                                    query
+                                )
+
+                                ||
+
+                                type.includes(
+                                    query
+                                )
+
+                                ||
+
+                                category.includes(
+                                    query
+                                )
+
                             ) {
 
-                                found = true;
+
+                                found =
+                                    true;
 
 
                                 if (
                                     layer.getLatLng
                                 ) {
 
+
                                     map.setView(
+
                                         layer.getLatLng(),
+
                                         16
+
                                     );
 
+
                                 }
+
 
                                 layer.openPopup();
 
                             }
 
                         }
+
                     );
 
                 }
+
             );
 
 
+            /* =========================================
+               SEARCH STRUCTURE
+            ========================================= */
+
             if (!found) {
 
+
                 layers.structures.eachLayer(
+
                     function(group) {
 
+
+                        if (
+                            !group.eachLayer
+                        ) {
+
+                            return;
+
+                        }
+
+
                         group.eachLayer(
+
                             function(layer) {
+
 
                                 if (found) {
 
@@ -2074,64 +2823,91 @@ document
 
 
                                 const p =
-                                    layer.feature?.properties ||
-                                    {};
+                                    layer
+                                        .feature
+                                        ?.properties
+                                    || {};
+
 
                                 const name =
                                     String(
-                                        p.name ||
-                                        ""
-                                    ).toLowerCase();
+                                        p.name
+                                        || ""
+                                    )
+                                    .toLowerCase();
+
 
                                 const type =
                                     String(
-                                        p.type ||
-                                        ""
-                                    ).toLowerCase();
+                                        p.type
+                                        || ""
+                                    )
+                                    .toLowerCase();
 
 
                                 if (
-                                    name.includes(query) ||
-                                    type.includes(query)
+
+                                    name.includes(
+                                        query
+                                    )
+
+                                    ||
+
+                                    type.includes(
+                                        query
+                                    )
+
                                 ) {
 
-                                    found = true;
+
+                                    found =
+                                        true;
 
 
                                     if (
                                         layer.getLatLng
                                     ) {
 
+
                                         map.setView(
+
                                             layer.getLatLng(),
+
                                             16
+
                                         );
 
+
                                     }
+
 
                                     layer.openPopup();
 
                                 }
 
                             }
+
                         );
 
                     }
+
                 );
 
             }
 
         }
+
     );
 
 
 /* =====================================================
-   17. BASEMAP CONTROL
+   21. BASEMAP CONTROL
 ===================================================== */
 
 L.control.layers(
 
     {
+
         "Satellite":
             satellite,
 
@@ -2143,22 +2919,29 @@ L.control.layers(
     null,
 
     {
+
         position:
             "topright"
+
     }
 
 ).addTo(map);
 
 
 /* =====================================================
-   18. SCALE
+   22. SCALE
 ===================================================== */
 
 L.control.scale({
-    imperial: false
+
+    imperial:
+        false
+
 }).addTo(map);
 
+
 </script>
+
 
 </body>
 </html>
