@@ -13,7 +13,6 @@
     />
 
     <style>
-
         * {
             box-sizing: border-box;
         }
@@ -25,194 +24,162 @@
             color: #263238;
         }
 
-        /* =========================
-           HEADER
-        ========================= */
-
-        .header {
-            height: 64px;
-            background: #073b4c;
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 22px;
-            position: relative;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .header-title {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .header-subtitle {
-            margin-left: 15px;
-            font-size: 12px;
-            opacity: 0.75;
-        }
-
-        /* =========================
-           LAYOUT
-        ========================= */
-
-        .layout {
-            display: flex;
-            height: calc(100vh - 64px);
+        #map {
+            position: absolute;
+            top: 0;
+            left: 330px;
+            right: 0;
+            bottom: 0;
         }
 
         /* =========================
            SIDEBAR
         ========================= */
 
-        .sidebar {
+        #sidebar {
+            position: absolute;
+            z-index: 1000;
+            top: 0;
+            left: 0;
             width: 330px;
-            background: white;
+            height: 100vh;
             overflow-y: auto;
-            padding: 18px;
-            border-right: 1px solid #d9e0e4;
-            z-index: 900;
+            background: white;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+        }
+
+        .header {
+            padding: 22px 20px;
+            background: #0b3954;
+            color: white;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 21px;
+        }
+
+        .header p {
+            margin: 7px 0 0;
+            font-size: 12px;
+            opacity: 0.85;
+            line-height: 1.5;
         }
 
         .section {
-            margin-bottom: 20px;
+            padding: 16px 18px;
+            border-bottom: 1px solid #e5e5e5;
         }
 
         .section-title {
             font-size: 12px;
-            font-weight: 700;
+            font-weight: bold;
+            text-transform: uppercase;
             color: #607d8b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
             margin-bottom: 10px;
-        }
-
-        /* =========================
-           DASHBOARD
-        ========================= */
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .metric {
-            background: #f4f7f9;
-            border: 1px solid #e1e7ea;
-            border-radius: 8px;
-            padding: 12px;
-        }
-
-        .metric-label {
-            font-size: 10px;
-            color: #78909c;
-            text-transform: uppercase;
-        }
-
-        .metric-value {
-            font-size: 22px;
-            font-weight: 700;
-            margin-top: 4px;
-            color: #073b4c;
-        }
-
-        /* =========================
-           LAYER BUTTON
-        ========================= */
-
-        .layer-button {
-            width: 100%;
-            padding: 10px 12px;
-            margin-bottom: 7px;
-            border: 1px solid #d8e0e4;
-            border-radius: 7px;
-            background: white;
-            cursor: pointer;
-            text-align: left;
-            font-size: 13px;
-            transition: 0.2s;
-        }
-
-        .layer-button:hover {
-            background: #f0f5f7;
-        }
-
-        .layer-button.active {
-            background: #e7f4f8;
-            border-color: #0b7285;
-            color: #073b4c;
-            font-weight: 600;
-        }
-
-        .layer-icon {
-            display: inline-block;
-            width: 18px;
-            margin-right: 5px;
+            letter-spacing: 0.5px;
         }
 
         /* =========================
            SEARCH
         ========================= */
 
-        .search-box {
-            display: flex;
-            gap: 6px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 9px;
-            border: 1px solid #ccd6da;
-            border-radius: 6px;
+        #searchBox {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cfd8dc;
+            border-radius: 7px;
             outline: none;
+            font-size: 13px;
         }
 
-        .search-box button {
-            border: none;
-            background: #073b4c;
-            color: white;
-            border-radius: 6px;
-            padding: 0 12px;
+        #searchBox:focus {
+            border-color: #0b7285;
+        }
+
+        /* =========================
+           DASHBOARD
+        ========================= */
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .metric {
+            padding: 12px;
+            background: #f5f8fa;
+            border-radius: 7px;
+            border: 1px solid #e1e8eb;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0b3954;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: #607d8b;
+            margin-top: 3px;
+        }
+
+        /* =========================
+           LAYER BUTTONS
+        ========================= */
+
+        .layer-button {
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            margin-bottom: 7px;
+            border: 1px solid #d7e0e4;
+            background: white;
+            border-radius: 7px;
             cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+
+        .layer-button:hover {
+            background: #f2f7f9;
+        }
+
+        .layer-button.active {
+            background: #e5f3f5;
+            border-color: #0b7285;
+            color: #075b68;
+            font-weight: bold;
         }
 
         /* =========================
            STATUS
         ========================= */
 
-        .status {
-            padding: 10px;
-            background: #f5f7f8;
-            border-radius: 7px;
-            font-size: 11px;
-            line-height: 1.6;
-        }
-
         .status-row {
             display: flex;
             justify-content: space-between;
-            border-bottom: 1px solid #e1e6e8;
-            padding: 4px 0;
+            align-items: center;
+            padding: 6px 0;
+            font-size: 11px;
         }
 
-        .status-row:last-child {
-            border-bottom: none;
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
         }
 
-        .status-ok {
-            color: #16803c;
-            font-weight: 600;
+        .loaded {
+            background: #2e7d32;
         }
 
-        .status-waiting {
-            color: #9a6700;
-            font-weight: 600;
-        }
-
-        .status-error {
-            color: #c62828;
-            font-weight: 600;
+        .missing {
+            background: #c62828;
         }
 
         /* =========================
@@ -222,72 +189,21 @@
         .legend-item {
             display: flex;
             align-items: center;
-            font-size: 12px;
-            margin-bottom: 7px;
+            font-size: 11px;
+            margin: 7px 0;
         }
 
         .legend-symbol {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             margin-right: 8px;
             border: 2px solid white;
-            box-shadow: 0 0 0 1px #aaa;
+            box-shadow: 0 0 2px rgba(0,0,0,0.4);
         }
 
-        .legend-line {
-            width: 22px;
-            height: 3px;
-            margin-right: 8px;
-        }
-
-        /* =========================
-           MAP
-        ========================= */
-
-        #map {
-            flex: 1;
-            height: 100%;
-        }
-
-        /* =========================
-           POPUP
-        ========================= */
-
-        .popup-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #073b4c;
-            margin-bottom: 8px;
-        }
-
-        .popup-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 4px 0;
-            border-bottom: 1px solid #eee;
-            font-size: 12px;
-        }
-
-        .popup-label {
-            color: #78909c;
-        }
-
-        .popup-value {
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .popup-status {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            background: #e7f4f8;
-            color: #073b4c;
-            font-size: 11px;
-            font-weight: 600;
+        .legend-symbol.square {
+            border-radius: 2px;
         }
 
         /* =========================
@@ -296,9 +212,95 @@
 
         .disclaimer {
             font-size: 10px;
-            color: #78909c;
             line-height: 1.5;
+            color: #607d8b;
+            background: #f8fafb;
+        }
+
+        /* =========================
+           POPUP
+        ========================= */
+
+        .popup {
+            min-width: 280px;
+            max-width: 350px;
+        }
+
+        .popup-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0b3954;
+            margin-bottom: 3px;
+        }
+
+        .popup-subtitle {
+            font-size: 11px;
+            color: #607d8b;
+            margin-bottom: 12px;
+        }
+
+        .popup-section {
+            border-top: 1px solid #e4e9ec;
             padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .popup-section-title {
+            font-size: 10px;
+            font-weight: bold;
+            color: #607d8b;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .popup-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 3px 0;
+            font-size: 11px;
+        }
+
+        .popup-label {
+            color: #607d8b;
+        }
+
+        .popup-value {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .badge-yes {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-no {
+            background: #eceff1;
+            color: #455a64;
+        }
+
+        .badge-unknown {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-review {
+            background: #fff8e1;
+            color: #f57f17;
+        }
+
+        .badge-matched {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         /* =========================
@@ -307,393 +309,336 @@
 
         @media (max-width: 800px) {
 
-            .header {
-                height: 58px;
-            }
-
-            .header-title {
-                font-size: 16px;
-            }
-
-            .header-subtitle {
-                display: none;
-            }
-
-            .layout {
-                height: calc(100vh - 58px);
-            }
-
-            .sidebar {
-                position: absolute;
-                left: 0;
-                top: 58px;
-                bottom: 0;
-                width: 290px;
-                transform: translateX(-100%);
-                transition: 0.25s;
-                box-shadow: 2px 0 8px rgba(0,0,0,0.15);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
+            #sidebar {
+                width: 280px;
             }
 
             #map {
-                width: 100%;
+                left: 280px;
             }
         }
 
+        @media (max-width: 600px) {
+
+            #sidebar {
+                width: 100%;
+                height: 45vh;
+                bottom: 0;
+                top: auto;
+            }
+
+            #map {
+                left: 0;
+                top: 0;
+                bottom: 45vh;
+            }
+        }
     </style>
 </head>
 
 <body>
 
 <!-- =========================
-     HEADER
+     SIDEBAR
 ========================= -->
 
-<header class="header">
+<div id="sidebar">
 
-    <div class="header-title">
-        Marine-Check Bali
+    <div class="header">
+        <h1>Marine-Check Bali</h1>
+        <p>
+            Marine Utilization Monitoring &
+            Spatial Screening
+        </p>
     </div>
 
-    <div class="header-subtitle">
-        Marine Utilization Monitoring WebGIS
+    <!-- SEARCH -->
+
+    <div class="section">
+
+        <div class="section-title">
+            Search
+        </div>
+
+        <input
+            type="text"
+            id="searchBox"
+            placeholder="Search business or structure..."
+        >
+
     </div>
 
-</header>
+    <!-- DASHBOARD -->
 
+    <div class="section">
 
-<div class="layout">
+        <div class="section-title">
+            Screening Dashboard
+        </div>
 
-    <!-- =========================
-         SIDEBAR
-    ========================= -->
+        <div class="metrics">
 
-    <aside class="sidebar">
+            <div class="metric">
+                <div
+                    class="metric-value"
+                    id="totalBusiness"
+                >0</div>
 
-        <!-- DASHBOARD -->
-
-        <div class="section">
-
-            <div class="section-title">
-                Screening Overview
+                <div class="metric-label">
+                    Coastal Businesses
+                </div>
             </div>
 
-            <div class="dashboard">
+            <div class="metric">
+                <div
+                    class="metric-value"
+                    id="marineBusiness"
+                >0</div>
 
-                <div class="metric">
-                    <div class="metric-label">
-                        Structures
-                    </div>
-
-                    <div class="metric-value"
-                         id="totalStructures">
-                        0
-                    </div>
+                <div class="metric-label">
+                    Marine Use
                 </div>
+            </div>
 
-                <div class="metric">
-                    <div class="metric-label">
-                        Matched
-                    </div>
+            <div class="metric">
+                <div
+                    class="metric-value"
+                    id="structureBusiness"
+                >0</div>
 
-                    <div class="metric-value"
-                         id="matchedStructures">
-                        0
-                    </div>
+                <div class="metric-label">
+                    With Structure
                 </div>
+            </div>
 
-                <div class="metric">
-                    <div class="metric-label">
-                        Review
-                    </div>
+            <div class="metric">
+                <div
+                    class="metric-value"
+                    id="permitBusiness"
+                >0</div>
 
-                    <div class="metric-value"
-                         id="reviewStructures">
-                        0
-                    </div>
+                <div class="metric-label">
+                    Permit Matched
                 </div>
-
-                <div class="metric">
-                    <div class="metric-label">
-                        Priority
-                    </div>
-
-                    <div class="metric-value"
-                         id="priorityStructures">
-                        0
-                    </div>
-                </div>
-
             </div>
 
         </div>
 
+    </div>
 
-        <!-- SEARCH -->
+    <!-- LAYERS -->
 
-        <div class="section">
+    <div class="section">
 
-            <div class="section-title">
-                Search
-            </div>
-
-            <div class="search-box">
-
-                <input
-                    type="text"
-                    id="searchInput"
-                    placeholder="Search structure / tourism..."
-                >
-
-                <button onclick="searchFeature()">
-                    Search
-                </button>
-
-            </div>
-
+        <div class="section-title">
+            Data Layers
         </div>
 
+        <button
+            class="layer-button active"
+            onclick="toggleLayer('businesses', this)"
+        >
+            🏨 Coastal Businesses
+        </button>
 
-        <!-- DATA LAYERS -->
+        <button
+            class="layer-button active"
+            onclick="toggleLayer('structures', this)"
+        >
+            ⚓ Marine Structures
+        </button>
 
-        <div class="section">
+        <button
+            class="layer-button active"
+            onclick="toggleLayer('permits', this)"
+        >
+            📋 Permit Areas
+        </button>
 
-            <div class="section-title">
-                Data Layers
-            </div>
+        <button
+            class="layer-button active"
+            onclick="toggleLayer('coastline', this)"
+        >
+            🌊 BIG Coastline
+        </button>
 
+        <button
+            class="layer-button active"
+            onclick="toggleLayer('administrative', this)"
+        >
+            🗺 Administrative Boundary
+        </button>
 
-            <button
-                id="btn-admin"
-                class="layer-button active"
-                onclick="toggleLayer('admin')">
+    </div>
 
-                <span class="layer-icon">▣</span>
-                Administrative Boundary
+    <!-- DATA STATUS -->
 
-            </button>
+    <div class="section">
 
+        <div class="section-title">
+            Data Status
+        </div>
 
-            <button
-                id="btn-coastline"
-                class="layer-button active"
-                onclick="toggleLayer('coastline')">
+        <div class="status-row">
+            <span>
+                <span
+                    class="status-dot"
+                    id="status-businesses"
+                ></span>
+                Coastal Businesses
+            </span>
 
-                <span class="layer-icon">〰</span>
-                Coastline
+            <span id="text-businesses">
+                Loading
+            </span>
+        </div>
 
-            </button>
-
-
-            <button
-                id="btn-structures"
-                class="layer-button active"
-                onclick="toggleLayer('structures')">
-
-                <span class="layer-icon">●</span>
+        <div class="status-row">
+            <span>
+                <span
+                    class="status-dot"
+                    id="status-structures"
+                ></span>
                 Marine Structures
+            </span>
 
-            </button>
-
-
-            <button
-                id="btn-permits"
-                class="layer-button active"
-                onclick="toggleLayer('permits')">
-
-                <span class="layer-icon">▰</span>
-                Permit / PKKPRL Areas
-
-            </button>
-
-
-            <button
-                id="btn-tourism"
-                class="layer-button active"
-                onclick="toggleLayer('tourism')">
-
-                <span class="layer-icon">★</span>
-                Coastal Tourism
-
-            </button>
-
+            <span id="text-structures">
+                Loading
+            </span>
         </div>
 
+        <div class="status-row">
+            <span>
+                <span
+                    class="status-dot"
+                    id="status-permits"
+                ></span>
+                Permit Areas
+            </span>
 
-        <!-- DATA STATUS -->
-
-        <div class="section">
-
-            <div class="section-title">
-                Data Status
-            </div>
-
-            <div class="status">
-
-                <div class="status-row">
-                    <span>Administrative</span>
-                    <span id="statusAdmin"
-                          class="status-waiting">
-                        Loading
-                    </span>
-                </div>
-
-                <div class="status-row">
-                    <span>Coastline</span>
-                    <span id="statusCoastline"
-                          class="status-waiting">
-                        Loading
-                    </span>
-                </div>
-
-                <div class="status-row">
-                    <span>Structures</span>
-                    <span id="statusStructures"
-                          class="status-waiting">
-                        Loading
-                    </span>
-                </div>
-
-                <div class="status-row">
-                    <span>Permit Areas</span>
-                    <span id="statusPermits"
-                          class="status-waiting">
-                        Loading
-                    </span>
-                </div>
-
-                <div class="status-row">
-                    <span>Coastal Tourism</span>
-                    <span id="statusTourism"
-                          class="status-waiting">
-                        Loading
-                    </span>
-                </div>
-
-            </div>
-
+            <span id="text-permits">
+                Loading
+            </span>
         </div>
 
-
-        <!-- LEGEND -->
-
-        <div class="section">
-
-            <div class="section-title">
-                Legend
-            </div>
-
-
-            <div class="legend-item">
-
-                <div
-                    class="legend-line"
-                    style="background:#00a9e8;">
-                </div>
-
+        <div class="status-row">
+            <span>
+                <span
+                    class="status-dot"
+                    id="status-coastline"
+                ></span>
                 Coastline
+            </span>
 
-            </div>
+            <span id="text-coastline">
+                Loading
+            </span>
+        </div>
 
+        <div class="status-row">
+            <span>
+                <span
+                    class="status-dot"
+                    id="status-administrative"
+                ></span>
+                Administrative
+            </span>
 
-            <div class="legend-item">
+            <span id="text-administrative">
+                Loading
+            </span>
+        </div>
 
-                <div
-                    class="legend-line"
-                    style="background:#00ffff;">
-                </div>
+    </div>
 
-                Administrative Boundary
+    <!-- LEGEND -->
 
-            </div>
+    <div class="section">
 
+        <div class="section-title">
+            Legend
+        </div>
 
-            <div class="legend-item">
+        <div class="legend-item">
 
-                <div
-                    class="legend-symbol"
-                    style="background:#ff6b35;">
-                </div>
+            <span
+                class="legend-symbol"
+                style="background:#1565c0;"
+            ></span>
 
-                Marine Structure
-
-            </div>
-
-
-            <div class="legend-item">
-
-                <div
-                    class="legend-symbol"
-                    style="background:#6a4c93;">
-                </div>
-
-                Permit Area
-
-            </div>
-
-
-            <div class="legend-item">
-
-                <div
-                    class="legend-symbol"
-                    style="background:#2a9d8f;">
-                </div>
-
-                Coastal Tourism
-
-            </div>
+            Coastal Business
 
         </div>
 
+        <div class="legend-item">
 
-        <!-- DISCLAIMER -->
+            <span
+                class="legend-symbol"
+                style="background:#ef6c00;"
+            ></span>
 
-        <div class="section">
-
-            <div class="section-title">
-                Disclaimer
-            </div>
-
-            <div class="disclaimer">
-
-                This WebGIS is intended for preliminary
-                spatial screening and visualization.
-
-                <br><br>
-
-                Spatial proximity or absence of a matching
-                permit record does not constitute a legal
-                determination of violation, unauthorized
-                activity, or permit status.
-
-                <br><br>
-
-                Data should be verified against official
-                records and field information before being
-                used for regulatory or legal purposes.
-
-            </div>
+            Marine Structure
 
         </div>
 
-    </aside>
+        <div class="legend-item">
 
+            <span
+                class="legend-symbol square"
+                style="background:#43a047;"
+            ></span>
 
-    <!-- =========================
-         MAP
-    ========================= -->
+            Permit Area
 
-    <main id="map"></main>
+        </div>
+
+        <div class="legend-item">
+
+            <span
+                class="legend-symbol"
+                style="background:#8e24aa;"
+            ></span>
+
+            Administrative Area
+
+        </div>
+
+    </div>
+
+    <!-- DISCLAIMER -->
+
+    <div class="section disclaimer">
+
+        <strong>Disclaimer</strong><br><br>
+
+        This WebGIS is intended for preliminary
+        spatial screening and visualization of
+        marine utilization.
+
+        <br><br>
+
+        A missing permit match does not necessarily
+        indicate that a business or activity is
+        operating without a permit.
+
+        <br><br>
+
+        Permit information should be verified
+        against authoritative government records.
+
+    </div>
 
 </div>
 
 
 <!-- =========================
-     LEAFLET
+     MAP
 ========================= -->
+
+<div id="map"></div>
+
+
+<!-- Leaflet -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -701,16 +646,70 @@
 <script>
 
 /* =====================================================
-   DATA FILES
+   1. MAP
+===================================================== */
+
+const map = L.map("map", {
+    center: [-8.67, 115.21],
+    zoom: 10
+});
+
+
+/* =====================================================
+   2. BASEMAPS
+===================================================== */
+
+const satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+        attribution:
+            "Tiles © Esri"
+    }
+);
+
+const osm = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        attribution:
+            "&copy; OpenStreetMap contributors"
+    }
+);
+
+satellite.addTo(map);
+
+
+/* =====================================================
+   3. LAYER GROUPS
+===================================================== */
+
+const layers = {
+
+    businesses:
+        L.layerGroup().addTo(map),
+
+    structures:
+        L.layerGroup().addTo(map),
+
+    permits:
+        L.layerGroup().addTo(map),
+
+    coastline:
+        L.layerGroup().addTo(map),
+
+    administrative:
+        L.layerGroup().addTo(map)
+
+};
+
+
+/* =====================================================
+   4. GEOJSON FILES
 ===================================================== */
 
 const dataFiles = {
 
-    administrative:
-        "./administrative_bali.geojson",
-
-    coastline:
-        "./coastline.geojson",
+    businesses:
+        "./coastal_businesses.geojson",
 
     structures:
         "./marine_structures.geojson",
@@ -718,168 +717,47 @@ const dataFiles = {
     permits:
         "./permit_areas.geojson",
 
-    tourism:
-        "./coastal_tourism.geojson"
-
-};
-
-
-/* =====================================================
-   MAP
-===================================================== */
-
-const map = L.map("map", {
-
-    center: [-8.67, 115.21],
-
-    zoom: 10,
-
-    zoomControl: true
-
-});
-
-
-/* =====================================================
-   BASEMAP
-===================================================== */
-
-const satellite = L.tileLayer(
-
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-
-    {
-        maxZoom: 20,
-
-        attribution:
-            "Tiles © Esri"
-    }
-
-);
-
-
-const streets = L.tileLayer(
-
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-    {
-        maxZoom: 19,
-
-        attribution:
-            "&copy; OpenStreetMap contributors"
-    }
-
-);
-
-
-satellite.addTo(map);
-
-
-const baseMaps = {
-
-    "Satellite": satellite,
-
-    "Streets": streets
-
-};
-
-
-L.control.layers(
-    baseMaps,
-    null,
-    {
-        collapsed: true
-    }
-).addTo(map);
-
-
-/* =====================================================
-   LAYER GROUPS
-===================================================== */
-
-const layers = {
+    coastline:
+        "./coastline.geojson",
 
     administrative:
-        L.layerGroup().addTo(map),
-
-    coastline:
-        L.layerGroup().addTo(map),
-
-    structures:
-        L.layerGroup().addTo(map),
-
-    permits:
-        L.layerGroup().addTo(map),
-
-    tourism:
-        L.layerGroup().addTo(map)
+        "./administrative_bali.geojson"
 
 };
 
 
 /* =====================================================
-   OVERLAY CONTROL
+   5. STATUS
 ===================================================== */
 
-L.control.layers(
+function setStatus(
+    layerName,
+    success
+) {
 
-    null,
+    const dot =
+        document.getElementById(
+            "status-" + layerName
+        );
 
-    {
+    const text =
+        document.getElementById(
+            "text-" + layerName
+        );
 
-        "Administrative Boundary":
-            layers.administrative,
+    if (success) {
 
-        "Coastline":
-            layers.coastline,
+        dot.classList.add("loaded");
+        dot.classList.remove("missing");
 
-        "Marine Structures":
-            layers.structures,
+        text.innerText = "Loaded";
 
-        "Permit / PKKPRL Areas":
-            layers.permits,
+    } else {
 
-        "Coastal Tourism":
-            layers.tourism
+        dot.classList.add("missing");
+        dot.classList.remove("loaded");
 
-    },
-
-    {
-        collapsed: true
-    }
-
-).addTo(map);
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-function setStatus(id, status, type = "ok") {
-
-    const element =
-        document.getElementById(id);
-
-    if (!element) return;
-
-    element.textContent = status;
-
-    element.className = "";
-
-    if (type === "ok") {
-
-        element.classList.add("status-ok");
-
-    }
-
-    else if (type === "error") {
-
-        element.classList.add("status-error");
-
-    }
-
-    else {
-
-        element.classList.add("status-waiting");
+        text.innerText = "Not available";
 
     }
 
@@ -887,545 +765,672 @@ function setStatus(id, status, type = "ok") {
 
 
 /* =====================================================
-   ADMINISTRATIVE BOUNDARY
+   6. HELPERS
 ===================================================== */
 
-let administrativeData = null;
+function safeValue(
+    value,
+    fallback = "Unknown"
+) {
 
+    if (
+        value === undefined ||
+        value === null ||
+        value === ""
+    ) {
 
-fetch(dataFiles.administrative)
+        return fallback;
 
-    .then(response => {
+    }
 
-        if (!response.ok) {
+    return value;
 
-            throw new Error(
-                "Administrative GeoJSON tidak ditemukan."
-            );
+}
 
-        }
 
-        return response.json();
+function badge(
+    value
+) {
 
-    })
+    const v =
+        String(value || "")
+        .toUpperCase();
 
-    .then(data => {
+    if (
+        v === "YES" ||
+        v === "MATCHED"
+    ) {
 
-        administrativeData = L.geoJSON(
+        return `
+            <span class="badge badge-yes">
+                ${value}
+            </span>
+        `;
 
-            data,
+    }
 
-            {
+    if (
+        v === "NO"
+    ) {
 
-                style: {
+        return `
+            <span class="badge badge-no">
+                ${value}
+            </span>
+        `;
 
-                    color: "#00ffff",
+    }
 
-                    weight: 2,
-
-                    opacity: 1,
-
-                    fillColor: "#00ffff",
-
-                    fillOpacity: 0.03
-
-                },
-
-                onEachFeature:
-                    function(feature, layer) {
-
-                        const p =
-                            feature.properties || {};
-
-                        layer.bindPopup(
-
-                            createPopup(
-                                "Administrative Boundary",
-                                p
-                            )
-
-                        );
-
-                    }
-
-            }
-
-        );
-
-        administrativeData
-            .addTo(layers.administrative);
-
-
-        setStatus(
-            "statusAdmin",
-            "Loaded",
-            "ok"
-        );
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-        setStatus(
-            "statusAdmin",
-            "Not available",
-            "error"
-        );
-
-    });
-
-
-/* =====================================================
-   COASTLINE
-===================================================== */
-
-let coastlineData = null;
-
-
-fetch(dataFiles.coastline)
-
-    .then(response => {
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Coastline GeoJSON tidak ditemukan."
-            );
-
-        }
-
-        return response.json();
-
-    })
-
-    .then(data => {
-
-        coastlineData = L.geoJSON(
-
-            data,
-
-            {
-
-                style: {
-
-                    color: "#00a9e8",
-
-                    weight: 3,
-
-                    opacity: 1
-
-                },
-
-                onEachFeature:
-                    function(feature, layer) {
-
-                        const p =
-                            feature.properties || {};
-
-                        layer.bindPopup(
-
-                            createPopup(
-                                "Coastline",
-                                p
-                            )
-
-                        );
-
-                    }
-
-            }
-
-        );
-
-        coastlineData
-            .addTo(layers.coastline);
-
-
-        setStatus(
-            "statusCoastline",
-            "Loaded",
-            "ok"
-        );
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-        setStatus(
-            "statusCoastline",
-            "Not available",
-            "error"
-        );
-
-    });
-
-
-/* =====================================================
-   MARINE STRUCTURES
-===================================================== */
-
-let structuresData = null;
-
-let structureFeatures = [];
-
-
-fetch(dataFiles.structures)
-
-    .then(response => {
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Marine structures GeoJSON tidak ditemukan."
-            );
-
-        }
-
-        return response.json();
-
-    })
-
-    .then(data => {
-
-        structureFeatures =
-            data.features || [];
-
-
-        structuresData = L.geoJSON(
-
-            data,
-
-            {
-
-                pointToLayer:
-                    function(feature, latlng) {
-
-                        return L.circleMarker(
-
-                            latlng,
-
-                            {
-
-                                radius: 7,
-
-                                color: "#ffffff",
-
-                                weight: 2,
-
-                                fillColor: "#ff6b35",
-
-                                fillOpacity: 0.9
-
-                            }
-
-                        );
-
-                    },
-
-
-                style:
-                    function() {
-
-                        return {
-
-                            color: "#ff6b35",
-
-                            weight: 2,
-
-                            fillColor: "#ff6b35",
-
-                            fillOpacity: 0.45
-
-                        };
-
-                    },
-
-
-                onEachFeature:
-                    function(feature, layer) {
-
-                        const p =
-                            feature.properties || {};
-
-                        layer.bindPopup(
-
-                            createStructurePopup(p)
-
-                        );
-
-                    }
-
-            }
-
-        );
-
-
-        structuresData
-            .addTo(layers.structures);
-
-
-        updateStructureDashboard();
-
-
-        setStatus(
-            "statusStructures",
-            `${structureFeatures.length} features`,
-            "ok"
-        );
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-        setStatus(
-            "statusStructures",
-            "Not available",
-            "error"
-        );
-
-    });
-
-
-/* =====================================================
-   PERMIT AREAS
-===================================================== */
-
-let permitsData = null;
-
-
-fetch(dataFiles.permits)
-
-    .then(response => {
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Permit areas GeoJSON tidak ditemukan."
-            );
-
-        }
-
-        return response.json();
-
-    })
-
-    .then(data => {
-
-        permitsData = L.geoJSON(
-
-            data,
-
-            {
-
-                style: {
-
-                    color: "#6a4c93",
-
-                    weight: 2,
-
-                    opacity: 1,
-
-                    fillColor: "#6a4c93",
-
-                    fillOpacity: 0.25
-
-                },
-
-                onEachFeature:
-                    function(feature, layer) {
-
-                        const p =
-                            feature.properties || {};
-
-                        layer.bindPopup(
-
-                            createPermitPopup(p)
-
-                        );
-
-                    }
-
-            }
-
-        );
-
-
-        permitsData
-            .addTo(layers.permits);
-
-
-        setStatus(
-            "statusPermits",
-            `${data.features?.length || 0} features`,
-            "ok"
-        );
-
-    })
-
-    .catch(error => {
-
-        console.error(error);
-
-        setStatus(
-            "statusPermits",
-            "Not available",
-            "error"
-        );
-
-    });
-
-
-/* =====================================================
-   COASTAL TOURISM
-===================================================== */
-
-let tourismData = null;
-
-let tourismFeatures = [];
-
-
-fetch(dataFiles.tourism)
-
-    .then(response => {
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Coastal tourism GeoJSON belum tersedia."
-            );
-
-        }
-
-        return response.json();
-
-    })
-
-    .then(data => {
-
-        tourismFeatures =
-            data.features || [];
-
-
-        tourismData = L.geoJSON(
-
-            data,
-
-            {
-
-                pointToLayer:
-                    function(feature, latlng) {
-
-                        return L.circleMarker(
-
-                            latlng,
-
-                            {
-
-                                radius: 7,
-
-                                color: "#ffffff",
-
-                                weight: 2,
-
-                                fillColor: "#2a9d8f",
-
-                                fillOpacity: 0.9
-
-                            }
-
-                        );
-
-                    },
-
-
-                onEachFeature:
-                    function(feature, layer) {
-
-                        const p =
-                            feature.properties || {};
-
-                        layer.bindPopup(
-
-                            createTourismPopup(p)
-
-                        );
-
-                    }
-
-            }
-
-        );
-
-
-        tourismData
-            .addTo(layers.tourism);
-
-
-        setStatus(
-            "statusTourism",
-            `${tourismFeatures.length} features`,
-            "ok"
-        );
-
-    })
-
-    .catch(error => {
-
-        console.warn(
-            "Coastal Tourism belum tersedia:",
-            error
-        );
-
-        setStatus(
-            "statusTourism",
-            "Waiting for data",
-            "waiting"
-        );
-
-    });
-
-
-/* =====================================================
-   POPUP - GENERAL
-===================================================== */
-
-function createPopup(title, properties) {
-
-    let html = `
-        <div class="popup-title">
-            ${title}
-        </div>
+    return `
+        <span class="badge badge-unknown">
+            ${safeValue(value)}
+        </span>
     `;
 
+}
 
-    Object.entries(properties)
-        .slice(0, 10)
-        .forEach(([key, value]) => {
 
-            html += `
+/* =====================================================
+   7. BUSINESS POPUP
+===================================================== */
+
+function businessPopup(
+    properties
+) {
+
+    const p = properties || {};
+
+    return `
+
+        <div class="popup">
+
+            <div class="popup-title">
+                ${safeValue(
+                    p.business_name,
+                    "Unnamed Business"
+                )}
+            </div>
+
+            <div class="popup-subtitle">
+                ${safeValue(
+                    p.business_type
+                )}
+            </div>
+
+
+            <div class="popup-section">
+
+                <div class="popup-section-title">
+                    Business Information
+                </div>
 
                 <div class="popup-row">
 
                     <span class="popup-label">
-                        ${formatFieldName(key)}
+                        Category
                     </span>
 
                     <span class="popup-value">
-                        ${value ?? "-"}
+                        ${safeValue(p.category)}
                     </span>
 
                 </div>
 
-            `;
+                <div class="popup-row">
 
-        });
+                    <span class="popup-label">
+                        Address
+                    </span>
 
+                    <span class="popup-value">
+                        ${safeValue(p.address)}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Regency
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(p.regency)}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="popup-section">
+
+                <div class="popup-section-title">
+                    Marine Utilization
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Uses Marine Area
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${badge(
+                            p.marine_use
+                        )}
+
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Marine Activity
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.marine_use_type
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Enters Sea
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${badge(
+                            p.enters_sea
+                        )}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="popup-section">
+
+                <div class="popup-section-title">
+                    Marine Structure
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Structure
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${badge(
+                            p.marine_structure
+                        )}
+
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Structure Type
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.structure_type
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Distance
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${
+                            p.distance_structure_m !== undefined
+                            ? p.distance_structure_m + " m"
+                            : "Unknown"
+                        }
+
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Coast Distance
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${
+                            p.distance_coast_m !== undefined
+                            ? p.distance_coast_m + " m"
+                            : "Unknown"
+                        }
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="popup-section">
+
+                <div class="popup-section-title">
+                    Permit Screening
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Permit Match
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${badge(
+                            p.permit_match
+                        )}
+
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Permit ID
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.permit_id
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Permit Type
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.permit_type
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Permit Status
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.permit_status
+                        )}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="popup-section">
+
+                <div class="popup-section-title">
+                    Verification
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Status
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${badge(
+                            p.verification_status
+                        )}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="popup-section">
+
+                <div class="popup-section-title">
+                    Data Source
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Source
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.source
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Data Date
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.data_date
+                        )}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   8. STRUCTURE POPUP
+===================================================== */
+
+function structurePopup(
+    properties
+) {
+
+    const p = properties || {};
+
+    return `
+
+        <div class="popup">
+
+            <div class="popup-title">
+                ${safeValue(
+                    p.name,
+                    "Marine Structure"
+                )}
+            </div>
+
+            <div class="popup-section">
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Object ID
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.object_id
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Type
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.type
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Area
+                    </span>
+
+                    <span class="popup-value">
+
+                        ${
+                            p.area_m2 !== undefined
+                            ? p.area_m2 + " m²"
+                            : "Unknown"
+                        }
+
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Detection Date
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.detection_date
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Screening
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.screening_status
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Priority
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.priority
+                        )}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   9. PERMIT POPUP
+===================================================== */
+
+function permitPopup(
+    properties
+) {
+
+    const p = properties || {};
+
+    return `
+
+        <div class="popup">
+
+            <div class="popup-title">
+                Permit Area
+            </div>
+
+            <div class="popup-section">
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Permit ID
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.permit_id
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Type
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.permit_type
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Holder
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.holder_name
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Status
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.permit_status
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Source
+                    </span>
+
+                    <span class="popup-value">
+                        ${safeValue(
+                            p.source
+                        )}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =====================================================
+   10. GENERIC POPUP
+===================================================== */
+
+function genericPopup(
+    properties
+) {
+
+    const p = properties || {};
+
+    let html = `
+        <div class="popup">
+            <div class="popup-title">
+                Spatial Data
+            </div>
+    `;
+
+    Object.keys(p)
+        .slice(0, 12)
+        .forEach(
+            key => {
+
+                html += `
+
+                    <div class="popup-row">
+
+                        <span class="popup-label">
+                            ${key}
+                        </span>
+
+                        <span class="popup-value">
+                            ${safeValue(
+                                p[key]
+                            )}
+                        </span>
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+    html += "</div>";
 
     return html;
 
@@ -1433,365 +1438,366 @@ function createPopup(title, properties) {
 
 
 /* =====================================================
-   POPUP - STRUCTURE
+   11. STYLE FUNCTIONS
 ===================================================== */
 
-function createStructurePopup(p) {
+function businessStyle() {
 
-    return `
+    return {
 
-        <div class="popup-title">
-            ${p.name || "Marine Structure"}
-        </div>
+        radius: 8,
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Object ID
-            </span>
+        fillColor: "#1565c0",
 
-            <span class="popup-value">
-                ${p.object_id || "-"}
-            </span>
-        </div>
+        color: "#ffffff",
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Type
-            </span>
+        weight: 2,
 
-            <span class="popup-value">
-                ${p.type || "-"}
-            </span>
-        </div>
+        opacity: 1,
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Area
-            </span>
+        fillOpacity: 0.9
 
-            <span class="popup-value">
-                ${p.area_m2
-                    ? Number(p.area_m2).toLocaleString() + " m²"
-                    : "-"
-                }
-            </span>
-        </div>
+    };
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Detection Date
-            </span>
+}
 
-            <span class="popup-value">
-                ${p.detection_date || "-"}
-            </span>
-        </div>
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Permit
-            </span>
+function structureStyle() {
 
-            <span class="popup-value">
-                ${p.permit_id || "-"}
-            </span>
-        </div>
+    return {
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Change
-            </span>
+        color: "#ef6c00",
 
-            <span class="popup-value">
-                ${p.change_status || "-"}
-            </span>
-        </div>
+        weight: 3,
 
-        <div class="popup-status">
+        opacity: 0.9,
 
-            ${p.screening_status || "Screening"}
+        fillColor: "#ef6c00",
 
-        </div>
+        fillOpacity: 0.7
 
-    `;
+    };
+
+}
+
+
+function permitStyle() {
+
+    return {
+
+        color: "#43a047",
+
+        weight: 2,
+
+        fillColor: "#43a047",
+
+        fillOpacity: 0.18
+
+    };
+
+}
+
+
+function coastlineStyle() {
+
+    return {
+
+        color: "#00acc1",
+
+        weight: 2,
+
+        opacity: 1
+
+    };
+
+}
+
+
+function administrativeStyle() {
+
+    return {
+
+        color: "#8e24aa",
+
+        weight: 1,
+
+        fillColor: "#8e24aa",
+
+        fillOpacity: 0.03
+
+    };
 
 }
 
 
 /* =====================================================
-   POPUP - PERMIT
+   12. LOAD GEOJSON
 ===================================================== */
 
-function createPermitPopup(p) {
+async function loadGeoJSON(
+    layerName
+) {
 
-    return `
+    try {
 
-        <div class="popup-title">
-            ${p.permit_holder || "Permit Area"}
-        </div>
+        const response =
+            await fetch(
+                dataFiles[layerName]
+            );
 
-        <div class="popup-row">
-            <span class="popup-label">
-                Permit ID
-            </span>
+        if (!response.ok) {
 
-            <span class="popup-value">
-                ${p.permit_id || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Activity
-            </span>
-
-            <span class="popup-value">
-                ${p.activity_type || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Status
-            </span>
-
-            <span class="popup-value">
-                ${p.status || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Area
-            </span>
-
-            <span class="popup-value">
-                ${p.area_m2
-                    ? Number(p.area_m2).toLocaleString() + " m²"
-                    : "-"
-                }
-            </span>
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   POPUP - TOURISM
-===================================================== */
-
-function createTourismPopup(p) {
-
-    return `
-
-        <div class="popup-title">
-            ${p.name || "Coastal Tourism"}
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Category
-            </span>
-
-            <span class="popup-value">
-                ${p.category || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Type
-            </span>
-
-            <span class="popup-value">
-                ${p.subtype || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Regency
-            </span>
-
-            <span class="popup-value">
-                ${p.regency || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Source
-            </span>
-
-            <span class="popup-value">
-                ${p.source || "-"}
-            </span>
-        </div>
-
-        <div class="popup-row">
-            <span class="popup-label">
-                Data Year
-            </span>
-
-            <span class="popup-value">
-                ${p.data_year || "-"}
-            </span>
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   FIELD NAME
-===================================================== */
-
-function formatFieldName(field) {
-
-    return field
-
-        .replaceAll("_", " ")
-
-        .replace(/\b\w/g, c =>
-            c.toUpperCase()
-        );
-
-}
-
-
-/* =====================================================
-   DASHBOARD
-===================================================== */
-
-function updateStructureDashboard() {
-
-    const total =
-        structureFeatures.length;
-
-
-    let matched = 0;
-
-    let review = 0;
-
-    let priority = 0;
-
-
-    structureFeatures.forEach(feature => {
-
-        const p =
-            feature.properties || {};
-
-
-        const status =
-            String(
-                p.screening_status || ""
-            ).toLowerCase();
-
-
-        const priorityValue =
-            String(
-                p.priority || ""
-            ).toLowerCase();
-
-
-        if (
-            status.includes("matched")
-        ) {
-
-            matched++;
-
-        }
-
-
-        if (
-            status.includes("review")
-        ) {
-
-            review++;
-
-        }
-
-
-        if (
-            status.includes("priority") ||
-            priorityValue === "high"
-        ) {
-
-            priority++;
-
-        }
-
-    });
-
-
-    document.getElementById(
-        "totalStructures"
-    ).textContent = total;
-
-
-    document.getElementById(
-        "matchedStructures"
-    ).textContent = matched;
-
-
-    document.getElementById(
-        "reviewStructures"
-    ).textContent = review;
-
-
-    document.getElementById(
-        "priorityStructures"
-    ).textContent = priority;
-
-}
-
-
-/* =====================================================
-   TOGGLE LAYER
-===================================================== */
-
-function toggleLayer(name) {
-
-    const layer =
-        layers[name];
-
-    const button =
-        document.getElementById(
-            "btn-" + name
-        );
-
-
-    if (!layer) return;
-
-
-    if (map.hasLayer(layer)) {
-
-        map.removeLayer(layer);
-
-        if (button) {
-
-            button.classList.remove(
-                "active"
+            throw new Error(
+                "File not found"
             );
 
         }
 
-    }
+        const data =
+            await response.json();
 
-    else {
 
-        map.addLayer(layer);
+        let geoLayer;
 
-        if (button) {
 
-            button.classList.add(
-                "active"
+        /* =========================
+           BUSINESSES
+        ========================= */
+
+        if (
+            layerName === "businesses"
+        ) {
+
+            geoLayer = L.geoJSON(
+                data,
+                {
+
+                    pointToLayer:
+                        function(
+                            feature,
+                            latlng
+                        ) {
+
+                            return L.circleMarker(
+                                latlng,
+                                businessStyle()
+                            );
+
+                        },
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            layer.bindPopup(
+                                businessPopup(
+                                    feature.properties
+                                )
+                            );
+
+                        }
+
+                }
             );
 
         }
+
+
+        /* =========================
+           STRUCTURES
+        ========================= */
+
+        else if (
+            layerName === "structures"
+        ) {
+
+            geoLayer = L.geoJSON(
+                data,
+                {
+
+                    pointToLayer:
+                        function(
+                            feature,
+                            latlng
+                        ) {
+
+                            return L.circleMarker(
+                                latlng,
+                                {
+                                    radius: 7,
+                                    fillColor:
+                                        "#ef6c00",
+                                    color:
+                                        "#ffffff",
+                                    weight: 2,
+                                    fillOpacity:
+                                        0.9
+                                }
+                            );
+
+                        },
+
+                    style:
+                        structureStyle,
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            layer.bindPopup(
+                                structurePopup(
+                                    feature.properties
+                                )
+                            );
+
+                        }
+
+                }
+            );
+
+        }
+
+
+        /* =========================
+           PERMITS
+        ========================= */
+
+        else if (
+            layerName === "permits"
+        ) {
+
+            geoLayer = L.geoJSON(
+                data,
+                {
+
+                    style:
+                        permitStyle,
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            layer.bindPopup(
+                                permitPopup(
+                                    feature.properties
+                                )
+                            );
+
+                        }
+
+                }
+            );
+
+        }
+
+
+        /* =========================
+           COASTLINE
+        ========================= */
+
+        else if (
+            layerName === "coastline"
+        ) {
+
+            geoLayer = L.geoJSON(
+                data,
+                {
+
+                    style:
+                        coastlineStyle,
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            layer.bindPopup(
+                                genericPopup(
+                                    feature.properties
+                                )
+                            );
+
+                        }
+
+                }
+            );
+
+        }
+
+
+        /* =========================
+           ADMINISTRATIVE
+        ========================= */
+
+        else if (
+            layerName === "administrative"
+        ) {
+
+            geoLayer = L.geoJSON(
+                data,
+                {
+
+                    style:
+                        administrativeStyle,
+
+                    onEachFeature:
+                        function(
+                            feature,
+                            layer
+                        ) {
+
+                            layer.bindPopup(
+                                genericPopup(
+                                    feature.properties
+                                )
+                            );
+
+                        }
+
+                }
+            );
+
+        }
+
+
+        if (geoLayer) {
+
+            geoLayer.addTo(
+                layers[layerName]
+            );
+
+        }
+
+
+        setStatus(
+            layerName,
+            true
+        );
+
+
+        updateDashboard();
+
+
+    }
+
+    catch (error) {
+
+        console.warn(
+            layerName,
+            error
+        );
+
+        setStatus(
+            layerName,
+            false
+        );
 
     }
 
@@ -1799,148 +1805,159 @@ function toggleLayer(name) {
 
 
 /* =====================================================
-   SEARCH
+   13. LOAD ALL DATA
 ===================================================== */
 
-function searchFeature() {
+loadGeoJSON(
+    "businesses"
+);
 
-    const query =
-        document
-            .getElementById("searchInput")
-            .value
-            .trim()
-            .toLowerCase();
+loadGeoJSON(
+    "structures"
+);
 
+loadGeoJSON(
+    "permits"
+);
 
-    if (!query) return;
+loadGeoJSON(
+    "coastline"
+);
 
-
-    let found = false;
-
-
-    /*
-       Search Marine Structures
-    */
-
-    if (structureFeatures.length) {
-
-        for (
-            const feature
-            of structureFeatures
-        ) {
-
-            const p =
-                feature.properties || {};
+loadGeoJSON(
+    "administrative"
+);
 
 
-            const searchable =
+/* =====================================================
+   14. DASHBOARD
+===================================================== */
 
-                Object.values(p)
-                    .join(" ")
-                    .toLowerCase();
+function updateDashboard() {
 
+    let total = 0;
+    let marine = 0;
+    let structure = 0;
+    let permit = 0;
+
+
+    layers.businesses.eachLayer(
+        function(layerGroup) {
 
             if (
-                searchable.includes(query)
+                !layerGroup.getLayers
             ) {
 
-                const layer =
-                    findLayerForFeature(
-                        structuresData,
-                        feature
-                    );
-
-
-                if (layer) {
-
-                    map.setView(
-                        layer.getLatLng(),
-                        16
-                    );
-
-                    layer.openPopup();
-
-                    found = true;
-
-                    break;
-
-                }
+                return;
 
             }
 
-        }
+            layerGroup.eachLayer(
+                function(layer) {
 
-    }
+                    const p =
+                        layer.feature?.properties ||
+                        {};
 
+                    total++;
 
-    /*
-       Search Tourism
-    */
-
-    if (
-        !found &&
-        tourismFeatures.length
-    ) {
-
-        for (
-            const feature
-            of tourismFeatures
-        ) {
-
-            const p =
-                feature.properties || {};
-
-
-            const searchable =
-
-                Object.values(p)
-                    .join(" ")
-                    .toLowerCase();
-
-
-            if (
-                searchable.includes(query)
-            ) {
-
-                const layer =
-                    findLayerForFeature(
-                        tourismData,
-                        feature
-                    );
-
-
-                if (layer) {
 
                     if (
-                        layer.getLatLng
+                        String(
+                            p.marine_use
+                        ).toUpperCase()
+                        === "YES"
                     ) {
 
-                        map.setView(
-                            layer.getLatLng(),
-                            16
-                        );
+                        marine++;
 
                     }
 
-                    layer.openPopup();
 
-                    found = true;
+                    if (
+                        String(
+                            p.marine_structure
+                        ).toUpperCase()
+                        === "YES"
+                    ) {
 
-                    break;
+                        structure++;
+
+                    }
+
+
+                    if (
+                        String(
+                            p.permit_match
+                        ).toUpperCase()
+                        === "MATCHED" ||
+                        String(
+                            p.permit_match
+                        ).toUpperCase()
+                        === "YES"
+                    ) {
+
+                        permit++;
+
+                    }
 
                 }
-
-            }
+            );
 
         }
+    );
 
-    }
+
+    document.getElementById(
+        "totalBusiness"
+    ).innerText = total;
+
+    document.getElementById(
+        "marineBusiness"
+    ).innerText = marine;
+
+    document.getElementById(
+        "structureBusiness"
+    ).innerText = structure;
+
+    document.getElementById(
+        "permitBusiness"
+    ).innerText = permit;
+
+}
 
 
-    if (!found) {
+/* =====================================================
+   15. TOGGLE LAYERS
+===================================================== */
 
-        alert(
-            "Object not found."
+function toggleLayer(
+    layerName,
+    button
+) {
+
+    if (
+        map.hasLayer(
+            layers[layerName]
+        )
+    ) {
+
+        map.removeLayer(
+            layers[layerName]
+        );
+
+        button.classList.remove(
+            "active"
+        );
+
+    } else {
+
+        map.addLayer(
+            layers[layerName]
+        );
+
+        button.classList.add(
+            "active"
         );
 
     }
@@ -1949,25 +1966,158 @@ function searchFeature() {
 
 
 /* =====================================================
-   FIND LAYER
+   16. SEARCH
 ===================================================== */
 
-function findLayerForFeature(
-    geoJsonLayer,
-    feature
-) {
+document
+    .getElementById("searchBox")
+    .addEventListener(
+        "input",
+        function() {
 
-    let result = null;
+            const query =
+                this.value
+                    .toLowerCase()
+                    .trim();
 
 
-    geoJsonLayer.eachLayer(
-        layer => {
+            if (!query) {
 
-            if (
-                layer.feature === feature
-            ) {
+                return;
 
-                result = layer;
+            }
+
+
+            let found = false;
+
+
+            layers.businesses.eachLayer(
+                function(group) {
+
+                    group.eachLayer(
+                        function(layer) {
+
+                            if (found) {
+
+                                return;
+
+                            }
+
+
+                            const p =
+                                layer.feature?.properties ||
+                                {};
+
+                            const name =
+                                String(
+                                    p.business_name ||
+                                    ""
+                                ).toLowerCase();
+
+                            const type =
+                                String(
+                                    p.business_type ||
+                                    ""
+                                ).toLowerCase();
+
+                            const category =
+                                String(
+                                    p.category ||
+                                    ""
+                                ).toLowerCase();
+
+
+                            if (
+                                name.includes(query) ||
+                                type.includes(query) ||
+                                category.includes(query)
+                            ) {
+
+                                found = true;
+
+
+                                if (
+                                    layer.getLatLng
+                                ) {
+
+                                    map.setView(
+                                        layer.getLatLng(),
+                                        16
+                                    );
+
+                                }
+
+                                layer.openPopup();
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+
+            if (!found) {
+
+                layers.structures.eachLayer(
+                    function(group) {
+
+                        group.eachLayer(
+                            function(layer) {
+
+                                if (found) {
+
+                                    return;
+
+                                }
+
+
+                                const p =
+                                    layer.feature?.properties ||
+                                    {};
+
+                                const name =
+                                    String(
+                                        p.name ||
+                                        ""
+                                    ).toLowerCase();
+
+                                const type =
+                                    String(
+                                        p.type ||
+                                        ""
+                                    ).toLowerCase();
+
+
+                                if (
+                                    name.includes(query) ||
+                                    type.includes(query)
+                                ) {
+
+                                    found = true;
+
+
+                                    if (
+                                        layer.getLatLng
+                                    ) {
+
+                                        map.setView(
+                                            layer.getLatLng(),
+                                            16
+                                        );
+
+                                    }
+
+                                    layer.openPopup();
+
+                                }
+
+                            }
+                        );
+
+                    }
+                );
 
             }
 
@@ -1975,29 +2125,38 @@ function findLayerForFeature(
     );
 
 
-    return result;
+/* =====================================================
+   17. BASEMAP CONTROL
+===================================================== */
 
-}
+L.control.layers(
+
+    {
+        "Satellite":
+            satellite,
+
+        "OpenStreetMap":
+            osm
+
+    },
+
+    null,
+
+    {
+        position:
+            "topright"
+    }
+
+).addTo(map);
 
 
 /* =====================================================
-   MAP SCALE
+   18. SCALE
 ===================================================== */
 
 L.control.scale({
-
     imperial: false
-
 }).addTo(map);
-
-
-/* =====================================================
-   INITIAL VIEW
-===================================================== */
-
-console.log(
-    "Marine-Check Bali WebGIS initialized."
-);
 
 </script>
 
