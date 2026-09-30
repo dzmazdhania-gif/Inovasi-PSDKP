@@ -44,14 +44,12 @@
             box-sizing: border-box;
         }
 
-
         body {
             margin: 0;
             font-family:
                 Arial,
                 Helvetica,
                 sans-serif;
-
             background: #f4f7f9;
             color: #263238;
         }
@@ -531,6 +529,10 @@
 
             font-weight: 600;
 
+            max-width: 210px;
+
+            word-break: break-word;
+
         }
 
 
@@ -583,17 +585,6 @@
 
             color:
                 #e65100;
-
-        }
-
-
-        .badge-matched {
-
-            background:
-                #e8f5e9;
-
-            color:
-                #2e7d32;
 
         }
 
@@ -951,9 +942,7 @@
 
             <span
                 class="legend-symbol"
-                style="
-                    background:#1565c0;
-                "
+                style="background:#1565c0;"
             ></span>
 
             Coastal Business
@@ -965,9 +954,7 @@
 
             <span
                 class="legend-symbol"
-                style="
-                    background:#ef6c00;
-                "
+                style="background:#ef6c00;"
             ></span>
 
             Marine Structure
@@ -979,9 +966,7 @@
 
             <span
                 class="legend-symbol square"
-                style="
-                    background:#43a047;
-                "
+                style="background:#43a047;"
             ></span>
 
             Permit Area
@@ -993,9 +978,7 @@
 
             <span
                 class="legend-line"
-                style="
-                    background:#00acc1;
-                "
+                style="background:#00acc1;"
             ></span>
 
             BIG Garis Pantai
@@ -1007,9 +990,7 @@
 
             <span
                 class="legend-line"
-                style="
-                    background:#8e24aa;
-                "
+                style="background:#8e24aa;"
             ></span>
 
             BIG Administrasi
@@ -1047,6 +1028,13 @@
         verified against authoritative
         government records.
 
+        <br><br>
+
+        Coastal business data are sourced
+        from OpenStreetMap and may not
+        represent all businesses or
+        current operating conditions.
+
     </div>
 
 </div>
@@ -1061,7 +1049,7 @@
 
 <!-- =====================================================
      JAVASCRIPT LIBRARIES
-====================================================== -->
+===================================================== -->
 
 <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -1179,7 +1167,6 @@ const BIG_RBI_URL =
 
 /* =====================================================
    6. BIG GARIS PANTAI
-      Layer 21
 ===================================================== */
 
 const bigCoastline =
@@ -1207,7 +1194,6 @@ bigCoastline.addTo(
 
 /* =====================================================
    7. BIG ADMINISTRASI
-      Layer 12
 ===================================================== */
 
 const bigAdministrative =
@@ -1234,14 +1220,13 @@ bigAdministrative.addTo(
 
 
 /* =====================================================
-   8. BIG STATUS
+   8. STATUS
 ===================================================== */
 
 setStatus(
     "coastline",
     true
 );
-
 
 setStatus(
     "administrative",
@@ -1254,21 +1239,14 @@ setStatus(
 ===================================================== */
 
 function safeValue(
-
     value,
-
     fallback = "Unknown"
-
 ) {
 
     if (
-
         value === undefined ||
-
         value === null ||
-
         value === ""
-
     ) {
 
         return fallback;
@@ -1281,7 +1259,25 @@ function safeValue(
 
 
 /* =====================================================
-   10. BADGE
+   10. HTML ESCAPE
+===================================================== */
+
+function escapeHTML(value) {
+
+    return String(
+        safeValue(value, "")
+    )
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+/* =====================================================
+   11. BADGE
 ===================================================== */
 
 function badge(value) {
@@ -1293,11 +1289,8 @@ function badge(value) {
 
 
     if (
-
         v === "YES" ||
-
         v === "MATCHED"
-
     ) {
 
         return `
@@ -1305,7 +1298,7 @@ function badge(value) {
             <span
                 class="badge badge-yes"
             >
-                ${value}
+                ${escapeHTML(value)}
             </span>
 
         `;
@@ -1314,9 +1307,7 @@ function badge(value) {
 
 
     if (
-
         v === "NO"
-
     ) {
 
         return `
@@ -1324,7 +1315,7 @@ function badge(value) {
             <span
                 class="badge badge-no"
             >
-                ${value}
+                ${escapeHTML(value)}
             </span>
 
         `;
@@ -1337,7 +1328,9 @@ function badge(value) {
         <span
             class="badge badge-unknown"
         >
-            ${safeValue(value)}
+            ${escapeHTML(
+                safeValue(value)
+            )}
         </span>
 
     `;
@@ -1346,15 +1339,111 @@ function badge(value) {
 
 
 /* =====================================================
-   11. BUSINESS POPUP
+   12. BUSINESS POPUP
 ===================================================== */
 
-function businessPopup(
-    properties
-) {
+function businessPopup(properties) {
 
     const p =
         properties || {};
+
+
+    const name =
+        escapeHTML(
+            p.name ||
+            "Unnamed Business"
+        );
+
+
+    const businessType =
+        escapeHTML(
+            p.business_type ||
+            "Unknown"
+        );
+
+
+    const category =
+        escapeHTML(
+            p.tourism ||
+            p.amenity ||
+            p.leisure ||
+            "Unknown"
+        );
+
+
+    const address =
+        escapeHTML(
+            p.address
+        );
+
+
+    const village =
+        escapeHTML(
+            p.village
+        );
+
+
+    const phone =
+        escapeHTML(
+            p.phone
+        );
+
+
+    const openingHours =
+        escapeHTML(
+            p.opening_hours
+        );
+
+
+    const osmId =
+        escapeHTML(
+            p.osm_id
+        );
+
+
+    const source =
+        escapeHTML(
+            p.source ||
+            "OpenStreetMap"
+        );
+
+
+    let websiteHTML = "";
+
+
+    if (p.website) {
+
+        const website =
+            escapeHTML(
+                p.website
+            );
+
+
+        websiteHTML = `
+
+            <div class="popup-row">
+
+                <span class="popup-label">
+                    Website
+                </span>
+
+                <span class="popup-value">
+
+                    <a
+                        href="${website}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        Visit
+                    </a>
+
+                </span>
+
+            </div>
+
+        `;
+
+    }
 
 
     return `
@@ -1363,21 +1452,12 @@ function businessPopup(
 
 
             <div class="popup-title">
-
-                ${safeValue(
-                    p.business_name,
-                    "Unnamed Business"
-                )}
-
+                ${name}
             </div>
 
 
             <div class="popup-subtitle">
-
-                ${safeValue(
-                    p.business_type
-                )}
-
+                ${businessType}
             </div>
 
 
@@ -1386,9 +1466,7 @@ function businessPopup(
             <div class="popup-section">
 
                 <div class="popup-section-title">
-
                     Business Information
-
                 </div>
 
 
@@ -1399,11 +1477,7 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.category
-                        )}
-
+                        ${category}
                     </span>
 
                 </div>
@@ -1416,11 +1490,7 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.address
-                        )}
-
+                        ${address}
                     </span>
 
                 </div>
@@ -1429,18 +1499,43 @@ function businessPopup(
                 <div class="popup-row">
 
                     <span class="popup-label">
-                        Regency
+                        Village
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.regency
-                        )}
-
+                        ${village}
                     </span>
 
                 </div>
+
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Phone
+                    </span>
+
+                    <span class="popup-value">
+                        ${phone}
+                    </span>
+
+                </div>
+
+
+                <div class="popup-row">
+
+                    <span class="popup-label">
+                        Opening Hours
+                    </span>
+
+                    <span class="popup-value">
+                        ${openingHours}
+                    </span>
+
+                </div>
+
+
+                ${websiteHTML}
 
             </div>
 
@@ -1450,9 +1545,7 @@ function businessPopup(
             <div class="popup-section">
 
                 <div class="popup-section-title">
-
-                    Marine Utilization
-
+                    Marine Screening
                 </div>
 
 
@@ -1463,11 +1556,9 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
                         ${badge(
                             p.marine_use
                         )}
-
                     </span>
 
                 </div>
@@ -1480,11 +1571,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.marine_use_type
+                        ${escapeHTML(
+                            safeValue(
+                                p.marine_use_type
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1497,11 +1588,9 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
                         ${badge(
                             p.enters_sea
                         )}
-
                     </span>
 
                 </div>
@@ -1514,9 +1603,7 @@ function businessPopup(
             <div class="popup-section">
 
                 <div class="popup-section-title">
-
                     Marine Structure
-
                 </div>
 
 
@@ -1527,11 +1614,9 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
                         ${badge(
                             p.marine_structure
                         )}
-
                     </span>
 
                 </div>
@@ -1544,11 +1629,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.structure_type
+                        ${escapeHTML(
+                            safeValue(
+                                p.structure_type
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1564,7 +1649,9 @@ function businessPopup(
 
                         ${
                             p.distance_structure_m !== undefined
-                            ? p.distance_structure_m + " m"
+                            ? escapeHTML(
+                                p.distance_structure_m
+                            ) + " m"
                             : "Unknown"
                         }
 
@@ -1583,7 +1670,9 @@ function businessPopup(
 
                         ${
                             p.distance_coast_m !== undefined
-                            ? p.distance_coast_m + " m"
+                            ? escapeHTML(
+                                p.distance_coast_m
+                            ) + " m"
                             : "Unknown"
                         }
 
@@ -1599,9 +1688,7 @@ function businessPopup(
             <div class="popup-section">
 
                 <div class="popup-section-title">
-
                     Permit Screening
-
                 </div>
 
 
@@ -1612,11 +1699,9 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
                         ${badge(
                             p.permit_match
                         )}
-
                     </span>
 
                 </div>
@@ -1629,11 +1714,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.permit_id
+                        ${escapeHTML(
+                            safeValue(
+                                p.permit_id
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1646,11 +1731,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.permit_type
+                        ${escapeHTML(
+                            safeValue(
+                                p.permit_type
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1663,41 +1748,11 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.permit_status
+                        ${escapeHTML(
+                            safeValue(
+                                p.permit_status
+                            )
                         )}
-
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- VERIFICATION -->
-
-            <div class="popup-section">
-
-                <div class="popup-section-title">
-
-                    Verification
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Status
-                    </span>
-
-                    <span class="popup-value">
-
-                        ${badge(
-                            p.verification_status
-                        )}
-
                     </span>
 
                 </div>
@@ -1710,9 +1765,7 @@ function businessPopup(
             <div class="popup-section">
 
                 <div class="popup-section-title">
-
                     Data Source
-
                 </div>
 
 
@@ -1723,11 +1776,7 @@ function businessPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.source
-                        )}
-
+                        ${source}
                     </span>
 
                 </div>
@@ -1736,15 +1785,11 @@ function businessPopup(
                 <div class="popup-row">
 
                     <span class="popup-label">
-                        Data Date
+                        OSM ID
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.data_date
-                        )}
-
+                        ${osmId}
                     </span>
 
                 </div>
@@ -1760,12 +1805,10 @@ function businessPopup(
 
 
 /* =====================================================
-   12. STRUCTURE POPUP
+   13. STRUCTURE POPUP
 ===================================================== */
 
-function structurePopup(
-    properties
-) {
+function structurePopup(properties) {
 
     const p =
         properties || {};
@@ -1777,8 +1820,8 @@ function structurePopup(
 
             <div class="popup-title">
 
-                ${safeValue(
-                    p.name,
+                ${escapeHTML(
+                    p.name ||
                     "Marine Structure"
                 )}
 
@@ -1795,11 +1838,11 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.object_id
+                        ${escapeHTML(
+                            safeValue(
+                                p.object_id
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1812,11 +1855,11 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.type
+                        ${escapeHTML(
+                            safeValue(
+                                p.type
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1832,7 +1875,9 @@ function structurePopup(
 
                         ${
                             p.area_m2 !== undefined
-                            ? p.area_m2 + " m²"
+                            ? escapeHTML(
+                                p.area_m2
+                            ) + " m²"
                             : "Unknown"
                         }
 
@@ -1848,11 +1893,11 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.detection_date
+                        ${escapeHTML(
+                            safeValue(
+                                p.detection_date
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1865,11 +1910,11 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.screening_status
+                        ${escapeHTML(
+                            safeValue(
+                                p.screening_status
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1882,11 +1927,11 @@ function structurePopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.priority
+                        ${escapeHTML(
+                            safeValue(
+                                p.priority
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1902,12 +1947,10 @@ function structurePopup(
 
 
 /* =====================================================
-   13. PERMIT POPUP
+   14. PERMIT POPUP
 ===================================================== */
 
-function permitPopup(
-    properties
-) {
+function permitPopup(properties) {
 
     const p =
         properties || {};
@@ -1934,11 +1977,11 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.permit_id
+                        ${escapeHTML(
+                            safeValue(
+                                p.permit_id
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1951,11 +1994,11 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.permit_type
+                        ${escapeHTML(
+                            safeValue(
+                                p.permit_type
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1968,11 +2011,11 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.holder_name
+                        ${escapeHTML(
+                            safeValue(
+                                p.holder_name
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -1985,11 +2028,11 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.permit_status
+                        ${escapeHTML(
+                            safeValue(
+                                p.permit_status
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -2002,11 +2045,11 @@ function permitPopup(
                     </span>
 
                     <span class="popup-value">
-
-                        ${safeValue(
-                            p.source
+                        ${escapeHTML(
+                            safeValue(
+                                p.source
+                            )
                         )}
-
                     </span>
 
                 </div>
@@ -2022,91 +2065,26 @@ function permitPopup(
 
 
 /* =====================================================
-   14. GENERIC POPUP
-===================================================== */
-
-function genericPopup(
-    properties
-) {
-
-    const p =
-        properties || {};
-
-
-    let html = `
-
-        <div class="popup">
-
-            <div class="popup-title">
-                Spatial Data
-            </div>
-
-    `;
-
-
-    Object.keys(p)
-        .slice(0, 12)
-        .forEach(
-            key => {
-
-                html += `
-
-                    <div class="popup-row">
-
-                        <span class="popup-label">
-
-                            ${key}
-
-                        </span>
-
-
-                        <span class="popup-value">
-
-                            ${safeValue(
-                                p[key]
-                            )}
-
-                        </span>
-
-                    </div>
-
-                `;
-
-            }
-        );
-
-
-    html += `
-        </div>
-    `;
-
-
-    return html;
-
-}
-
-
-/* =====================================================
    15. LOAD GEOJSON
 ===================================================== */
 
-async function loadGeoJSON(
-    layerName
-) {
+async function loadGeoJSON(layerName) {
 
     try {
 
-
         const response =
             await fetch(
-                dataFiles[layerName]
+                dataFiles[layerName] +
+                "?v=" +
+                Date.now()
             );
 
 
         if (!response.ok) {
 
             throw new Error(
-                "File not found"
+                "File not found: " +
+                dataFiles[layerName]
             );
 
         }
@@ -2127,7 +2105,6 @@ async function loadGeoJSON(
             layerName ===
             "businesses"
         ) {
-
 
             geoLayer =
                 L.geoJSON(
@@ -2196,7 +2173,6 @@ async function loadGeoJSON(
             layerName ===
             "structures"
         ) {
-
 
             geoLayer =
                 L.geoJSON(
@@ -2287,7 +2263,6 @@ async function loadGeoJSON(
             "permits"
         ) {
 
-
             geoLayer =
                 L.geoJSON(
                     data,
@@ -2358,7 +2333,6 @@ async function loadGeoJSON(
 
     catch (error) {
 
-
         console.warn(
             layerName,
             error
@@ -2403,7 +2377,6 @@ function setStatus(
     success
 ) {
 
-
     const dot =
         document.getElementById(
             "status-" +
@@ -2427,16 +2400,13 @@ function setStatus(
 
     if (success) {
 
-
         dot.classList.add(
             "loaded"
         );
 
-
         dot.classList.remove(
             "missing"
         );
-
 
         text.innerText =
             "Loaded";
@@ -2444,16 +2414,13 @@ function setStatus(
 
     } else {
 
-
         dot.classList.add(
             "missing"
         );
 
-
         dot.classList.remove(
             "loaded"
         );
-
 
         text.innerText =
             "Not available";
@@ -2469,27 +2436,21 @@ function setStatus(
 
 function updateDashboard() {
 
+    let total = 0;
 
-    let total =
-        0;
+    let marine = 0;
 
-    let marine =
-        0;
+    let structure = 0;
 
-    let structure =
-        0;
-
-    let permit =
-        0;
+    let permit = 0;
 
 
     layers.businesses.eachLayer(
 
-        function(layer) {
-
+        function(group) {
 
             if (
-                !layer.eachLayer
+                !group.eachLayer
             ) {
 
                 return;
@@ -2497,10 +2458,9 @@ function updateDashboard() {
             }
 
 
-            layer.eachLayer(
+            group.eachLayer(
 
                 function(featureLayer) {
-
 
                     const p =
                         featureLayer
@@ -2513,12 +2473,11 @@ function updateDashboard() {
 
 
                     if (
-
                         String(
                             p.marine_use
-                        ).toUpperCase()
+                        )
+                        .toUpperCase()
                         === "YES"
-
                     ) {
 
                         marine++;
@@ -2527,12 +2486,11 @@ function updateDashboard() {
 
 
                     if (
-
                         String(
                             p.marine_structure
-                        ).toUpperCase()
+                        )
+                        .toUpperCase()
                         === "YES"
-
                     ) {
 
                         structure++;
@@ -2541,19 +2499,19 @@ function updateDashboard() {
 
 
                     if (
-
                         String(
                             p.permit_match
-                        ).toUpperCase()
+                        )
+                        .toUpperCase()
                         === "YES"
 
                         ||
 
                         String(
                             p.permit_match
-                        ).toUpperCase()
+                        )
+                        .toUpperCase()
                         === "MATCHED"
-
                     ) {
 
                         permit++;
@@ -2604,15 +2562,11 @@ function toggleLayer(
     button
 ) {
 
-
     if (
-
         map.hasLayer(
             layers[layerName]
         )
-
     ) {
-
 
         map.removeLayer(
             layers[layerName]
@@ -2625,7 +2579,6 @@ function toggleLayer(
 
 
     } else {
-
 
         map.addLayer(
             layers[layerName]
@@ -2655,7 +2608,6 @@ document
 
         function() {
 
-
             const query =
                 this.value
                     .toLowerCase()
@@ -2681,7 +2633,6 @@ document
 
                 function(group) {
 
-
                     if (
                         !group.eachLayer
                     ) {
@@ -2694,7 +2645,6 @@ document
                     group.eachLayer(
 
                         function(layer) {
-
 
                             if (found) {
 
@@ -2712,24 +2662,34 @@ document
 
                             const name =
                                 String(
-                                    p.business_name
-                                    || ""
+                                    p.name ||
+                                    ""
                                 )
                                 .toLowerCase();
 
 
                             const type =
                                 String(
-                                    p.business_type
-                                    || ""
+                                    p.business_type ||
+                                    ""
                                 )
                                 .toLowerCase();
 
 
                             const category =
                                 String(
-                                    p.category
-                                    || ""
+                                    p.tourism ||
+                                    p.amenity ||
+                                    p.leisure ||
+                                    ""
+                                )
+                                .toLowerCase();
+
+
+                            const address =
+                                String(
+                                    p.address ||
+                                    ""
                                 )
                                 .toLowerCase();
 
@@ -2752,8 +2712,13 @@ document
                                     query
                                 )
 
-                            ) {
+                                ||
 
+                                address.includes(
+                                    query
+                                )
+
+                            ) {
 
                                 found =
                                     true;
@@ -2763,7 +2728,6 @@ document
                                     layer.getLatLng
                                 ) {
 
-
                                     map.setView(
 
                                         layer.getLatLng(),
@@ -2771,7 +2735,6 @@ document
                                         16
 
                                     );
-
 
                                 }
 
@@ -2795,11 +2758,9 @@ document
 
             if (!found) {
 
-
                 layers.structures.eachLayer(
 
                     function(group) {
-
 
                         if (
                             !group.eachLayer
@@ -2813,7 +2774,6 @@ document
                         group.eachLayer(
 
                             function(layer) {
-
 
                                 if (found) {
 
@@ -2831,16 +2791,16 @@ document
 
                                 const name =
                                     String(
-                                        p.name
-                                        || ""
+                                        p.name ||
+                                        ""
                                     )
                                     .toLowerCase();
 
 
                                 const type =
                                     String(
-                                        p.type
-                                        || ""
+                                        p.type ||
+                                        ""
                                     )
                                     .toLowerCase();
 
@@ -2859,7 +2819,6 @@ document
 
                                 ) {
 
-
                                     found =
                                         true;
 
@@ -2868,7 +2827,6 @@ document
                                         layer.getLatLng
                                     ) {
 
-
                                         map.setView(
 
                                             layer.getLatLng(),
@@ -2876,7 +2834,6 @@ document
                                             16
 
                                         );
-
 
                                     }
 
@@ -2938,6 +2895,20 @@ L.control.scale({
         false
 
 }).addTo(map);
+
+
+/* =====================================================
+   23. INITIAL VIEW
+===================================================== */
+
+setTimeout(
+    function() {
+
+        map.invalidateSize();
+
+    },
+    500
+);
 
 
 </script>
