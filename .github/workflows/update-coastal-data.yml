@@ -31,18 +31,18 @@ jobs:
 
       - name: Download Bali coastal business data
         run: |
-          python scripts/download_bali_coastal_businesses.py
+          python download_bali_hotels.py
 
       - name: Check generated file
         run: |
-          ls -lh data/coastal_businesses.geojson
+          ls -lh coastal_businesses.geojson
 
       - name: Commit updated GeoJSON
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add data/coastal_businesses.geojson
+          git add coastal_businesses.geojson
 
           if git diff --cached --quiet; then
             echo "No changes detected."
