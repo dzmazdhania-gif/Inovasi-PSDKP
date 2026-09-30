@@ -1,1 +1,4 @@
 requests
+geopandas
+shapely
+pyogrio
