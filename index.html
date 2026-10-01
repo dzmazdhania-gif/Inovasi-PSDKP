@@ -4155,18 +4155,13 @@ function styleStructure() {
    ========================================================= */
 
 function businessPoint(feature, latlng) {
-
-  return L.circleMarker(
-    latlng,
-    {
-      radius: 7,
-      weight: 2,
-      color: "#073b4c",
-      fillColor: "#0b7285",
-      fillOpacity: 0.9
-    }
-  );
-
+  return L.circleMarker(latlng, {
+    radius: 7,
+    weight: 2,
+    color: "#006d77",
+    fillColor: "#00b4d8",
+    fillOpacity: 0.9
+  });
 }
 
 
@@ -4230,44 +4225,38 @@ function createGeoJSONLayer(
    LOAD GEOJSON
    ========================================================= */
 
-async function loadGeoJSON(
-  url,
-  useCache = true
-) {
-
-  if (
-    useCache &&
-    geojsonCache[url]
-  ) {
-
+async function loadGeoJSON(url, useCache = true) {
+  if (useCache && geojsonCache[url]) {
     return geojsonCache[url];
-
   }
 
-
-  const response =
-    await fetch(
+  try {
+    const response = await fetch(
       url + "?v=" + Date.now()
     );
 
+    if (!response.ok) {
+      throw new Error(
+        `${response.status} ${response.statusText}`
+      );
+    }
 
-  if (!response.ok) {
+    const data = await response.json();
 
-    throw new Error(
-      `Failed loading ${url}: ${response.status}`
-    );
+    if (useCache) {
+      geojsonCache[url] = data;
+    }
 
+    return data;
+
+  } catch (error) {
+    console.error("Gagal memuat GeoJSON:", url, error);
+
+    return {
+      type: "FeatureCollection",
+      features: []
+    };
   }
-
-
-  const data =
-    await response.json();
-
-
-  geojsonCache[url] = data;
-
-  return data;
-
 }
 
 
