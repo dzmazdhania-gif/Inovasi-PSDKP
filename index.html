@@ -2854,29 +2854,61 @@ a{
 
 
 <script>
-
 /* =========================================================
-   DATA
-========================================================= */
+   MARINE-CHECK BALI
+   FUNCTIONAL JAVASCRIPT
+   CSS / DESIGN TIDAK DIUBAH
+   ========================================================= */
 
 const DATA = {
-
   businesses: "./coastal_businesses.geojson",
-
   structures: "./marine_structures.geojson",
-
-  permits: "./permit_areas.geojson"
-
+  permits: "./permit_areas.geojson",
+  coastline: "./coastline.geojson",
+  administrative: "./administrative_bali.geojson"
 };
 
+const BALI_CENTER = [-8.67, 115.21];
+const BALI_ZOOM = 10;
 
 const BIG_RBI =
-"https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer";
+  "https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer";
+
+
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
+
+let mapBusiness = null;
+let mapMarine = null;
+let mapPermit = null;
+
+let businessInitialized = false;
+let marineInitialized = false;
+let permitInitialized = false;
+
+const layers = {
+  businesses: null,
+  structures: null,
+  permits: null,
+  coastline: null,
+  administrative: null
+};
+
+const marineLayers = {
+  structures: null
+};
+
+const permitLayers = {
+  permits: null
+};
+
+const geojsonCache = {};
 
 
 /* =========================================================
    PAGE NAVIGATION
-========================================================= */
+   ========================================================= */
 
 const pages = [
   "landing",
@@ -2887,234 +2919,337 @@ const pages = [
   "about"
 ];
 
+function showPage(pageName) {
 
-function showPage(page){
+  pages.forEach(page => {
 
-  pages.forEach(id => {
+    const section = document.getElementById(page);
 
-    const el = document.getElementById(id);
+    if (!section) return;
 
-    if(el){
-      el.classList.remove("active");
-    }
+    section.classList.toggle(
+      "active",
+      page === pageName
+    );
 
   });
 
+  updateNavigation(pageName);
 
-  const target = document.getElementById(page);
-
-  if(target){
-
-    target.classList.add("active");
-
-    window.scrollTo({
-      top:0,
-      behavior:"instant"
-    });
-
-  }
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 
 
-  if(page==="business"){
-
-    setTimeout(()=>{
+  if (pageName === "business") {
+    setTimeout(() => {
 
       initBusinessMap();
 
-      if(mapBusiness){
+      if (mapBusiness) {
         mapBusiness.invalidateSize();
       }
 
-    },100);
-
+    }, 150);
   }
 
 
-  if(page==="marine"){
+  if (pageName === "marine") {
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
-      if(mapMarine){
+      if (mapMarine) {
         mapMarine.invalidateSize();
       }
 
-    },100);
+    }, 150);
 
   }
 
 
-  if(page==="permit"){
+  if (pageName === "permit") {
 
-    setTimeout(()=>{
+    setTimeout(() => {
 
-      if(mapPermit){
+      if (mapPermit) {
         mapPermit.invalidateSize();
       }
 
-    },100);
+    }, 150);
 
   }
-
-
-  updateNavigation(page);
 
 }
 
 
-function updateNavigation(page){
+function updateNavigation(pageName) {
 
-  document.querySelectorAll(".nav-link").forEach(btn=>{
+  document.querySelectorAll(".nav-links button").forEach(btn => {
+
     btn.classList.remove("active");
+
   });
-
-}
-
-
-function toggleMobileNav(){
-
-  const links =
-    document.querySelector(".nav-links");
-
-  if(!links) return;
-
-  if(
-    links.style.display==="flex"
-  ){
-
-    links.style.display="none";
-
-  }else{
-
-    links.style.display="flex";
-    links.style.position="absolute";
-    links.style.top="68px";
-    links.style.left="0";
-    links.style.right="0";
-    links.style.background="white";
-    links.style.padding="10px";
-    links.style.borderBottom="1px solid var(--line)";
-    links.style.flexDirection="column";
-
-  }
 
 }
 
 
 /* =========================================================
-   ESCAPE
-========================================================= */
+   MOBILE NAV
+   ========================================================= */
 
-function esc(v){
+function toggleMobileNav() {
 
-  return String(v ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+  const nav = document.querySelector(".nav-links");
+
+  if (!nav) return;
+
+  nav.classList.toggle("open");
 
 }
 
 
-function display(
-  v,
-  label="Data belum tercantum"
-){
+/* =========================================================
+   GENERAL HELPERS
+   ========================================================= */
 
-  return (
-    v!==undefined &&
-    v!==null &&
-    String(v).trim()!==""
-  )
+function esc(value) {
 
-  ?
+  if (
+    value === null ||
+    value === undefined
+  ) return "";
 
-  esc(v)
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-  :
+}
 
-  `<span style="color:#84969c">${label}</span>`;
+
+function display(value, fallback = "—") {
+
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return fallback;
+  }
+
+  return esc(value);
+
+}
+
+
+function firstValue(obj, keys, fallback = "") {
+
+  if (!obj) return fallback;
+
+  for (const key of keys) {
+
+    if (
+      obj[key] !== undefined &&
+      obj[key] !== null &&
+      obj[key] !== ""
+    ) {
+
+      return obj[key];
+
+    }
+
+  }
+
+  return fallback;
 
 }
 
 
 /* =========================================================
    URL HELPERS
-========================================================= */
+   ========================================================= */
 
-function googleMapsUrl(p){
+function googleMapsUrl(properties = {}) {
 
-  const q = encodeURIComponent(
-    `${p.name || "coastal business"} ${p.village || ""} Bali`
+  const name = firstValue(
+    properties,
+    ["name", "business_name", "operator"],
+    ""
   );
 
-  return `https://www.google.com/maps/search/?api=1&query=${q}`;
+  const address = firstValue(
+    properties,
+    [
+      "address",
+      "addr_full",
+      "addr_street",
+      "village",
+      "desa"
+    ],
+    ""
+  );
+
+  const query = [
+    name,
+    address,
+    "Bali"
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (!query) return null;
+
+  return (
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent(query)
+  );
 
 }
 
 
-function osmUrl(p){
+function osmUrl(properties = {}) {
 
-  if(!p.osm_id || !p.osm_type){
+  const osmId = firstValue(
+    properties,
+    ["osm_id"],
+    ""
+  );
 
-    return "";
+  const osmType = firstValue(
+    properties,
+    ["osm_type"],
+    ""
+  );
 
-  }
+  if (!osmId) return null;
 
+  let type = String(osmType).toLowerCase();
 
-  const type =
-    p.osm_type==="node"
-      ? "node"
-      : p.osm_type==="way"
-        ? "way"
-        : "relation";
+  if (type === "node") type = "node";
+  else if (type === "way") type = "way";
+  else if (type === "relation") type = "relation";
+  else return null;
 
-
-  return `https://www.openstreetmap.org/${type}/${p.osm_id}`;
+  return `https://www.openstreetmap.org/${type}/${osmId}`;
 
 }
 
 
-function websiteUrl(v){
+function websiteUrl(properties = {}) {
 
-  if(!v) return "";
+  let url = firstValue(
+    properties,
+    [
+      "website",
+      "website_url",
+      "contact:website",
+      "url"
+    ],
+    ""
+  );
 
-  if(/^https?:\/\//i.test(v)){
+  if (!url) return null;
 
-    return v;
+  url = String(url).trim();
+
+  if (
+    !url.startsWith("http://") &&
+    !url.startsWith("https://")
+  ) {
+
+    url = "https://" + url;
 
   }
 
-  return "https://" + v;
+  return url;
 
 }
 
 
 /* =========================================================
-   MARINE ACTIVITY
-========================================================= */
+   MARINE ACTIVITY DETECTION
+   ========================================================= */
 
-function marineActivity(p){
+function marineActivity(properties = {}) {
 
-  const tags = [
-
-    p.marine_use_type,
-    p.tourism,
-    p.leisure,
-    p.amenity,
-    p.shop
-
-  ]
-
-  .filter(Boolean)
-
-  .map(
-    x=>String(x).toLowerCase()
+  const explicit = firstValue(
+    properties,
+    [
+      "marine_use",
+      "marine_activity",
+      "marine_use_type"
+    ],
+    ""
   );
+
+  if (explicit) {
+
+    const normalized =
+      String(explicit)
+        .trim()
+        .toLowerCase();
+
+    if (
+      [
+        "yes",
+        "y",
+        "true",
+        "1",
+        "marine",
+        "laut"
+      ].includes(normalized)
+    ) {
+
+      return {
+        status: "YES",
+        label: "Menggunakan aktivitas/ruang laut"
+      };
+
+    }
+
+    if (
+      [
+        "no",
+        "n",
+        "false",
+        "0",
+        "tidak"
+      ].includes(normalized)
+    ) {
+
+      return {
+        status: "NO",
+        label: "Tidak terindikasi menggunakan ruang laut"
+      };
+
+    }
+
+  }
+
+
+  const fields = [
+    "name",
+    "business_name",
+    "tourism",
+    "leisure",
+    "amenity",
+    "shop",
+    "marine_use_type",
+    "description",
+    "category",
+    "type"
+  ];
+
+  const text = fields
+    .map(key => properties[key] || "")
+    .join(" ")
+    .toLowerCase();
 
 
   const keywords = [
-
     "diving",
     "dive",
     "snorkel",
@@ -3122,38 +3257,98 @@ function marineActivity(p){
     "surfing",
     "sailing",
     "boat",
+    "boating",
     "marina",
     "fishing",
+    "fish",
     "water",
     "beach",
     "sea",
     "marine",
-    "resort"
-
+    "ocean",
+    "island",
+    "reef",
+    "cruise",
+    "watersport",
+    "water sport"
   ];
 
 
-  return keywords.some(
-    k=>tags.some(
-      t=>t.includes(k)
-    )
-  );
+  const detected =
+    keywords.some(keyword =>
+      text.includes(keyword)
+    );
+
+
+  return detected
+    ? {
+        status: "YES",
+        label: "Terindikasi aktivitas terkait laut"
+      }
+    : {
+        status: "UNKNOWN",
+        label: "Belum teridentifikasi"
+      };
 
 }
 
 
 /* =========================================================
-   BADGE
-========================================================= */
+   BADGES
+   ========================================================= */
 
-function badge(
-  text,
-  cls="gray"
-){
+function badge(status, label = null) {
+
+  const normalized =
+    String(status || "")
+      .toLowerCase()
+      .trim();
+
+  let cls = "neutral";
+
+  if (
+    [
+      "yes",
+      "verified",
+      "available",
+      "available ",
+      "inside",
+      "match",
+      "matched",
+      "active"
+    ].includes(normalized)
+  ) {
+
+    cls = "yes";
+
+  } else if (
+    [
+      "no",
+      "not found",
+      "none",
+      "not_match",
+      "not matched"
+    ].includes(normalized)
+  ) {
+
+    cls = "no";
+
+  } else if (
+    [
+      "unknown",
+      "unverified",
+      "data unavailable",
+      "pending"
+    ].includes(normalized)
+  ) {
+
+    cls = "warning";
+
+  }
 
   return `
-    <span class="badge ${cls}">
-      ${esc(text)}
+    <span class="status-badge ${cls}">
+      ${esc(label || status || "Unknown")}
     </span>
   `;
 
@@ -3161,1169 +3356,1660 @@ function badge(
 
 
 /* =========================================================
-   BUSINESS SOURCE
-========================================================= */
+   SOURCE LINKS
+   ========================================================= */
 
-function sourceLinks(p){
+function sourceLinks(properties = {}) {
 
-  const osm =
-    osmUrl(p);
+  const links = [];
 
-  const google =
-    googleMapsUrl(p);
+  const google = googleMapsUrl(properties);
+  const osm = osmUrl(properties);
+  const website = websiteUrl(properties);
 
-  const web =
-    p.website
-      ? websiteUrl(p.website)
-      : "";
+  if (google) {
 
+    links.push(`
+      <a
+        href="${google}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Google Maps
+      </a>
+    `);
+
+  }
+
+  if (osm) {
+
+    links.push(`
+      <a
+        href="${osm}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        OpenStreetMap
+      </a>
+    `);
+
+  }
+
+  if (website) {
+
+    links.push(`
+      <a
+        href="${website}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Website
+      </a>
+    `);
+
+  }
+
+  if (!links.length) {
+
+    return `
+      <div class="muted">
+        Tidak ada tautan sumber langsung.
+      </div>
+    `;
+
+  }
 
   return `
-
-    <div class="source-box">
-
-      <b>Sumber informasi</b><br>
-
-      Data spasial usaha:
-      <b>OpenStreetMap</b>
-
-      <br>
-
-      ${
-        osm
-
-        ?
-
-        `<a href="${osm}"
-            target="_blank"
-            rel="noopener">
-            Buka objek OpenStreetMap ↗
-         </a><br>`
-
-        :
-
-        ""
-      }
-
-      <a href="${google}"
-         target="_blank"
-         rel="noopener">
-         Cek lokasi di Google Maps ↗
-      </a>
-
-      ${
-        web
-
-        ?
-
-        `<br>
-         <a href="${esc(web)}"
-            target="_blank"
-            rel="noopener">
-            Website usaha ↗
-         </a>`
-
-        :
-
-        ""
-      }
-
-      <br>
-
-      <span style="color:#71848a">
-
-        Google Maps dan website digunakan
-        sebagai tautan verifikasi lokasi/informasi,
-        bukan hasil scraping.
-
-      </span>
-
+    <div class="source-links">
+      ${links.join(" · ")}
     </div>
-
   `;
+
+}
+
+
+/* =========================================================
+   DRAWER
+   ========================================================= */
+
+function openDrawer(id) {
+
+  const drawer = document.getElementById(id);
+
+  if (!drawer) return;
+
+  drawer.classList.add("open");
+
+}
+
+
+function closeDrawer(id) {
+
+  const drawer = document.getElementById(id);
+
+  if (!drawer) return;
+
+  drawer.classList.remove("open");
+
+}
+
+
+function closeAllDrawers() {
+
+  [
+    "businessDrawer",
+    "marineDrawer",
+    "permitDrawer"
+  ].forEach(closeDrawer);
 
 }
 
 
 /* =========================================================
    BUSINESS DRAWER
-========================================================= */
+   ========================================================= */
 
-function businessPopup(p){
+function businessPopup(feature, layer = null) {
 
-  const activity =
-    p.marine_use
+  const p = feature.properties || {};
 
-    ?
-
-    String(p.marine_use).toUpperCase()==="YES"
-
-    :
-
-    marineActivity(p);
-
-
-  const distance =
-    p.coastal_distance_m ??
-    p.distance_coast_m;
+  const name = firstValue(
+    p,
+    [
+      "name",
+      "business_name",
+      "operator"
+    ],
+    "Unnamed coastal business"
+  );
 
 
-  return `
+  const type = firstValue(
+    p,
+    [
+      "type",
+      "category",
+      "tourism",
+      "amenity",
+      "shop",
+      "business_type"
+    ],
+    "—"
+  );
 
-    <div class="drawer-section-title">
-      Identitas usaha
+
+  const address = firstValue(
+    p,
+    [
+      "address",
+      "addr_full",
+      "addr_street",
+      "village",
+      "desa"
+    ],
+    "—"
+  );
+
+
+  const activity = marineActivity(p);
+
+
+  const distance = firstValue(
+    p,
+    [
+      "coastal_distance_m",
+      "distance_coast_m",
+      "distance_to_coast_m"
+    ],
+    ""
+  );
+
+
+  const marineStructure = firstValue(
+    p,
+    [
+      "marine_structure",
+      "structure_match",
+      "near_structure"
+    ],
+    ""
+  );
+
+
+  const permitMatch = firstValue(
+    p,
+    [
+      "permit_match",
+      "permit_overlap",
+      "permit_area_match"
+    ],
+    ""
+  );
+
+
+  const permitId = firstValue(
+    p,
+    [
+      "permit_id",
+      "izin_id"
+    ],
+    ""
+  );
+
+
+  const permitType = firstValue(
+    p,
+    [
+      "permit_type",
+      "izin_type"
+    ],
+    ""
+  );
+
+
+  const permitStatus = firstValue(
+    p,
+    [
+      "permit_status",
+      "izin_status"
+    ],
+    ""
+  );
+
+
+  const html = `
+
+    <div class="drawer-title">
+      <div>
+        <div class="eyebrow">
+          COASTAL BUSINESS
+        </div>
+
+        <h3>
+          ${display(name)}
+        </h3>
+      </div>
     </div>
 
 
-    <div class="info-row">
-      <span>Jenis usaha</span>
-      <span>${display(p.business_type)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Kategori</span>
-      <span>
-        ${display(
-          p.tourism ||
-          p.amenity ||
-          p.leisure ||
-          p.shop
-        )}
-      </span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Alamat</span>
-      <span>${display(p.address)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Desa / lokasi</span>
-      <span>${display(p.village)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Telepon</span>
-      <span>${display(p.phone)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Jam buka</span>
-      <span>${display(p.opening_hours)}</span>
-    </div>
-
-
-    <div class="drawer-section-title">
-      Konteks pesisir & laut
-    </div>
-
-
-    <div class="info-row">
-      <span>Jarak ke pantai</span>
-
-      <span>
-
-        ${
-          distance!==undefined &&
-          distance!==null
-
-          ?
-
-          esc(distance)+" m"
-
-          :
-
-          "Tidak tercantum"
-
-        }
-
-      </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-      <span>
-        Indikasi aktivitas laut
-      </span>
-
-      <span>
-
-        ${
-          activity
-
-          ?
-
-          badge("Terindikasi","blue")
-
-          :
-
-          badge("Tidak teridentifikasi","gray")
-
-        }
-
-      </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-      <span>Marine use</span>
-
-      <span>
-
-        ${
-          p.marine_use
-
-          ?
-
-          badge(p.marine_use,"blue")
-
-          :
-
-          badge("Perlu verifikasi","orange")
-
-        }
-
-      </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-      <span>Marine structure</span>
-
-      <span>
-
-        ${
-          p.marine_structure
-
-          ?
-
-          badge(p.marine_structure,"blue")
-
-          :
-
-          badge("Perlu verifikasi","orange")
-
-        }
-
-      </span>
-
-    </div>
-
-
-    <div class="drawer-section-title">
-      Perizinan
-    </div>
-
-
-    <div class="info-row">
-
-      <span>Spatial permit match</span>
-
-      <span>
-
-        ${
-          p.permit_match
-
-          ?
-
-          badge(p.permit_match,"green")
-
-          :
-
-          badge(
-            "Data izin belum tersedia",
-            "orange"
-          )
-
-        }
-
-      </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-      <span>Permit ID</span>
-
-      <span>
-        ${display(
-          p.permit_id,
-          "Belum tercantum"
-        )}
-      </span>
+    <div class="drawer-grid">
+
+      <div class="info-item">
+        <span>Jenis Usaha</span>
+        <strong>${display(type)}</strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Alamat</span>
+        <strong>${display(address)}</strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Indikasi Aktivitas Laut</span>
+        ${badge(activity.status, activity.label)}
+      </div>
+
+
+      <div class="info-item">
+        <span>Jarak dari Pantai</span>
+        <strong>
+          ${
+            distance !== ""
+              ? `${display(distance)} m`
+              : "Tidak tersedia"
+          }
+        </strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Marine Structure</span>
+        <strong>
+          ${display(marineStructure, "Tidak tersedia")}
+        </strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Permit Spatial Match</span>
+        <strong>
+          ${display(permitMatch, "Tidak tersedia")}
+        </strong>
+      </div>
+
+
+      ${
+        permitId
+          ? `
+            <div class="info-item">
+              <span>Permit ID</span>
+              <strong>${display(permitId)}</strong>
+            </div>
+          `
+          : ""
+      }
+
+
+      ${
+        permitType
+          ? `
+            <div class="info-item">
+              <span>Permit Type</span>
+              <strong>${display(permitType)}</strong>
+            </div>
+          `
+          : ""
+      }
+
+
+      ${
+        permitStatus
+          ? `
+            <div class="info-item">
+              <span>Permit Status</span>
+              <strong>${display(permitStatus)}</strong>
+            </div>
+          `
+          : ""
+      }
 
     </div>
 
 
-    <div class="info-row">
+    <div class="screening-note">
 
-      <span>Permit type</span>
+      <strong>
+        Catatan screening
+      </strong>
 
-      <span>
-        ${display(
-          p.permit_type,
-          "Belum tercantum"
-        )}
-      </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-      <span>Permit status</span>
-
-      <span>
-        ${display(
-          p.permit_status,
-          "Belum tercantum"
-        )}
-      </span>
+      <p>
+        Kecocokan spasial dengan area izin hanya menunjukkan
+        indikasi hubungan lokasi. Hal tersebut bukan bukti
+        bahwa usaha memiliki, tidak memiliki, atau melanggar
+        izin. Status legal perlu diverifikasi menggunakan
+        sumber resmi.
+      </p>
 
     </div>
 
 
-    ${sourceLinks(p)}
+    <div class="drawer-section">
 
+      <h4>
+        Sumber / Verifikasi
+      </h4>
 
-    <div class="notice">
-
-      <b>Interpretasi:</b>
-
-      “Terindikasi” berarti kategori atau atribut
-      sumber menunjukkan kemungkinan keterkaitan
-      dengan aktivitas laut.
-
-      Status izin tetap perlu diverifikasi
-      terhadap data resmi yang berlaku.
+      ${sourceLinks(p)}
 
     </div>
 
   `;
+
+
+  const drawer = document.getElementById(
+    "businessDrawer"
+  );
+
+  if (!drawer) return;
+
+
+  const content =
+    drawer.querySelector(".drawer-content") ||
+    drawer;
+
+
+  content.innerHTML = html;
+
+  openDrawer("businessDrawer");
+
+
+  if (layer && mapBusiness) {
+
+    try {
+
+      const latlng =
+        layer.getLatLng
+          ? layer.getLatLng()
+          : null;
+
+      if (latlng) {
+
+        mapBusiness.flyTo(
+          latlng,
+          Math.max(
+            mapBusiness.getZoom(),
+            14
+          ),
+          {
+            duration: 0.6
+          }
+        );
+
+      }
+
+    } catch (err) {
+
+      console.warn(
+        "Unable to focus business:",
+        err
+      );
+
+    }
+
+  }
 
 }
 
 
 /* =========================================================
    STRUCTURE DRAWER
-========================================================= */
+   ========================================================= */
 
-function structurePopup(p){
+function structurePopup(feature, layer = null) {
 
-  return `
+  const p = feature.properties || {};
 
-    <div class="drawer-section-title">
-      Struktur
+  const name = firstValue(
+    p,
+    [
+      "name",
+      "structure_name",
+      "operator",
+      "id"
+    ],
+    "Marine Structure"
+  );
+
+
+  const type = firstValue(
+    p,
+    [
+      "type",
+      "structure_type",
+      "category"
+    ],
+    "—"
+  );
+
+
+  const status = firstValue(
+    p,
+    [
+      "status",
+      "condition",
+      "structure_status"
+    ],
+    "—"
+  );
+
+
+  const html = `
+
+    <div class="drawer-title">
+
+      <div>
+
+        <div class="eyebrow">
+          MARINE STRUCTURE
+        </div>
+
+        <h3>
+          ${display(name)}
+        </h3>
+
+      </div>
+
     </div>
 
 
-    <div class="info-row">
-      <span>Nama</span>
-      <span>${display(p.name)}</span>
+    <div class="drawer-grid">
+
+      <div class="info-item">
+        <span>Jenis</span>
+        <strong>${display(type)}</strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Status</span>
+        <strong>${display(status)}</strong>
+      </div>
+
     </div>
 
 
-    <div class="info-row">
-      <span>Tipe</span>
-      <span>${display(p.type)}</span>
-    </div>
+    <div class="drawer-section">
 
+      <h4>
+        Data atribut
+      </h4>
 
-    <div class="info-row">
-
-      <span>Luas</span>
-
-      <span>
+      <div class="attribute-list">
 
         ${
-          p.area_m2!=null
-
-          ?
-
-          esc(p.area_m2)+" m²"
-
-          :
-
-          "Data luas belum tercantum"
-
+          Object.entries(p)
+            .filter(
+              ([key]) =>
+                ![
+                  "name",
+                  "structure_name",
+                  "type",
+                  "structure_type",
+                  "category",
+                  "status",
+                  "condition",
+                  "structure_status"
+                ].includes(key)
+            )
+            .slice(0, 12)
+            .map(
+              ([key, value]) => `
+                <div class="info-item">
+                  <span>${display(key)}</span>
+                  <strong>${display(value)}</strong>
+                </div>
+              `
+            )
+            .join("")
         }
 
-      </span>
-
-    </div>
-
-
-    <div class="info-row">
-      <span>Tanggal deteksi</span>
-      <span>${display(p.detection_date)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Screening</span>
-      <span>${display(p.screening_status)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Prioritas</span>
-      <span>${display(p.priority)}</span>
-    </div>
-
-
-    <div class="source-box">
-
-      Sumber struktur mengikuti atribut
-      pada <b>marine_structures.geojson</b>.
+      </div>
 
     </div>
 
   `;
+
+
+  const drawer =
+    document.getElementById(
+      "marineDrawer"
+    );
+
+  if (!drawer) return;
+
+
+  const content =
+    drawer.querySelector(".drawer-content") ||
+    drawer;
+
+
+  content.innerHTML = html;
+
+  openDrawer("marineDrawer");
+
+
+  if (
+    layer &&
+    mapBusiness
+  ) {
+
+    focusLayer(
+      mapBusiness,
+      layer
+    );
+
+  }
 
 }
 
 
 /* =========================================================
    PERMIT DRAWER
-========================================================= */
+   ========================================================= */
 
-function permitPopup(p){
+function permitPopup(feature, layer = null) {
 
-  return `
+  const p = feature.properties || {};
 
-    <div class="drawer-section-title">
-      Area perizinan
+  const name = firstValue(
+    p,
+    [
+      "name",
+      "permit_name",
+      "permit_id",
+      "id"
+    ],
+    "Permit Area"
+  );
+
+
+  const permitId = firstValue(
+    p,
+    [
+      "permit_id",
+      "izin_id",
+      "id"
+    ],
+    "—"
+  );
+
+
+  const type = firstValue(
+    p,
+    [
+      "permit_type",
+      "izin_type",
+      "type",
+      "category"
+    ],
+    "—"
+  );
+
+
+  const status = firstValue(
+    p,
+    [
+      "permit_status",
+      "izin_status",
+      "status"
+    ],
+    "Data tidak tersedia"
+  );
+
+
+  const html = `
+
+    <div class="drawer-title">
+
+      <div>
+
+        <div class="eyebrow">
+          PERMIT / SPATIAL AREA
+        </div>
+
+        <h3>
+          ${display(name)}
+        </h3>
+
+      </div>
+
     </div>
 
 
-    <div class="info-row">
-      <span>Permit ID</span>
-      <span>${display(p.permit_id)}</span>
+    <div class="drawer-grid">
+
+      <div class="info-item">
+        <span>Permit ID</span>
+        <strong>${display(permitId)}</strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Jenis</span>
+        <strong>${display(type)}</strong>
+      </div>
+
+
+      <div class="info-item">
+        <span>Status</span>
+        <strong>${display(status)}</strong>
+      </div>
+
     </div>
 
 
-    <div class="info-row">
-      <span>Jenis</span>
-      <span>${display(p.permit_type)}</span>
-    </div>
+    <div class="screening-note">
 
+      <strong>
+        Penting
+      </strong>
 
-    <div class="info-row">
-      <span>Pemegang</span>
-      <span>${display(p.holder_name)}</span>
-    </div>
-
-
-    <div class="info-row">
-      <span>Status</span>
-      <span>${display(p.permit_status)}</span>
-    </div>
-
-
-    <div class="source-box">
-
-      Sumber area mengikuti atribut
-      pada <b>permit_areas.geojson</b>.
-
-      Pencocokan spasial bukan bukti
-      legalitas perizinan.
+      <p>
+        Layer ini digunakan sebagai referensi spasial
+        dalam screening. Keberadaan atau overlap suatu
+        objek dengan layer ini tidak otomatis membuktikan
+        status perizinan.
+      </p>
 
     </div>
 
   `;
 
+
+  const drawer =
+    document.getElementById(
+      "permitDrawer"
+    );
+
+  if (!drawer) return;
+
+
+  const content =
+    drawer.querySelector(".drawer-content") ||
+    drawer;
+
+
+  content.innerHTML = html;
+
+  openDrawer("permitDrawer");
+
+
+  if (
+    layer &&
+    mapPermit
+  ) {
+
+    focusLayer(
+      mapPermit,
+      layer
+    );
+
+  }
+
 }
 
 
 /* =========================================================
-   MAP VARIABLES
-========================================================= */
+   MAP BASEMAP
+   ========================================================= */
 
-let mapBusiness = null;
-let mapMarine = null;
-let mapPermit = null;
+function addBaseMaps(map) {
 
-let businessInitialized = false;
-let marineInitialized = false;
-let permitInitialized = false;
+  const osm = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution:
+        "&copy; OpenStreetMap contributors"
+    }
+  );
 
-
-/* =========================================================
-   BASEMAP
-========================================================= */
-
-function addBaseMaps(map){
 
   const satellite =
     L.tileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
-        attribution:"Tiles © Esri"
-      }
-    );
-
-  const osm =
-    L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      {
-        attribution:"© OpenStreetMap contributors"
+        maxZoom: 19,
+        attribution:
+          "Tiles &copy; Esri"
       }
     );
 
 
-  satellite.addTo(map);
+  osm.addTo(map);
 
 
-  L.control.layers(
+  return {
+    osm,
+    satellite
+  };
 
+}
+
+
+/* =========================================================
+   GEOJSON STYLES
+   ========================================================= */
+
+function styleCoastline() {
+
+  return {
+    color: "#13a8b7",
+    weight: 2,
+    opacity: 0.9
+  };
+
+}
+
+
+function styleAdministrative() {
+
+  return {
+    color: "#7b2cbf",
+    weight: 1.5,
+    opacity: 0.8,
+    fillOpacity: 0
+  };
+
+}
+
+
+function stylePermit() {
+
+  return {
+    color: "#2a9d8f",
+    weight: 2,
+    opacity: 0.9,
+    fillOpacity: 0.12
+  };
+
+}
+
+
+function styleStructure() {
+
+  return {
+    color: "#f4a261",
+    weight: 2,
+    opacity: 0.95,
+    fillOpacity: 0.18
+  };
+
+}
+
+
+/* =========================================================
+   BUSINESS GEOJSON
+   ========================================================= */
+
+function businessPoint(feature, latlng) {
+
+  return L.circleMarker(
+    latlng,
     {
-      "Satellite":satellite,
-      "OpenStreetMap":osm
-    },
-
-    null,
-
-    {
-      position:"topright"
+      radius: 7,
+      weight: 2,
+      color: "#073b4c",
+      fillColor: "#0b7285",
+      fillOpacity: 0.9
     }
-
-  ).addTo(map);
-
-
-  L.control.scale({
-    imperial:false
-  }).addTo(map);
+  );
 
 }
 
 
-/* =========================================================
-   COMMON BIG LAYERS
-========================================================= */
+function createBusinessLayer(data) {
 
-function addBigLayers(map){
-
-  const layers = {
-
-    coastline:
-      L.layerGroup().addTo(map),
-
-    administrative:
-      L.layerGroup().addTo(map)
-
-  };
-
-
-  L.esri.dynamicMapLayer({
-
-    url:BIG_RBI,
-
-    layers:[21],
-
-    opacity:1,
-
-    attribution:
-      "Garis Pantai © Badan Informasi Geospasial"
-
-  }).addTo(layers.coastline);
-
-
-  L.esri.dynamicMapLayer({
-
-    url:BIG_RBI,
-
-    layers:[12],
-
-    opacity:.8,
-
-    attribution:
-      "Batas Administrasi © Badan Informasi Geospasial"
-
-  }).addTo(layers.administrative);
-
-
-  return layers;
-
-}
-
-
-/* =========================================================
-   BUSINESS MAP
-========================================================= */
-
-let businessLayers = {};
-
-
-function initBusinessMap(){
-
-  if(businessInitialized){
-
-    setTimeout(()=>{
-      mapBusiness.invalidateSize();
-    },100);
-
-    return;
-
-  }
-
-
-  businessInitialized=true;
-
-
-  mapBusiness =
-    L.map("mapBusiness",{
-
-      center:[
-        -8.67,
-        115.21
-      ],
-
-      zoom:10,
-
-      zoomControl:true
-
-    });
-
-
-  addBaseMaps(mapBusiness);
-
-
-  businessLayers = {
-
-    businesses:
-      L.layerGroup().addTo(mapBusiness),
-
-    structures:
-      L.layerGroup().addTo(mapBusiness),
-
-    permits:
-      L.layerGroup().addTo(mapBusiness)
-
-  };
-
-
-  const big =
-    addBigLayers(mapBusiness);
-
-
-  businessLayers.coastline =
-    big.coastline;
-
-  businessLayers.administrative =
-    big.administrative;
-
-
-  loadGeoJSON(
-    "businesses",
-    businessLayers,
-    mapBusiness
-  );
-
-  loadGeoJSON(
-    "structures",
-    businessLayers,
-    mapBusiness
-  );
-
-  loadGeoJSON(
-    "permits",
-    businessLayers,
-    mapBusiness
-  );
-
-
-  setTimeout(()=>{
-    mapBusiness.invalidateSize();
-  },300);
-
-}
-
-
-/* =========================================================
-   MARINE MAP
-========================================================= */
-
-function initMarineMap(){
-
-  if(marineInitialized){
-
-    setTimeout(()=>{
-      mapMarine.invalidateSize();
-    },100);
-
-    return;
-
-  }
-
-
-  marineInitialized=true;
-
-
-  mapMarine =
-    L.map("mapMarine",{
-
-      center:[
-        -8.67,
-        115.21
-      ],
-
-      zoom:10,
-
-      zoomControl:true
-
-    });
-
-
-  addBaseMaps(mapMarine);
-
-
-  const big =
-    addBigLayers(mapMarine);
-
-
-  L.geoJSON([],{}).addTo(mapMarine);
-
-
-  loadGeoJSON(
-    "structures",
+  return L.geoJSON(
+    data,
     {
-      structures:
-        L.layerGroup().addTo(mapMarine)
-    },
-    mapMarine
+      pointToLayer:
+        businessPoint,
+
+      onEachFeature:
+        function(feature, layer) {
+
+          layer.on(
+            "click",
+            function() {
+
+              businessPopup(
+                feature,
+                layer
+              );
+
+            }
+          );
+
+        }
+    }
   );
-
-
-  setTimeout(()=>{
-    mapMarine.invalidateSize();
-  },300);
 
 }
 
 
 /* =========================================================
-   PERMIT MAP
-========================================================= */
+   GENERIC GEOJSON LAYER
+   ========================================================= */
 
-function initPermitMap(){
+function createGeoJSONLayer(
+  data,
+  options = {}
+) {
 
-  if(permitInitialized){
-
-    setTimeout(()=>{
-      mapPermit.invalidateSize();
-    },100);
-
-    return;
-
-  }
-
-
-  permitInitialized=true;
-
-
-  mapPermit =
-    L.map("mapPermit",{
-
-      center:[
-        -8.67,
-        115.21
-      ],
-
-      zoom:10,
-
-      zoomControl:true
-
-    });
-
-
-  addBaseMaps(mapPermit);
-
-
-  const big =
-    addBigLayers(mapPermit);
-
-
-  loadGeoJSON(
-    "permits",
+  return L.geoJSON(
+    data,
     {
-      permits:
-        L.layerGroup().addTo(mapPermit)
-    },
-    mapPermit
+      style:
+        options.style || undefined,
+
+      pointToLayer:
+        options.pointToLayer || undefined,
+
+      onEachFeature:
+        options.onEachFeature || undefined
+    }
   );
-
-
-  setTimeout(()=>{
-    mapPermit.invalidateSize();
-  },300);
 
 }
 
 
 /* =========================================================
    LOAD GEOJSON
-========================================================= */
+   ========================================================= */
 
 async function loadGeoJSON(
-  name,
-  targetLayers,
-  map
-){
+  url,
+  useCache = true
+) {
 
-  try{
+  if (
+    useCache &&
+    geojsonCache[url]
+  ) {
 
-    const res =
-      await fetch(
-        DATA[name]+"?v="+Date.now()
+    return geojsonCache[url];
+
+  }
+
+
+  const response =
+    await fetch(
+      url + "?v=" + Date.now()
+    );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      `Failed loading ${url}: ${response.status}`
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  geojsonCache[url] = data;
+
+  return data;
+
+}
+
+
+/* =========================================================
+   FIT MAP TO LAYER
+   ========================================================= */
+
+function fitLayer(
+  map,
+  layer,
+  maxZoom = 13
+) {
+
+  if (!map || !layer) return;
+
+  try {
+
+    const bounds =
+      layer.getBounds();
+
+    if (
+      bounds &&
+      bounds.isValid()
+    ) {
+
+      map.fitBounds(
+        bounds,
+        {
+          padding: [30, 30],
+          maxZoom
+        }
+      );
+
+    }
+
+  } catch (err) {
+
+    console.warn(
+      "Cannot fit layer:",
+      err
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FOCUS FEATURE
+   ========================================================= */
+
+function focusLayer(
+  map,
+  layer
+) {
+
+  if (!map || !layer) return;
+
+  try {
+
+    if (
+      layer.getLatLng
+    ) {
+
+      map.flyTo(
+        layer.getLatLng(),
+        Math.max(
+          map.getZoom(),
+          14
+        ),
+        {
+          duration: 0.6
+        }
+      );
+
+      return;
+
+    }
+
+
+    if (
+      layer.getBounds
+    ) {
+
+      map.fitBounds(
+        layer.getBounds(),
+        {
+          padding: [40, 40],
+          maxZoom: 15
+        }
+      );
+
+    }
+
+  } catch (err) {
+
+    console.warn(
+      "Cannot focus layer:",
+      err
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   BUSINESS MAP
+   ========================================================= */
+
+async function initBusinessMap() {
+
+  if (
+    businessInitialized &&
+    mapBusiness
+  ) {
+
+    mapBusiness.invalidateSize();
+
+    return;
+
+  }
+
+
+  const mapElement =
+    document.getElementById(
+      "mapBusiness"
+    );
+
+  if (!mapElement) return;
+
+
+  mapBusiness =
+    L.map(
+      "mapBusiness",
+      {
+        center: BALI_CENTER,
+        zoom: BALI_ZOOM,
+        zoomControl: true
+      }
+    );
+
+
+  const baseMaps =
+    addBaseMaps(
+      mapBusiness
+    );
+
+
+  try {
+
+    const [
+      businessData,
+      structureData,
+      permitData,
+      coastlineData,
+      administrativeData
+    ] = await Promise.all([
+
+      loadGeoJSON(
+        DATA.businesses
+      ),
+
+      loadGeoJSON(
+        DATA.structures
+      ),
+
+      loadGeoJSON(
+        DATA.permits
+      ),
+
+      loadGeoJSON(
+        DATA.coastline
+      ),
+
+      loadGeoJSON(
+        DATA.administrative
+      )
+
+    ]);
+
+
+    /* BUSINESS */
+
+    layers.businesses =
+      createBusinessLayer(
+        businessData
       );
 
 
-    if(!res.ok){
+    layers.businesses.addTo(
+      mapBusiness
+    );
 
-      throw new Error(
-        "File not found"
+
+    /* STRUCTURES */
+
+    layers.structures =
+      createGeoJSONLayer(
+        structureData,
+        {
+          style:
+            styleStructure(),
+
+          onEachFeature:
+            function(
+              feature,
+              layer
+            ) {
+
+              layer.on(
+                "click",
+                function() {
+
+                  structurePopup(
+                    feature,
+                    layer
+                  );
+
+                }
+              );
+
+            }
+        }
       );
 
-    }
+
+    layers.structures.addTo(
+      mapBusiness
+    );
 
 
-    const data =
-      await res.json();
+    /* PERMITS */
+
+    layers.permits =
+      createGeoJSONLayer(
+        permitData,
+        {
+          style:
+            stylePermit(),
+
+          onEachFeature:
+            function(
+              feature,
+              layer
+            ) {
+
+              layer.on(
+                "click",
+                function() {
+
+                  permitPopup(
+                    feature,
+                    layer
+                  );
+
+                }
+              );
+
+            }
+        }
+      );
 
 
-    let layer;
+    layers.permits.addTo(
+      mapBusiness
+    );
 
 
-    /* -------------------------
-       BUSINESSES
-    ------------------------- */
+    /* COASTLINE */
 
-    if(name==="businesses"){
-
-      layer =
-        L.geoJSON(
-          data,
-          {
-
-            pointToLayer:
-              (f,ll)=>
-
-                L.circleMarker(
-                  ll,
-                  {
-
-                    radius:7,
-
-                    fillColor:"#1565c0",
-
-                    color:"#fff",
-
-                    weight:2,
-
-                    fillOpacity:.9
-
-                  }
-                ),
+    layers.coastline =
+      createGeoJSONLayer(
+        coastlineData,
+        {
+          style:
+            styleCoastline()
+        }
+      );
 
 
-            onEachFeature:
-              (f,l)=>{
-
-                l.on(
-                  "click",
-                  ()=>{
-
-                    openBusiness(
-                      f.properties,
-                      l
-                    );
-
-                  }
-                );
-
-              }
-
-          }
-        );
+    layers.coastline.addTo(
+      mapBusiness
+    );
 
 
-      const total =
-        data.features?.length || 0;
+    /* ADMINISTRATIVE */
+
+    layers.administrative =
+      createGeoJSONLayer(
+        administrativeData,
+        {
+          style:
+            styleAdministrative()
+        }
+      );
 
 
-      document.getElementById(
-        "totalBusiness"
-      ).textContent=total;
+    layers.administrative.addTo(
+      mapBusiness
+    );
 
 
-      document.getElementById(
-        "landingTotal"
-      ).textContent=total;
+    /* LEAFLET LAYER CONTROL */
 
+    L.control.layers(
+      {
+        "OpenStreetMap":
+          baseMaps.osm,
 
-      const status =
-        document.getElementById(
-          "status-businesses"
-        );
+        "Satellite":
+          baseMaps.satellite
+      },
+      {
+        "Coastal Businesses":
+          layers.businesses,
 
+        "Marine Structures":
+          layers.structures,
 
-      const dot =
-        document.getElementById(
-          "dot-businesses"
-        );
+        "Permit Areas":
+          layers.permits,
 
+        "Coastline":
+          layers.coastline,
 
-      if(status){
-
-        status.textContent="Loaded";
-
+        "Administrative":
+          layers.administrative
+      },
+      {
+        collapsed: true
       }
+    ).addTo(
+      mapBusiness
+    );
 
 
-      if(dot){
+    /* FIT TO DATA */
 
-        dot.classList.add("ok");
+    const allBounds =
+      L.latLngBounds([]);
 
-      }
 
-    }
+    [
+      layers.businesses,
+      layers.structures,
+      layers.permits,
+      layers.coastline,
+      layers.administrative
+    ].forEach(layer => {
 
+      try {
 
-    /* -------------------------
-       STRUCTURES
-    ------------------------- */
+        const bounds =
+          layer.getBounds();
 
-    if(name==="structures"){
+        if (
+          bounds &&
+          bounds.isValid()
+        ) {
 
-      layer =
-        L.geoJSON(
-          data,
-          {
+          allBounds.extend(
+            bounds
+          );
 
-            pointToLayer:
-              (f,ll)=>
+        }
 
-                L.circleMarker(
-                  ll,
-                  {
+      } catch (err) {}
 
-                    radius:7,
+    });
 
-                    fillColor:"#ef6c00",
 
-                    color:"#fff",
+    if (
+      allBounds.isValid()
+    ) {
 
-                    weight:2,
-
-                    fillOpacity:.9
-
-                  }
-                ),
-
-
-            style:
-              ()=>({
-
-                color:"#ef6c00",
-
-                weight:2,
-
-                fillColor:"#ef6c00",
-
-                fillOpacity:.25
-
-              }),
-
-
-            onEachFeature:
-              (f,l)=>{
-
-                l.on(
-                  "click",
-                  ()=>{
-
-                    openStructure(
-                      f.properties,
-                      l
-                    );
-
-                  }
-                );
-
-              }
-
-          }
-        );
-
-
-      const status =
-        document.getElementById(
-          "status-structures"
-        );
-
-
-      const dot =
-        document.getElementById(
-          "dot-structures"
-        );
-
-
-      if(status){
-
-        status.textContent="Loaded";
-
-      }
-
-
-      if(dot){
-
-        dot.classList.add("ok");
-
-      }
-
-    }
-
-
-    /* -------------------------
-       PERMITS
-    ------------------------- */
-
-    if(name==="permits"){
-
-      layer =
-        L.geoJSON(
-          data,
-          {
-
-            style:
-              ()=>({
-
-                color:"#43a047",
-
-                weight:2,
-
-                fillColor:"#43a047",
-
-                fillOpacity:.16
-
-              }),
-
-
-            onEachFeature:
-              (f,l)=>{
-
-                l.on(
-                  "click",
-                  ()=>{
-
-                    openPermit(
-                      f.properties
-                    );
-
-                  }
-                );
-
-              }
-
-          }
-        );
-
-
-      const status =
-        document.getElementById(
-          "status-permits"
-        );
-
-
-      const dot =
-        document.getElementById(
-          "dot-permits"
-        );
-
-
-      if(status){
-
-        status.textContent="Loaded";
-
-      }
-
-
-      if(dot){
-
-        dot.classList.add("ok");
-
-      }
-
-    }
-
-
-    if(layer){
-
-      if(targetLayers[name]){
-
-        layer.addTo(
-          targetLayers[name]
-        );
-
-      }else{
-
-        layer.addTo(map);
-
-      }
+      mapBusiness.fitBounds(
+        allBounds,
+        {
+          padding: [30, 30],
+          maxZoom: 11
+        }
+      );
 
     }
 
 
     updateDashboard(
-      targetLayers
+      businessData,
+      structureData,
+      permitData
     );
 
 
-  }catch(err){
+    businessInitialized = true;
 
-    console.warn(
-      name,
-      err
+
+  } catch (error) {
+
+    console.error(
+      "Business map error:",
+      error
+    );
+
+    const mapStatus =
+      document.getElementById(
+        "businessMapStatus"
+      );
+
+    if (mapStatus) {
+
+      mapStatus.textContent =
+        "Gagal memuat data peta";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   MARINE MAP
+   ========================================================= */
+
+async function initMarineMap() {
+
+  if (
+    marineInitialized &&
+    mapMarine
+  ) {
+
+    mapMarine.invalidateSize();
+
+    return;
+
+  }
+
+
+  const mapElement =
+    document.getElementById(
+      "mapMarine"
+    );
+
+  if (!mapElement) return;
+
+
+  mapMarine =
+    L.map(
+      "mapMarine",
+      {
+        center: BALI_CENTER,
+        zoom: BALI_ZOOM
+      }
     );
 
 
-    const status =
-      document.getElementById(
-        "status-"+name
+  const baseMaps =
+    addBaseMaps(
+      mapMarine
+    );
+
+
+  try {
+
+    const [
+      structureData,
+      coastlineData
+    ] = await Promise.all([
+
+      loadGeoJSON(
+        DATA.structures
+      ),
+
+      loadGeoJSON(
+        DATA.coastline
+      )
+
+    ]);
+
+
+    marineLayers.structures =
+      createGeoJSONLayer(
+        structureData,
+        {
+          style:
+            styleStructure(),
+
+          onEachFeature:
+            function(
+              feature,
+              layer
+            ) {
+
+              layer.on(
+                "click",
+                function() {
+
+                  structurePopup(
+                    feature,
+                    layer
+                  );
+
+                }
+              );
+
+            }
+        }
       );
 
 
-    const dot =
-      document.getElementById(
-        "dot-"+name
+    marineLayers.structures.addTo(
+      mapMarine
+    );
+
+
+    const coastline =
+      createGeoJSONLayer(
+        coastlineData,
+        {
+          style:
+            styleCoastline()
+        }
       );
 
 
-    if(status){
-
-      status.textContent=
-        "Perlu diperbarui";
-
-    }
+    coastline.addTo(
+      mapMarine
+    );
 
 
-    if(dot){
+    L.control.layers(
+      {
+        "OpenStreetMap":
+          baseMaps.osm,
 
-      dot.classList.add("bad");
+        "Satellite":
+          baseMaps.satellite
+      },
+      {
+        "Marine Structures":
+          marineLayers.structures,
 
-    }
+        "Coastline":
+          coastline
+      }
+    ).addTo(
+      mapMarine
+    );
+
+
+    fitLayer(
+      mapMarine,
+      marineLayers.structures,
+      11
+    );
+
+
+    marineInitialized = true;
+
+
+  } catch (error) {
+
+    console.error(
+      "Marine map error:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   PERMIT MAP
+   ========================================================= */
+
+async function initPermitMap() {
+
+  if (
+    permitInitialized &&
+    mapPermit
+  ) {
+
+    mapPermit.invalidateSize();
+
+    return;
+
+  }
+
+
+  const mapElement =
+    document.getElementById(
+      "mapPermit"
+    );
+
+  if (!mapElement) return;
+
+
+  mapPermit =
+    L.map(
+      "mapPermit",
+      {
+        center: BALI_CENTER,
+        zoom: BALI_ZOOM
+      }
+    );
+
+
+  const baseMaps =
+    addBaseMaps(
+      mapPermit
+    );
+
+
+  try {
+
+    const [
+      permitData,
+      administrativeData,
+      coastlineData
+    ] = await Promise.all([
+
+      loadGeoJSON(
+        DATA.permits
+      ),
+
+      loadGeoJSON(
+        DATA.administrative
+      ),
+
+      loadGeoJSON(
+        DATA.coastline
+      )
+
+    ]);
+
+
+    permitLayers.permits =
+      createGeoJSONLayer(
+        permitData,
+        {
+          style:
+            stylePermit(),
+
+          onEachFeature:
+            function(
+              feature,
+              layer
+            ) {
+
+              layer.on(
+                "click",
+                function() {
+
+                  permitPopup(
+                    feature,
+                    layer
+                  );
+
+                }
+              );
+
+            }
+        }
+      );
+
+
+    permitLayers.permits.addTo(
+      mapPermit
+    );
+
+
+    const administrative =
+      createGeoJSONLayer(
+        administrativeData,
+        {
+          style:
+            styleAdministrative()
+        }
+      );
+
+
+    administrative.addTo(
+      mapPermit
+    );
+
+
+    const coastline =
+      createGeoJSONLayer(
+        coastlineData,
+        {
+          style:
+            styleCoastline()
+        }
+      );
+
+
+    coastline.addTo(
+      mapPermit
+    );
+
+
+    L.control.layers(
+      {
+        "OpenStreetMap":
+          baseMaps.osm,
+
+        "Satellite":
+          baseMaps.satellite
+      },
+      {
+        "Permit Areas":
+          permitLayers.permits,
+
+        "Administrative":
+          administrative,
+
+        "Coastline":
+          coastline
+      }
+    ).addTo(
+      mapPermit
+    );
+
+
+    fitLayer(
+      mapPermit,
+      permitLayers.permits,
+      11
+    );
+
+
+    permitInitialized = true;
+
+
+  } catch (error) {
+
+    console.error(
+      "Permit map error:",
+      error
+    );
 
   }
 
@@ -4332,186 +5018,76 @@ async function loadGeoJSON(
 
 /* =========================================================
    DASHBOARD
-========================================================= */
+   ========================================================= */
 
 function updateDashboard(
-  targetLayers
-){
+  businessData,
+  structureData,
+  permitData
+) {
 
-  if(!targetLayers.businesses){
+  const businesses =
+    businessData?.features || [];
 
-    return;
+  const structures =
+    structureData?.features || [];
+
+  const permits =
+    permitData?.features || [];
+
+
+  const totalElement =
+    document.getElementById(
+      "businessCount"
+    );
+
+
+  if (totalElement) {
+
+    totalElement.textContent =
+      businesses.length;
 
   }
 
 
-  let total=0;
-  let marine=0;
-  let structure=0;
-  let permit=0;
-
-
-  targetLayers.businesses.eachLayer(
-    group=>{
-
-      if(!group.eachLayer){
-
-        return;
-
-      }
-
-
-      group.eachLayer(
-        l=>{
-
-          const p =
-            l.feature?.properties || {};
-
-
-          total++;
-
-
-          if(
-
-            String(
-              p.marine_use || ""
-            ).toUpperCase()==="YES"
-
-            ||
-
-            marineActivity(p)
-
-          ){
-
-            marine++;
-
-          }
-
-
-          if(
-
-            String(
-              p.marine_structure || ""
-            ).toUpperCase()==="YES"
-
-          ){
-
-            structure++;
-
-          }
-
-
-          if(
-
-            ["YES","MATCHED"].includes(
-
-              String(
-                p.permit_match || ""
-              ).toUpperCase()
-
-            )
-
-          ){
-
-            permit++;
-
-          }
-
-        }
-      );
-
-    }
-  );
-
-
-  const ids = {
-
-    totalBusiness:total,
-
-    marineBusiness:marine,
-
-    structureBusiness:structure,
-
-    permitBusiness:permit
-
-  };
-
-
-  Object.entries(ids).forEach(
-    ([id,value])=>{
-
-      const el =
-        document.getElementById(id);
-
-
-      if(el){
-
-        el.textContent=value;
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   OPEN BUSINESS
-========================================================= */
-
-function openBusiness(
-  p,
-  layer
-){
-
-  const title =
+  const structureElement =
     document.getElementById(
-      "businessDrawerTitle"
+      "structureCount"
     );
 
 
-  const subtitle =
+  if (structureElement) {
+
+    structureElement.textContent =
+      structures.length;
+
+  }
+
+
+  const permitElement =
     document.getElementById(
-      "businessDrawerSubtitle"
+      "permitCount"
     );
 
 
-  const body =
+  if (permitElement) {
+
+    permitElement.textContent =
+      permits.length;
+
+  }
+
+
+  const landingTotal =
     document.getElementById(
-      "businessDrawerBody"
+      "landingTotal"
     );
 
 
-  title.textContent =
-    p.name ||
-    "Usaha Pesisir";
+  if (landingTotal) {
 
-
-  subtitle.textContent =
-    p.business_type ||
-    "Coastal business";
-
-
-  body.innerHTML =
-    businessPopup(p);
-
-
-  document.getElementById(
-    "businessDrawer"
-  ).style.display="block";
-
-
-  if(
-    layer &&
-    layer.getLatLng &&
-    mapBusiness
-  ){
-
-    mapBusiness.setView(
-      layer.getLatLng(),
-      16
-    );
+    landingTotal.textContent =
+      businesses.length;
 
   }
 
@@ -4519,335 +5095,88 @@ function openBusiness(
 
 
 /* =========================================================
-   OPEN STRUCTURE
-========================================================= */
-
-function openStructure(
-  p,
-  layer
-){
-
-  const drawer =
-    document.getElementById(
-      "marineDrawer"
-    );
-
-
-  document.getElementById(
-    "marineDrawerTitle"
-  ).textContent =
-    p.name ||
-    "Marine Structure";
-
-
-  document.getElementById(
-    "marineDrawerSubtitle"
-  ).textContent =
-    p.type ||
-    "Marine structure";
-
-
-  document.getElementById(
-    "marineDrawerBody"
-  ).innerHTML =
-    structurePopup(p);
-
-
-  drawer.style.display="block";
-
-
-  if(
-    layer &&
-    layer.getLatLng &&
-    mapMarine
-  ){
-
-    mapMarine.setView(
-      layer.getLatLng(),
-      16
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   OPEN PERMIT
-========================================================= */
-
-function openPermit(p){
-
-  document.getElementById(
-    "permitDrawerTitle"
-  ).textContent =
-    "Permit Area";
-
-
-  document.getElementById(
-    "permitDrawerSubtitle"
-  ).textContent =
-    p.permit_type ||
-    "Spatial permit";
-
-
-  document.getElementById(
-    "permitDrawerBody"
-  ).innerHTML =
-    permitPopup(p);
-
-
-  document.getElementById(
-    "permitDrawer"
-  ).style.display="block";
-
-}
-
-
-/* =========================================================
-   DRAWER
-========================================================= */
-
-function closeDrawer(id){
-
-  const el =
-    document.getElementById(id);
-
-
-  if(el){
-
-    el.style.display="none";
-
-  }
-
-}
-
-
-/* =========================================================
-   TOGGLE LAYER
-========================================================= */
+   LAYER TOGGLE
+   ========================================================= */
 
 function toggleLayer(
-  name,
-  id,
-  mapId
-){
+  layerName,
+  checkbox = null
+) {
 
-  const btn =
-    document.getElementById(id);
-
-
-  let map =
-    mapId==="mapBusiness"
-      ? mapBusiness
-      : mapId==="mapMarine"
-        ? mapMarine
-        : mapPermit;
-
-
-  if(!map) return;
-
-
-  let collection =
-    businessLayers;
-
-
-  if(mapId==="mapBusiness"){
-
-    collection =
-      businessLayers;
-
-  }
+  if (
+    !mapBusiness ||
+    !layers[layerName]
+  ) return;
 
 
   const layer =
-    collection[name];
+    layers[layerName];
 
 
-  if(!layer){
+  const visible =
+    mapBusiness.hasLayer(
+      layer
+    );
 
-    return;
+
+  if (visible) {
+
+    mapBusiness.removeLayer(
+      layer
+    );
+
+  } else {
+
+    mapBusiness.addLayer(
+      layer
+    );
 
   }
 
 
-  if(map.hasLayer(layer)){
+  if (checkbox) {
 
-    map.removeLayer(layer);
-
-    btn.classList.remove("on");
-
-  }else{
-
-    map.addLayer(layer);
-
-    btn.classList.add("on");
+    checkbox.checked =
+      !visible;
 
   }
-
-}
-
-
-/* =========================================================
-   MARINE MAP BUTTON
-========================================================= */
-
-function openMarineMap(){
-
-  const section =
-    document.getElementById(
-      "marineMapSection"
-    );
-
-
-  section.style.display="block";
-
-
-  initMarineMap();
-
-
-  setTimeout(()=>{
-
-    section.scrollIntoView({
-      behavior:"smooth"
-    });
-
-    if(mapMarine){
-
-      mapMarine.invalidateSize();
-
-    }
-
-  },150);
-
-}
-
-
-/* =========================================================
-   PERMIT MAP BUTTON
-========================================================= */
-
-function openPermitMap(){
-
-  const section =
-    document.getElementById(
-      "permitMapSection"
-    );
-
-
-  section.style.display="block";
-
-
-  initPermitMap();
-
-
-  setTimeout(()=>{
-
-    section.scrollIntoView({
-      behavior:"smooth"
-    });
-
-    if(mapPermit){
-
-      mapPermit.invalidateSize();
-
-    }
-
-  },150);
 
 }
 
 
 /* =========================================================
    MARINE STRUCTURE TOGGLE
-========================================================= */
+   ========================================================= */
 
-function toggleMarineStructure(){
+function toggleMarineStructure(
+  checked = null
+) {
 
-  if(!mapMarine) return;
+  if (
+    !mapMarine ||
+    !marineLayers.structures
+  ) return;
 
 
-  const btn =
-    document.getElementById(
-      "swMarineStructure"
+  const shouldShow =
+    checked === null
+      ? !mapMarine.hasLayer(
+          marineLayers.structures
+        )
+      : checked;
+
+
+  if (shouldShow) {
+
+    marineLayers.structures.addTo(
+      mapMarine
     );
 
-
-  let found = false;
-
-
-  mapMarine.eachLayer(
-    layer=>{
-
-      if(
-        layer instanceof L.LayerGroup
-      ){
-
-        if(
-          layer.getLayers &&
-          layer.getLayers().length
-        ){
-
-          if(
-            layer.getLayers()[0]?.feature
-          ){
-
-            found=true;
-
-          }
-
-        }
-
-      }
-
-    }
-  );
-
-
-  /* simpler handling:
-     find GeoJSON layer */
-  let geoLayer=null;
-
-
-  mapMarine.eachLayer(
-    layer=>{
-
-      if(
-        layer instanceof L.GeoJSON
-      ){
-
-        geoLayer=layer;
-
-      }
-
-    }
-  );
-
-
-  if(!geoLayer){
-
-    return;
-
-  }
-
-
-  if(
-    mapMarine.hasLayer(geoLayer)
-  ){
+  } else {
 
     mapMarine.removeLayer(
-      geoLayer
+      marineLayers.structures
     );
-
-    btn.classList.remove("on");
-
-  }else{
-
-    mapMarine.addLayer(
-      geoLayer
-    );
-
-    btn.classList.add("on");
 
   }
 
@@ -4856,61 +5185,37 @@ function toggleMarineStructure(){
 
 /* =========================================================
    PERMIT AREA TOGGLE
-========================================================= */
+   ========================================================= */
 
-function togglePermitArea(){
+function togglePermitArea(
+  checked = null
+) {
 
-  if(!mapPermit) return;
+  if (
+    !mapPermit ||
+    !permitLayers.permits
+  ) return;
 
 
-  const btn =
-    document.getElementById(
-      "swPermitArea"
+  const shouldShow =
+    checked === null
+      ? !mapPermit.hasLayer(
+          permitLayers.permits
+        )
+      : checked;
+
+
+  if (shouldShow) {
+
+    permitLayers.permits.addTo(
+      mapPermit
     );
 
-
-  let geoLayer=null;
-
-
-  mapPermit.eachLayer(
-    layer=>{
-
-      if(
-        layer instanceof L.GeoJSON
-      ){
-
-        geoLayer=layer;
-
-      }
-
-    }
-  );
-
-
-  if(!geoLayer){
-
-    return;
-
-  }
-
-
-  if(
-    mapPermit.hasLayer(geoLayer)
-  ){
+  } else {
 
     mapPermit.removeLayer(
-      geoLayer
+      permitLayers.permits
     );
-
-    btn.classList.remove("on");
-
-  }else{
-
-    mapPermit.addLayer(
-      geoLayer
-    );
-
-    btn.classList.add("on");
 
   }
 
@@ -4918,374 +5223,461 @@ function togglePermitArea(){
 
 
 /* =========================================================
-   BUSINESS SEARCH
-========================================================= */
+   OPEN MARINE MAP
+   ========================================================= */
 
-document
-.getElementById("searchBusiness")
-.addEventListener(
-  "input",
-  function(){
+function openMarineMap() {
 
-    const q =
-      this.value
-      .toLowerCase()
-      .trim();
+  const section =
+    document.getElementById(
+      "marineMapSection"
+    );
 
+  if (section) {
 
-    if(!q || !businessLayers.businesses){
+    section.style.display =
+      "block";
 
-      return;
-
-    }
+  }
 
 
-    let found=false;
+  setTimeout(
+    async () => {
 
+      await initMarineMap();
 
-    businessLayers.businesses.eachLayer(
-      group=>{
+      if (mapMarine) {
 
-        if(
-          !group.eachLayer ||
-          found
-        ){
-
-          return;
-
-        }
-
-
-        group.eachLayer(
-          l=>{
-
-            if(found){
-
-              return;
-
-            }
-
-
-            const p =
-              l.feature?.properties || {};
-
-
-            const hay = [
-
-              p.name,
-              p.business_type,
-              p.tourism,
-              p.amenity,
-              p.leisure,
-              p.shop,
-              p.address,
-              p.village,
-              p.marine_use_type
-
-            ]
-
-            .filter(Boolean)
-
-            .join(" ")
-
-            .toLowerCase();
-
-
-            if(
-              hay.includes(q)
-            ){
-
-              found=true;
-
-              openBusiness(
-                p,
-                l
-              );
-
-            }
-
-          }
-        );
+        mapMarine.invalidateSize();
 
       }
+
+    },
+    100
+  );
+
+}
+
+
+/* =========================================================
+   OPEN PERMIT MAP
+   ========================================================= */
+
+function openPermitMap() {
+
+  const section =
+    document.getElementById(
+      "permitMapSection"
+    );
+
+  if (section) {
+
+    section.style.display =
+      "block";
+
+  }
+
+
+  setTimeout(
+    async () => {
+
+      await initPermitMap();
+
+      if (mapPermit) {
+
+        mapPermit.invalidateSize();
+
+      }
+
+    },
+    100
+  );
+
+}
+
+
+/* =========================================================
+   BUSINESS SEARCH
+   ========================================================= */
+
+function searchBusiness(query) {
+
+  if (
+    !layers.businesses
+  ) return;
+
+
+  const keyword =
+    String(query || "")
+      .trim()
+      .toLowerCase();
+
+
+  if (!keyword) return;
+
+
+  let found = null;
+
+
+  layers.businesses.eachLayer(
+    layer => {
+
+      if (found) return;
+
+
+      const feature =
+        layer.feature;
+
+
+      const p =
+        feature?.properties || {};
+
+
+      const text = Object.values(p)
+        .join(" ")
+        .toLowerCase();
+
+
+      if (
+        text.includes(keyword)
+      ) {
+
+        found = layer;
+
+      }
+
+    }
+  );
+
+
+  if (found) {
+
+    businessPopup(
+      found.feature,
+      found
+    );
+
+    focusLayer(
+      mapBusiness,
+      found
     );
 
   }
-);
+
+}
 
 
 /* =========================================================
    MARINE SEARCH
-========================================================= */
+   ========================================================= */
 
-document
-.getElementById("searchMarine")
-.addEventListener(
-  "input",
-  function(){
+function searchMarine(query) {
 
-    const q =
-      this.value
-      .toLowerCase()
-      .trim();
+  if (
+    !marineLayers.structures
+  ) return;
 
 
-    if(
-      !q ||
-      !mapMarine
-    ){
-
-      return;
-
-    }
+  const keyword =
+    String(query || "")
+      .trim()
+      .toLowerCase();
 
 
-    let found=false;
+  if (!keyword) return;
 
 
-    mapMarine.eachLayer(
-      layer=>{
-
-        if(
-          found ||
-          !(layer instanceof L.GeoJSON)
-        ){
-
-          return;
-
-        }
+  let found = null;
 
 
-        layer.eachLayer(
-          l=>{
+  marineLayers.structures.eachLayer(
+    layer => {
 
-            if(found) return;
-
-
-            const p =
-              l.feature?.properties || {};
+      if (found) return;
 
 
-            const hay = [
-
-              p.name,
-              p.type,
-              p.object_id
-
-            ]
-
-            .filter(Boolean)
-
-            .join(" ")
-
-            .toLowerCase();
+      const p =
+        layer.feature?.properties || {};
 
 
-            if(
-              hay.includes(q)
-            ){
+      const text =
+        Object.values(p)
+          .join(" ")
+          .toLowerCase();
 
-              found=true;
 
-              openStructure(
-                p,
-                l
-              );
+      if (
+        text.includes(keyword)
+      ) {
 
-            }
-
-          }
-        );
+        found = layer;
 
       }
+
+    }
+  );
+
+
+  if (found) {
+
+    structurePopup(
+      found.feature,
+      found
+    );
+
+    focusLayer(
+      mapMarine,
+      found
     );
 
   }
-);
+
+}
 
 
 /* =========================================================
    PERMIT SEARCH
-========================================================= */
+   ========================================================= */
 
-document
-.getElementById("searchPermit")
-.addEventListener(
-  "input",
-  function(){
+function searchPermit(query) {
 
-    const q =
-      this.value
-      .toLowerCase()
-      .trim();
+  if (
+    !permitLayers.permits
+  ) return;
 
 
-    if(
-      !q ||
-      !mapPermit
-    ){
+  const keyword =
+    String(query || "")
+      .trim()
+      .toLowerCase();
 
-      return;
+
+  if (!keyword) return;
+
+
+  let found = null;
+
+
+  permitLayers.permits.eachLayer(
+    layer => {
+
+      if (found) return;
+
+
+      const p =
+        layer.feature?.properties || {};
+
+
+      const text =
+        Object.values(p)
+          .join(" ")
+          .toLowerCase();
+
+
+      if (
+        text.includes(keyword)
+      ) {
+
+        found = layer;
+
+      }
+
+    }
+  );
+
+
+  if (found) {
+
+    permitPopup(
+      found.feature,
+      found
+    );
+
+    focusLayer(
+      mapPermit,
+      found
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SEARCH EVENT LISTENERS
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    /* BUSINESS SEARCH */
+
+    const businessSearch =
+      document.getElementById(
+        "businessSearch"
+      );
+
+
+    if (businessSearch) {
+
+      businessSearch.addEventListener(
+        "keydown",
+        function(event) {
+
+          if (
+            event.key === "Enter"
+          ) {
+
+            searchBusiness(
+              this.value
+            );
+
+          }
+
+        }
+      );
 
     }
 
 
-    let found=false;
+    /* MARINE SEARCH */
+
+    const marineSearch =
+      document.getElementById(
+        "marineSearch"
+      );
 
 
-    mapPermit.eachLayer(
-      layer=>{
+    if (marineSearch) {
 
-        if(
-          found ||
-          !(layer instanceof L.GeoJSON)
-        ){
+      marineSearch.addEventListener(
+        "keydown",
+        function(event) {
 
-          return;
+          if (
+            event.key === "Enter"
+          ) {
 
-        }
-
-
-        layer.eachLayer(
-          l=>{
-
-            if(found) return;
-
-
-            const p =
-              l.feature?.properties || {};
-
-
-            const hay = [
-
-              p.permit_id,
-              p.permit_type,
-              p.holder_name,
-              p.permit_status
-
-            ]
-
-            .filter(Boolean)
-
-            .join(" ")
-
-            .toLowerCase();
-
-
-            if(
-              hay.includes(q)
-            ){
-
-              found=true;
-
-              openPermit(p);
-
-            }
+            searchMarine(
+              this.value
+            );
 
           }
-        );
+
+        }
+      );
+
+    }
+
+
+    /* PERMIT SEARCH */
+
+    const permitSearch =
+      document.getElementById(
+        "permitSearch"
+      );
+
+
+    if (permitSearch) {
+
+      permitSearch.addEventListener(
+        "keydown",
+        function(event) {
+
+          if (
+            event.key === "Enter"
+          ) {
+
+            searchPermit(
+              this.value
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /* ESCAPE */
+
+    document.addEventListener(
+      "keydown",
+      function(event) {
+
+        if (
+          event.key === "Escape"
+        ) {
+
+          closeAllDrawers();
+
+        }
 
       }
     );
 
-  }
-);
 
+    /* INITIAL BUSINESS COUNT */
 
-/* =========================================================
-   INITIAL LOAD
-========================================================= */
-
-window.addEventListener(
-  "load",
-  ()=>{
-
-    /*
-      Tidak langsung membuka peta.
-      Peta baru diinisialisasi ketika
-      user masuk ke halaman Usaha Bahari.
-    */
-
-    fetch(
+    loadGeoJSON(
       DATA.businesses
-      +"?v="+Date.now()
     )
+      .then(data => {
 
-    .then(
-      res=>{
-
-        if(!res.ok){
-
-          throw new Error(
-            "GeoJSON unavailable"
-          );
-
-        }
-
-        return res.json();
-
-      }
-    )
-
-    .then(
-      data=>{
-
-        const total =
-          data.features?.length || 0;
+        const count =
+          data?.features?.length || 0;
 
 
-        const el =
+        const landingTotal =
           document.getElementById(
             "landingTotal"
           );
 
 
-        if(el){
+        if (landingTotal) {
 
-          el.textContent=total;
+          landingTotal.textContent =
+            count;
 
         }
 
-      }
-    )
 
-    .catch(
-      ()=>{
-        document.getElementById(
-          "landingTotal"
-        ).textContent="—";
-      }
-    );
+        const businessCount =
+          document.getElementById(
+            "businessCount"
+          );
+
+
+        if (businessCount) {
+
+          businessCount.textContent =
+            count;
+
+        }
+
+      })
+      .catch(error => {
+
+        console.warn(
+          "Initial business data unavailable:",
+          error
+        );
+
+      });
 
   }
 );
 
 
 /* =========================================================
-   ESCAPE DRAWER WHEN CLICK OUTSIDE
-========================================================= */
+   START
+   ========================================================= */
 
-document.addEventListener(
-  "keydown",
-  e=>{
-
-    if(e.key==="Escape"){
-
-      [
-        "businessDrawer",
-        "marineDrawer",
-        "permitDrawer"
-
-      ].forEach(
-        id=>closeDrawer(id)
-      );
-
-    }
-
-  }
-);
+showPage("landing");
 
 </script>
-
+  
 </body>
 </html>
