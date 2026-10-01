@@ -1,2918 +1,679 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Marine-Check Bali | Marine Utilization Monitoring
-    </title>
-
-
-    <!-- =================================================
-         LEAFLET
-    ================================================== -->
-
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
-
-
-    <!-- =================================================
-         ESRI LEAFLET
-    ================================================== -->
-
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.css"
-    >
-
-
-    <!-- =================================================
-         STYLE
-    ================================================== -->
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-            background: #f4f7f9;
-            color: #263238;
-        }
-
-
-        /* =============================================
-           MAP
-        ============================================= */
-
-        #map {
-
-            position: absolute;
-
-            top: 0;
-            left: 330px;
-            right: 0;
-            bottom: 0;
-
-        }
-
-
-        /* =============================================
-           SIDEBAR
-        ============================================= */
-
-        #sidebar {
-
-            position: absolute;
-
-            z-index: 1000;
-
-            top: 0;
-            left: 0;
-
-            width: 330px;
-            height: 100vh;
-
-            overflow-y: auto;
-
-            background: white;
-
-            box-shadow:
-                2px 0 12px
-                rgba(0,0,0,0.15);
-
-        }
-
-
-        /* =============================================
-           HEADER
-        ============================================= */
-
-        .header {
-
-            padding: 22px 20px;
-
-            background: #0b3954;
-
-            color: white;
-
-        }
-
-
-        .header h1 {
-
-            margin: 0;
-
-            font-size: 21px;
-
-        }
-
-
-        .header p {
-
-            margin: 7px 0 0;
-
-            font-size: 12px;
-
-            line-height: 1.5;
-
-            opacity: 0.85;
-
-        }
-
-
-        /* =============================================
-           SECTION
-        ============================================= */
-
-        .section {
-
-            padding: 16px 18px;
-
-            border-bottom:
-                1px solid #e5e5e5;
-
-        }
-
-
-        .section-title {
-
-            font-size: 12px;
-
-            font-weight: bold;
-
-            text-transform: uppercase;
-
-            color: #607d8b;
-
-            margin-bottom: 10px;
-
-            letter-spacing: 0.5px;
-
-        }
-
-
-        /* =============================================
-           SEARCH
-        ============================================= */
-
-        #searchBox {
-
-            width: 100%;
-
-            padding:
-                10px 12px;
-
-            border:
-                1px solid #cfd8dc;
-
-            border-radius: 7px;
-
-            outline: none;
-
-            font-size: 13px;
-
-        }
-
-
-        #searchBox:focus {
-
-            border-color:
-                #0b7285;
-
-        }
-
-
-        /* =============================================
-           DASHBOARD
-        ============================================= */
-
-        .metrics {
-
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr;
-
-            gap: 8px;
-
-        }
-
-
-        .metric {
-
-            padding: 12px;
-
-            background: #f5f8fa;
-
-            border-radius: 7px;
-
-            border:
-                1px solid #e1e8eb;
-
-        }
-
-
-        .metric-value {
-
-            font-size: 20px;
-
-            font-weight: bold;
-
-            color: #0b3954;
-
-        }
-
-
-        .metric-label {
-
-            font-size: 10px;
-
-            color: #607d8b;
-
-            margin-top: 3px;
-
-        }
-
-
-        /* =============================================
-           LAYER BUTTON
-        ============================================= */
-
-        .layer-button {
-
-            width: 100%;
-
-            text-align: left;
-
-            padding:
-                10px 12px;
-
-            margin-bottom: 7px;
-
-            border:
-                1px solid #d7e0e4;
-
-            background: white;
-
-            border-radius: 7px;
-
-            cursor: pointer;
-
-            font-size: 12px;
-
-            transition: 0.2s;
-
-        }
-
-
-        .layer-button:hover {
-
-            background:
-                #f2f7f9;
-
-        }
-
-
-        .layer-button.active {
-
-            background:
-                #e5f3f5;
-
-            border-color:
-                #0b7285;
-
-            color:
-                #075b68;
-
-            font-weight: bold;
-
-        }
-
-
-        /* =============================================
-           STATUS
-        ============================================= */
-
-        .status-row {
-
-            display: flex;
-
-            justify-content:
-                space-between;
-
-            align-items:
-                center;
-
-            padding:
-                6px 0;
-
-            font-size: 11px;
-
-        }
-
-
-        .status-dot {
-
-            display:
-                inline-block;
-
-            width: 8px;
-            height: 8px;
-
-            border-radius: 50%;
-
-            margin-right: 6px;
-
-        }
-
-
-        .loaded {
-
-            background:
-                #2e7d32;
-
-        }
-
-
-        .missing {
-
-            background:
-                #c62828;
-
-        }
-
-
-        /* =============================================
-           LEGEND
-        ============================================= */
-
-        .legend-item {
-
-            display: flex;
-
-            align-items:
-                center;
-
-            font-size: 11px;
-
-            margin: 7px 0;
-
-        }
-
-
-        .legend-symbol {
-
-            width: 14px;
-            height: 14px;
-
-            border-radius: 50%;
-
-            margin-right: 8px;
-
-            border:
-                2px solid white;
-
-            box-shadow:
-                0 0 2px
-                rgba(0,0,0,0.4);
-
-        }
-
-
-        .legend-symbol.square {
-
-            border-radius: 2px;
-
-        }
-
-
-        .legend-line {
-
-            width: 22px;
-
-            height: 3px;
-
-            margin-right: 8px;
-
-        }
-
-
-        /* =============================================
-           DISCLAIMER
-        ============================================= */
-
-        .disclaimer {
-
-            font-size: 10px;
-
-            line-height: 1.5;
-
-            color:
-                #607d8b;
-
-            background:
-                #f8fafb;
-
-        }
-
-
-        /* =============================================
-           POPUP
-        ============================================= */
-
-        .popup {
-
-            min-width: 280px;
-
-            max-width: 360px;
-
-        }
-
-
-        .popup-title {
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            color:
-                #0b3954;
-
-            margin-bottom: 3px;
-
-        }
-
-
-        .popup-subtitle {
-
-            font-size: 11px;
-
-            color:
-                #607d8b;
-
-            margin-bottom: 12px;
-
-        }
-
-
-        .popup-section {
-
-            border-top:
-                1px solid #e4e9ec;
-
-            padding-top: 8px;
-
-            margin-top: 8px;
-
-        }
-
-
-        .popup-section-title {
-
-            font-size: 10px;
-
-            font-weight: bold;
-
-            color:
-                #607d8b;
-
-            text-transform:
-                uppercase;
-
-            margin-bottom: 5px;
-
-        }
-
-
-        .popup-row {
-
-            display: flex;
-
-            justify-content:
-                space-between;
-
-            gap: 10px;
-
-            padding: 3px 0;
-
-            font-size: 11px;
-
-        }
-
-
-        .popup-label {
-
-            color:
-                #607d8b;
-
-        }
-
-
-        .popup-value {
-
-            text-align: right;
-
-            font-weight: 600;
-
-            max-width: 210px;
-
-            word-break: break-word;
-
-        }
-
-
-        /* =============================================
-           BADGES
-        ============================================= */
-
-        .badge {
-
-            display: inline-block;
-
-            padding:
-                3px 7px;
-
-            border-radius: 10px;
-
-            font-size: 9px;
-
-            font-weight: bold;
-
-        }
-
-
-        .badge-yes {
-
-            background:
-                #e8f5e9;
-
-            color:
-                #2e7d32;
-
-        }
-
-
-        .badge-no {
-
-            background:
-                #eceff1;
-
-            color:
-                #455a64;
-
-        }
-
-
-        .badge-unknown {
-
-            background:
-                #fff3e0;
-
-            color:
-                #e65100;
-
-        }
-
-
-        /* =============================================
-           MOBILE
-        ============================================= */
-
-        @media (max-width: 800px) {
-
-            #sidebar {
-
-                width: 280px;
-
-            }
-
-
-            #map {
-
-                left: 280px;
-
-            }
-
-        }
-
-
-        @media (max-width: 600px) {
-
-            #sidebar {
-
-                width: 100%;
-
-                height: 45vh;
-
-                bottom: 0;
-
-                top: auto;
-
-            }
-
-
-            #map {
-
-                left: 0;
-
-                top: 0;
-
-                bottom: 45vh;
-
-            }
-
-        }
-
-    </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marine-Check Bali | Coastal Marine Business Screening</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.css">
+
+<style>
+:root{
+  --navy:#073b4c;
+  --blue:#0b7285;
+  --cyan:#13a8b7;
+  --sea:#e9f7f8;
+  --ink:#19323c;
+  --muted:#6b7f86;
+  --line:#dce7ea;
+  --bg:#f4f8f9;
+  --white:#fff;
+  --green:#2e7d32;
+  --orange:#ef6c00;
+  --red:#c62828;
+  --shadow:0 10px 30px rgba(7,59,76,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--ink);background:var(--bg)}
+button,input{font:inherit}
+button{cursor:pointer}
+
+/* LANDING */
+#landing{
+  position:fixed;inset:0;z-index:5000;
+  background:
+    linear-gradient(120deg,rgba(3,37,48,.95),rgba(5,92,110,.88)),
+    radial-gradient(circle at 80% 20%,#2bc0c7 0,transparent 32%),
+    #073b4c;
+  color:white;display:flex;align-items:center;justify-content:center;
+  overflow:auto;
+}
+.hero{width:min(1120px,92vw);padding:48px 0}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:50px}
+.brand-mark{width:48px;height:48px;border-radius:14px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:24px;border:1px solid rgba(255,255,255,.2)}
+.brand h1{margin:0;font-size:22px}
+.brand p{margin:4px 0 0;font-size:12px;opacity:.72}
+.hero-copy{max-width:760px}
+.eyebrow{text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:700;color:#9de6eb}
+.hero h2{font-size:clamp(34px,6vw,64px);line-height:1.02;margin:14px 0 20px}
+.hero-copy>p{font-size:16px;line-height:1.7;color:rgba(255,255,255,.82);max-width:680px}
+.hero-actions{display:flex;gap:12px;margin:28px 0 42px;flex-wrap:wrap}
+.primary{border:0;background:white;color:var(--navy);padding:13px 20px;border-radius:10px;font-weight:800}
+.secondary{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);color:white;padding:13px 20px;border-radius:10px}
+.menu-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.menu-card{padding:18px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);border-radius:14px}
+.menu-card .icon{font-size:22px}
+.menu-card h3{font-size:13px;margin:12px 0 6px}
+.menu-card p{font-size:11px;line-height:1.5;margin:0;color:rgba(255,255,255,.68)}
+
+/* APP */
+#app{display:none;height:100vh}
+.topbar{
+  position:absolute;z-index:1200;left:0;right:0;top:0;height:64px;
+  background:rgba(255,255,255,.96);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 20px;
+}
+.topbrand{font-weight:800;color:var(--navy);font-size:17px;display:flex;align-items:center;gap:9px}
+.topnav{display:flex;gap:4px;margin-left:30px}
+.nav-btn{border:0;background:transparent;color:#587078;padding:9px 12px;border-radius:8px;font-size:12px;font-weight:700}
+.nav-btn.active,.nav-btn:hover{background:var(--sea);color:var(--blue)}
+.back-btn{margin-left:auto;border:1px solid var(--line);background:white;color:var(--ink);padding:8px 11px;border-radius:8px;font-size:11px}
+
+#map{position:absolute;inset:64px 0 0 360px}
+.sidebar{
+  position:absolute;z-index:1100;top:64px;left:0;bottom:0;width:360px;
+  background:white;border-right:1px solid var(--line);overflow-y:auto;
+}
+.panel{padding:18px;border-bottom:1px solid var(--line)}
+.panel-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:#74878e;font-weight:800;margin-bottom:10px}
+.search-wrap{position:relative}
+#searchBox{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px 13px;outline:0;font-size:12px}
+#searchBox:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(19,168,183,.10)}
+.search-hint{font-size:10px;color:var(--muted);margin-top:7px;line-height:1.5}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.metric{border:1px solid var(--line);border-radius:11px;padding:12px;background:#fbfdfd}
+.metric strong{display:block;font-size:22px;color:var(--navy)}
+.metric span{font-size:10px;color:var(--muted)}
+.menu-section{display:grid;gap:8px}
+.menu-item{
+  width:100%;text-align:left;border:1px solid var(--line);background:white;border-radius:10px;padding:12px;
+  display:flex;gap:11px;align-items:center;color:var(--ink)
+}
+.menu-item:hover,.menu-item.active{background:var(--sea);border-color:#a9dfe3}
+.menu-item .mi{font-size:19px}.menu-item b{font-size:12px;display:block}.menu-item small{font-size:10px;color:var(--muted)}
+.layer-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:11px}
+.switch{width:34px;height:19px;border-radius:20px;background:#cfdadd;position:relative;border:0}
+.switch:after{content:"";position:absolute;width:15px;height:15px;background:white;border-radius:50%;left:2px;top:2px;transition:.2s}
+.switch.on{background:var(--blue)}.switch.on:after{left:17px}
+.status{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted)}
+.dot{width:7px;height:7px;border-radius:50%;background:#cfdadd}.dot.ok{background:var(--green)}.dot.bad{background:var(--red)}
+.legend{display:grid;gap:8px}
+.legend div{font-size:10px;display:flex;align-items:center;gap:8px;color:#536970}
+.sym{width:11px;height:11px;border-radius:50%}.sym.square{border-radius:2px}.line{width:20px;height:3px}
+
+/* info drawer */
+#infoDrawer{
+  position:absolute;z-index:1500;right:18px;top:82px;width:370px;max-height:calc(100vh - 100px);
+  overflow:auto;background:white;border:1px solid var(--line);border-radius:15px;box-shadow:var(--shadow);display:none
+}
+.drawer-head{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}
+.drawer-head h2{font-size:17px;margin:0;color:var(--navy)}.drawer-head p{font-size:10px;color:var(--muted);margin:5px 0 0}
+.close{border:0;background:#f1f5f6;border-radius:8px;width:30px;height:30px}
+.drawer-body{padding:16px}
+.section-title{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:#75888e;font-weight:800;margin:15px 0 7px}
+.info-row{display:flex;justify-content:space-between;gap:15px;border-bottom:1px solid #edf2f3;padding:7px 0;font-size:11px}
+.info-row span:first-child{color:var(--muted)}.info-row span:last-child{text-align:right;font-weight:650;max-width:230px;word-break:break-word}
+.badge{display:inline-block;border-radius:20px;padding:4px 8px;font-size:9px;font-weight:800}
+.badge.blue{background:#e7f5f7;color:#075b68}.badge.green{background:#e8f5e9;color:#2e7d32}.badge.orange{background:#fff3e0;color:#e65100}.badge.gray{background:#eef2f3;color:#50646b}
+.source-box{background:#f7fafb;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;font-size:10px;line-height:1.6}
+.source-box a{color:var(--blue);font-weight:700;text-decoration:none}
+.notice{padding:10px;border-radius:10px;background:#fff8e8;color:#765719;font-size:10px;line-height:1.5;margin-top:12px}
+
+/* responsive */
+@media(max-width:900px){
+  .menu-grid{grid-template-columns:1fr 1fr}.topnav{display:none}
+  #map{left:0;top:58px}.sidebar{top:auto;width:100%;height:46vh;bottom:0;border-right:0;border-top:1px solid var(--line)}
+  .topbar{height:58px}.sidebar{z-index:1300}.hero{padding:30px 0}
+  #infoDrawer{right:10px;left:10px;width:auto;top:68px;max-height:55vh}
+}
+@media(max-width:500px){
+  .menu-grid{grid-template-columns:1fr}.hero h2{font-size:38px}
+}
+</style>
 </head>
-
 
 <body>
 
-
-<!-- =====================================================
-     SIDEBAR
-====================================================== -->
-
-<div id="sidebar">
-
-
-    <!-- HEADER -->
-
-    <div class="header">
-
-        <h1>
-            Marine-Check Bali
-        </h1>
-
-        <p>
-            Marine Utilization Monitoring
-            & Spatial Screening
-        </p>
-
+<!-- LANDING -->
+<section id="landing">
+  <div class="hero">
+    <div class="brand">
+      <div class="brand-mark">🌊</div>
+      <div>
+        <h1>Marine-Check Bali</h1>
+        <p>Coastal Marine Utilization Screening Portal</p>
+      </div>
     </div>
 
+    <div class="hero-copy">
+      <div class="eyebrow">Spatial screening • Coastal businesses • Marine utilization</div>
+      <h2>Kenali usaha bahari di pesisir Bali.</h2>
+      <p>
+        Portal pemetaan untuk menemukan usaha di kawasan pesisir,
+        melihat keterkaitannya dengan aktivitas laut, struktur pesisir,
+        area perizinan, serta sumber informasi yang digunakan.
+      </p>
 
-    <!-- SEARCH -->
-
-    <div class="section">
-
-        <div class="section-title">
-            Search
-        </div>
-
-        <input
-            type="text"
-            id="searchBox"
-            placeholder="Search business or structure..."
-        >
-
+      <div class="hero-actions">
+        <button class="primary" onclick="enterApp()">Mulai Cek Usaha Bahari →</button>
+        <button class="secondary" onclick="showAbout()">Tentang Marine-Check</button>
+      </div>
     </div>
 
+    <div class="menu-grid">
+      <div class="menu-card">
+        <div class="icon">🏝️</div>
+        <h3>Cek Usaha Bahari Pesisir</h3>
+        <p>Hotel, resort, diving, restoran, marina, wisata bahari, dan usaha pesisir lainnya.</p>
+      </div>
+      <div class="menu-card">
+        <div class="icon">⚓</div>
+        <h3>Aktivitas & Struktur Laut</h3>
+        <p>Identifikasi hubungan spasial usaha dengan struktur atau aktivitas di ruang laut.</p>
+      </div>
+      <div class="menu-card">
+        <div class="icon">📋</div>
+        <h3>Screening Perizinan</h3>
+        <p>Bandingkan lokasi usaha dengan data area perizinan yang tersedia.</p>
+      </div>
+      <div class="menu-card">
+        <div class="icon">🔎</div>
+        <h3>Sumber Data</h3>
+        <p>Lihat sumber, tautan verifikasi, dan waktu pembaruan informasi.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- DASHBOARD -->
+<!-- APPLICATION -->
+<section id="app">
+  <header class="topbar">
+    <div class="topbrand">🌊 Marine-Check Bali</div>
+    <nav class="topnav">
+      <button class="nav-btn active" onclick="activateMenu(this,'check')">Cek Usaha Bahari</button>
+      <button class="nav-btn" onclick="activateMenu(this,'marine')">Aktivitas Laut</button>
+      <button class="nav-btn" onclick="activateMenu(this,'permit')">Perizinan</button>
+      <button class="nav-btn" onclick="activateMenu(this,'source')">Sumber Data</button>
+    </nav>
+    <button class="back-btn" onclick="backHome()">← Pembukaan</button>
+  </header>
 
-    <div class="section">
+  <aside class="sidebar">
 
-        <div class="section-title">
-            Screening Dashboard
-        </div>
-
-
-        <div class="metrics">
-
-
-            <div class="metric">
-
-                <div
-                    class="metric-value"
-                    id="totalBusiness"
-                >
-                    0
-                </div>
-
-                <div class="metric-label">
-                    Coastal Businesses
-                </div>
-
-            </div>
-
-
-            <div class="metric">
-
-                <div
-                    class="metric-value"
-                    id="marineBusiness"
-                >
-                    0
-                </div>
-
-                <div class="metric-label">
-                    Marine Use
-                </div>
-
-            </div>
-
-
-            <div class="metric">
-
-                <div
-                    class="metric-value"
-                    id="structureBusiness"
-                >
-                    0
-                </div>
-
-                <div class="metric-label">
-                    With Structure
-                </div>
-
-            </div>
-
-
-            <div class="metric">
-
-                <div
-                    class="metric-value"
-                    id="permitBusiness"
-                >
-                    0
-                </div>
-
-                <div class="metric-label">
-                    Permit Matched
-                </div>
-
-            </div>
-
-
-        </div>
-
+    <div class="panel">
+      <div class="panel-title">Cek Usaha Bahari di Pesisir</div>
+      <div class="search-wrap">
+        <input id="searchBox" placeholder="Cari nama usaha, jenis, aktivitas, desa...">
+      </div>
+      <div class="search-hint">
+        Data usaha difokuskan pada lokasi dalam radius pesisir yang telah ditentukan
+        pada proses pembentukan <b>coastal_businesses.geojson</b>.
+      </div>
     </div>
 
+    <div class="panel">
+      <div class="panel-title">Ringkasan Data</div>
+      <div class="metrics">
+        <div class="metric"><strong id="totalBusiness">0</strong><span>Usaha Pesisir</span></div>
+        <div class="metric"><strong id="marineBusiness">0</strong><span>Terkait Aktivitas Laut</span></div>
+        <div class="metric"><strong id="structureBusiness">0</strong><span>Dekat Struktur</span></div>
+        <div class="metric"><strong id="permitBusiness">0</strong><span>Area Izin Terpetakan</span></div>
+      </div>
+    </div>
 
-    <!-- DATA LAYERS -->
-
-    <div class="section">
-
-        <div class="section-title">
-            Data Layers
-        </div>
-
-
-        <button
-            class="layer-button active"
-            onclick="toggleLayer('businesses', this)"
-        >
-            🏨 Coastal Businesses
+    <div class="panel">
+      <div class="panel-title">Menu</div>
+      <div class="menu-section">
+        <button class="menu-item active" onclick="activateMenu(null,'check')">
+          <div class="mi">🏝️</div><div><b>Cek Usaha Bahari</b><small>Usaha pesisir & aktivitas laut</small></div>
         </button>
-
-
-        <button
-            class="layer-button active"
-            onclick="toggleLayer('structures', this)"
-        >
-            ⚓ Marine Structures
+        <button class="menu-item" onclick="activateMenu(null,'marine')">
+          <div class="mi">⚓</div><div><b>Aktivitas & Struktur Laut</b><small>Hubungan spasial dengan laut</small></div>
         </button>
-
-
-        <button
-            class="layer-button active"
-            onclick="toggleLayer('permits', this)"
-        >
-            📋 Permit Areas
+        <button class="menu-item" onclick="activateMenu(null,'permit')">
+          <div class="mi">📋</div><div><b>Perizinan & Screening</b><small>Area izin yang tersedia</small></div>
         </button>
-
-
-        <button
-            class="layer-button active"
-            onclick="toggleLayer('coastline', this)"
-        >
-            🌊 BIG Garis Pantai
+        <button class="menu-item" onclick="activateMenu(null,'source')">
+          <div class="mi">🔎</div><div><b>Sumber Data</b><small>Source & verification links</small></div>
         </button>
-
-
-        <button
-            class="layer-button active"
-            onclick="toggleLayer('administrative', this)"
-        >
-            🗺 BIG Batas Administrasi
-        </button>
-
+      </div>
     </div>
 
-
-    <!-- STATUS -->
-
-    <div class="section">
-
-        <div class="section-title">
-            Data Status
-        </div>
-
-
-        <div class="status-row">
-
-            <span>
-
-                <span
-                    class="status-dot"
-                    id="status-businesses"
-                ></span>
-
-                Coastal Businesses
-
-            </span>
-
-            <span id="text-businesses">
-                Loading
-            </span>
-
-        </div>
-
-
-        <div class="status-row">
-
-            <span>
-
-                <span
-                    class="status-dot"
-                    id="status-structures"
-                ></span>
-
-                Marine Structures
-
-            </span>
-
-            <span id="text-structures">
-                Loading
-            </span>
-
-        </div>
-
-
-        <div class="status-row">
-
-            <span>
-
-                <span
-                    class="status-dot"
-                    id="status-permits"
-                ></span>
-
-                Permit Areas
-
-            </span>
-
-            <span id="text-permits">
-                Loading
-            </span>
-
-        </div>
-
-
-        <div class="status-row">
-
-            <span>
-
-                <span
-                    class="status-dot"
-                    id="status-coastline"
-                ></span>
-
-                BIG Garis Pantai
-
-            </span>
-
-            <span id="text-coastline">
-                Loading
-            </span>
-
-        </div>
-
-
-        <div class="status-row">
-
-            <span>
-
-                <span
-                    class="status-dot"
-                    id="status-administrative"
-                ></span>
-
-                BIG Administrasi
-
-            </span>
-
-            <span id="text-administrative">
-                Loading
-            </span>
-
-        </div>
-
+    <div class="panel">
+      <div class="panel-title">Layer Peta</div>
+      <div class="layer-row"><span>🏝️ Usaha Pesisir</span><button class="switch on" id="sw-businesses" onclick="toggleLayer('businesses','sw-businesses')"></button></div>
+      <div class="layer-row"><span>⚓ Struktur Laut</span><button class="switch on" id="sw-structures" onclick="toggleLayer('structures','sw-structures')"></button></div>
+      <div class="layer-row"><span>📋 Area Perizinan</span><button class="switch on" id="sw-permits" onclick="toggleLayer('permits','sw-permits')"></button></div>
+      <div class="layer-row"><span>🌊 Garis Pantai BIG</span><button class="switch on" id="sw-coastline" onclick="toggleLayer('coastline','sw-coastline')"></button></div>
+      <div class="layer-row"><span>🗺 Batas Administrasi BIG</span><button class="switch on" id="sw-administrative" onclick="toggleLayer('administrative','sw-administrative')"></button></div>
     </div>
 
-
-    <!-- LEGEND -->
-
-    <div class="section">
-
-        <div class="section-title">
-            Legend
-        </div>
-
-
-        <div class="legend-item">
-
-            <span
-                class="legend-symbol"
-                style="background:#1565c0;"
-            ></span>
-
-            Coastal Business
-
-        </div>
-
-
-        <div class="legend-item">
-
-            <span
-                class="legend-symbol"
-                style="background:#ef6c00;"
-            ></span>
-
-            Marine Structure
-
-        </div>
-
-
-        <div class="legend-item">
-
-            <span
-                class="legend-symbol square"
-                style="background:#43a047;"
-            ></span>
-
-            Permit Area
-
-        </div>
-
-
-        <div class="legend-item">
-
-            <span
-                class="legend-line"
-                style="background:#00acc1;"
-            ></span>
-
-            BIG Garis Pantai
-
-        </div>
-
-
-        <div class="legend-item">
-
-            <span
-                class="legend-line"
-                style="background:#8e24aa;"
-            ></span>
-
-            BIG Administrasi
-
-        </div>
-
+    <div class="panel">
+      <div class="panel-title">Status Sumber</div>
+      <div class="status"><span class="dot" id="dot-businesses"></span><span>Coastal businesses — <b id="status-businesses">Memuat</b></span></div>
+      <div class="status" style="margin-top:8px"><span class="dot" id="dot-structures"></span><span>Marine structures — <b id="status-structures">Memuat</b></span></div>
+      <div class="status" style="margin-top:8px"><span class="dot" id="dot-permits"></span><span>Permit areas — <b id="status-permits">Memuat</b></span></div>
+      <div class="status" style="margin-top:8px"><span class="dot ok" id="dot-coastline"></span><span>BIG coastline — <b>Available</b></span></div>
+      <div class="status" style="margin-top:8px"><span class="dot ok" id="dot-administrative"></span><span>BIG administration — <b>Available</b></span></div>
     </div>
 
-
-    <!-- DISCLAIMER -->
-
-    <div class="section disclaimer">
-
-        <strong>
-            Disclaimer
-        </strong>
-
-        <br><br>
-
-        This WebGIS is intended for
-        preliminary spatial screening
-        and visualization of marine
-        utilization.
-
-        <br><br>
-
-        A missing permit match does not
-        necessarily indicate that a
-        business or activity is operating
-        without a permit.
-
-        <br><br>
-
-        Permit information should be
-        verified against authoritative
-        government records.
-
-        <br><br>
-
-        Coastal business data are sourced
-        from OpenStreetMap and may not
-        represent all businesses or
-        current operating conditions.
-
+    <div class="panel">
+      <div class="panel-title">Legenda</div>
+      <div class="legend">
+        <div><span class="sym" style="background:#1565c0"></span> Usaha pesisir</div>
+        <div><span class="sym" style="background:#ef6c00"></span> Struktur laut</div>
+        <div><span class="sym square" style="background:#43a047"></span> Area perizinan</div>
+        <div><span class="line" style="background:#00a6b4"></span> Garis pantai BIG</div>
+        <div><span class="line" style="background:#8e24aa"></span> Batas administrasi BIG</div>
+      </div>
     </div>
 
-</div>
+    <div class="panel" style="font-size:10px;color:var(--muted);line-height:1.6">
+      <b>Catatan screening</b><br>
+      Peta ini digunakan untuk screening spasial awal. Kedekatan dengan pantai,
+      struktur, atau area izin tidak otomatis membuktikan bahwa suatu usaha
+      menggunakan ruang laut atau telah memiliki/tidak memiliki izin.
+    </div>
+  </aside>
 
+  <div id="map"></div>
 
-<!-- =====================================================
-     MAP
-====================================================== -->
+  <div id="infoDrawer">
+    <div class="drawer-head">
+      <div><h2 id="drawerTitle">Informasi Usaha</h2><p id="drawerSubtitle">Coastal business</p></div>
+      <button class="close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </div>
+</section>
 
-<div id="map"></div>
-
-
-<!-- =====================================================
-     JAVASCRIPT LIBRARIES
-===================================================== -->
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-></script>
-
-
-<script
-    src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"
-></script>
-
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/esri-leaflet@3.0.16/dist/esri-leaflet.js"></script>
 
 <script>
+const DATA = {
+  businesses: "./coastal_businesses.geojson",
+  structures: "./marine_structures.geojson",
+  permits: "./permit_areas.geojson"
+};
 
-
-/* =====================================================
-   1. MAP
-===================================================== */
+const BIG_RBI =
+  "https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer";
 
 const map = L.map("map", {
-
-    center: [
-        -8.67,
-        115.21
-    ],
-
-    zoom: 10
-
+  center: [-8.67,115.21],
+  zoom: 10,
+  zoomControl: true
 });
 
-
-/* =====================================================
-   2. BASEMAP
-===================================================== */
-
 const satellite = L.tileLayer(
-
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-
-    {
-
-        attribution:
-            "Tiles © Esri"
-
-    }
-
-);
-
-
-const osm = L.tileLayer(
-
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-    {
-
-        attribution:
-            "&copy; OpenStreetMap contributors"
-
-    }
-
-);
-
-
-satellite.addTo(map);
-
-
-/* =====================================================
-   3. LOCAL LAYER GROUPS
-===================================================== */
-
-const layers = {
-
-    businesses:
-        L.layerGroup().addTo(map),
-
-    structures:
-        L.layerGroup().addTo(map),
-
-    permits:
-        L.layerGroup().addTo(map),
-
-    coastline:
-        L.layerGroup().addTo(map),
-
-    administrative:
-        L.layerGroup().addTo(map)
-
-};
-
-
-/* =====================================================
-   4. LOCAL DATA FILES
-===================================================== */
-
-const dataFiles = {
-
-    businesses:
-        "./coastal_businesses.geojson",
-
-    structures:
-        "./marine_structures.geojson",
-
-    permits:
-        "./permit_areas.geojson"
-
-};
-
-
-/* =====================================================
-   5. BIG RBI SERVICE
-===================================================== */
-
-const BIG_RBI_URL =
-    "https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer";
-
-
-/* =====================================================
-   6. BIG GARIS PANTAI
-===================================================== */
-
-const bigCoastline =
-    L.esri.dynamicMapLayer({
-
-        url:
-            BIG_RBI_URL,
-
-        layers: [
-            21
-        ],
-
-        opacity: 1,
-
-        attribution:
-            "Garis Pantai © Badan Informasi Geospasial"
-
-    });
-
-
-bigCoastline.addTo(
-    layers.coastline
-);
-
-
-/* =====================================================
-   7. BIG ADMINISTRASI
-===================================================== */
-
-const bigAdministrative =
-    L.esri.dynamicMapLayer({
-
-        url:
-            BIG_RBI_URL,
-
-        layers: [
-            12
-        ],
-
-        opacity: 0.8,
-
-        attribution:
-            "Batas Administrasi © Badan Informasi Geospasial"
-
-    });
-
-
-bigAdministrative.addTo(
-    layers.administrative
-);
-
-
-/* =====================================================
-   8. STATUS
-===================================================== */
-
-setStatus(
-    "coastline",
-    true
-);
-
-setStatus(
-    "administrative",
-    true
-);
-
-
-/* =====================================================
-   9. SAFE VALUE
-===================================================== */
-
-function safeValue(
-    value,
-    fallback = "Unknown"
-) {
-
-    if (
-        value === undefined ||
-        value === null ||
-        value === ""
-    ) {
-
-        return fallback;
-
-    }
-
-    return value;
-
-}
-
-
-/* =====================================================
-   10. HTML ESCAPE
-===================================================== */
-
-function escapeHTML(value) {
-
-    return String(
-        safeValue(value, "")
-    )
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
-
-/* =====================================================
-   11. BADGE
-===================================================== */
-
-function badge(value) {
-
-    const v =
-        String(
-            value || ""
-        ).toUpperCase();
-
-
-    if (
-        v === "YES" ||
-        v === "MATCHED"
-    ) {
-
-        return `
-
-            <span
-                class="badge badge-yes"
-            >
-                ${escapeHTML(value)}
-            </span>
-
-        `;
-
-    }
-
-
-    if (
-        v === "NO"
-    ) {
-
-        return `
-
-            <span
-                class="badge badge-no"
-            >
-                ${escapeHTML(value)}
-            </span>
-
-        `;
-
-    }
-
-
-    return `
-
-        <span
-            class="badge badge-unknown"
-        >
-            ${escapeHTML(
-                safeValue(value)
-            )}
-        </span>
-
-    `;
-
-}
-
-
-/* =====================================================
-   12. BUSINESS POPUP
-===================================================== */
-
-function businessPopup(properties) {
-
-    const p =
-        properties || {};
-
-
-    const name =
-        escapeHTML(
-            p.name ||
-            "Unnamed Business"
-        );
-
-
-    const businessType =
-        escapeHTML(
-            p.business_type ||
-            "Unknown"
-        );
-
-
-    const category =
-        escapeHTML(
-            p.tourism ||
-            p.amenity ||
-            p.leisure ||
-            "Unknown"
-        );
-
-
-    const address =
-        escapeHTML(
-            p.address
-        );
-
-
-    const village =
-        escapeHTML(
-            p.village
-        );
-
-
-    const phone =
-        escapeHTML(
-            p.phone
-        );
-
-
-    const openingHours =
-        escapeHTML(
-            p.opening_hours
-        );
-
-
-    const osmId =
-        escapeHTML(
-            p.osm_id
-        );
-
-
-    const source =
-        escapeHTML(
-            p.source ||
-            "OpenStreetMap"
-        );
-
-
-    let websiteHTML = "";
-
-
-    if (p.website) {
-
-        const website =
-            escapeHTML(
-                p.website
-            );
-
-
-        websiteHTML = `
-
-            <div class="popup-row">
-
-                <span class="popup-label">
-                    Website
-                </span>
-
-                <span class="popup-value">
-
-                    <a
-                        href="${website}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Visit
-                    </a>
-
-                </span>
-
-            </div>
-
-        `;
-
-    }
-
-
-    return `
-
-        <div class="popup">
-
-
-            <div class="popup-title">
-                ${name}
-            </div>
-
-
-            <div class="popup-subtitle">
-                ${businessType}
-            </div>
-
-
-            <!-- BUSINESS -->
-
-            <div class="popup-section">
-
-                <div class="popup-section-title">
-                    Business Information
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Category
-                    </span>
-
-                    <span class="popup-value">
-                        ${category}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Address
-                    </span>
-
-                    <span class="popup-value">
-                        ${address}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Village
-                    </span>
-
-                    <span class="popup-value">
-                        ${village}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Phone
-                    </span>
-
-                    <span class="popup-value">
-                        ${phone}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Opening Hours
-                    </span>
-
-                    <span class="popup-value">
-                        ${openingHours}
-                    </span>
-
-                </div>
-
-
-                ${websiteHTML}
-
-            </div>
-
-
-            <!-- MARINE -->
-
-            <div class="popup-section">
-
-                <div class="popup-section-title">
-                    Marine Screening
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Uses Marine Area
-                    </span>
-
-                    <span class="popup-value">
-                        ${badge(
-                            p.marine_use
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Marine Activity
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.marine_use_type
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Enters Sea
-                    </span>
-
-                    <span class="popup-value">
-                        ${badge(
-                            p.enters_sea
-                        )}
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- STRUCTURE -->
-
-            <div class="popup-section">
-
-                <div class="popup-section-title">
-                    Marine Structure
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Structure
-                    </span>
-
-                    <span class="popup-value">
-                        ${badge(
-                            p.marine_structure
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Structure Type
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.structure_type
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Distance
-                    </span>
-
-                    <span class="popup-value">
-
-                        ${
-                            p.distance_structure_m !== undefined
-                            ? escapeHTML(
-                                p.distance_structure_m
-                            ) + " m"
-                            : "Unknown"
-                        }
-
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Coast Distance
-                    </span>
-
-                    <span class="popup-value">
-
-                        ${
-                            p.distance_coast_m !== undefined
-                            ? escapeHTML(
-                                p.distance_coast_m
-                            ) + " m"
-                            : "Unknown"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- PERMIT -->
-
-            <div class="popup-section">
-
-                <div class="popup-section-title">
-                    Permit Screening
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Permit Match
-                    </span>
-
-                    <span class="popup-value">
-                        ${badge(
-                            p.permit_match
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Permit ID
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.permit_id
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Permit Type
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.permit_type
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Permit Status
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.permit_status
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-            </div>
-
-
-            <!-- SOURCE -->
-
-            <div class="popup-section">
-
-                <div class="popup-section-title">
-                    Data Source
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Source
-                    </span>
-
-                    <span class="popup-value">
-                        ${source}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        OSM ID
-                    </span>
-
-                    <span class="popup-value">
-                        ${osmId}
-                    </span>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   13. STRUCTURE POPUP
-===================================================== */
-
-function structurePopup(properties) {
-
-    const p =
-        properties || {};
-
-
-    return `
-
-        <div class="popup">
-
-            <div class="popup-title">
-
-                ${escapeHTML(
-                    p.name ||
-                    "Marine Structure"
-                )}
-
-            </div>
-
-
-            <div class="popup-section">
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Object ID
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.object_id
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Type
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.type
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Area
-                    </span>
-
-                    <span class="popup-value">
-
-                        ${
-                            p.area_m2 !== undefined
-                            ? escapeHTML(
-                                p.area_m2
-                            ) + " m²"
-                            : "Unknown"
-                        }
-
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Detection Date
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.detection_date
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Screening
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.screening_status
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Priority
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.priority
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   14. PERMIT POPUP
-===================================================== */
-
-function permitPopup(properties) {
-
-    const p =
-        properties || {};
-
-
-    return `
-
-        <div class="popup">
-
-            <div class="popup-title">
-
-                Permit Area
-
-            </div>
-
-
-            <div class="popup-section">
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Permit ID
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.permit_id
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Type
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.permit_type
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Holder
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.holder_name
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Status
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.permit_status
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-                <div class="popup-row">
-
-                    <span class="popup-label">
-                        Source
-                    </span>
-
-                    <span class="popup-value">
-                        ${escapeHTML(
-                            safeValue(
-                                p.source
-                            )
-                        )}
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =====================================================
-   15. LOAD GEOJSON
-===================================================== */
-
-async function loadGeoJSON(layerName) {
-
-    try {
-
-        const response =
-            await fetch(
-                dataFiles[layerName] +
-                "?v=" +
-                Date.now()
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "File not found: " +
-                dataFiles[layerName]
-            );
-
-        }
-
-
-        const data =
-            await response.json();
-
-
-        let geoLayer;
-
-
-        /* =============================================
-           BUSINESSES
-        ============================================= */
-
-        if (
-            layerName ===
-            "businesses"
-        ) {
-
-            geoLayer =
-                L.geoJSON(
-                    data,
-                    {
-
-                        pointToLayer:
-                            function(
-                                feature,
-                                latlng
-                            ) {
-
-                                return L.circleMarker(
-
-                                    latlng,
-
-                                    {
-
-                                        radius: 8,
-
-                                        fillColor:
-                                            "#1565c0",
-
-                                        color:
-                                            "#ffffff",
-
-                                        weight: 2,
-
-                                        fillOpacity:
-                                            0.9
-
-                                    }
-
-                                );
-
-                            },
-
-
-                        onEachFeature:
-                            function(
-                                feature,
-                                layer
-                            ) {
-
-                                layer.bindPopup(
-
-                                    businessPopup(
-                                        feature.properties
-                                    )
-
-                                );
-
-                            }
-
-                    }
-                );
-
-        }
-
-
-        /* =============================================
-           STRUCTURES
-        ============================================= */
-
-        else if (
-            layerName ===
-            "structures"
-        ) {
-
-            geoLayer =
-                L.geoJSON(
-                    data,
-                    {
-
-                        pointToLayer:
-                            function(
-                                feature,
-                                latlng
-                            ) {
-
-                                return L.circleMarker(
-
-                                    latlng,
-
-                                    {
-
-                                        radius: 7,
-
-                                        fillColor:
-                                            "#ef6c00",
-
-                                        color:
-                                            "#ffffff",
-
-                                        weight: 2,
-
-                                        fillOpacity:
-                                            0.9
-
-                                    }
-
-                                );
-
-                            },
-
-
-                        style:
-                            function() {
-
-                                return {
-
-                                    color:
-                                        "#ef6c00",
-
-                                    weight: 3,
-
-                                    fillColor:
-                                        "#ef6c00",
-
-                                    fillOpacity:
-                                        0.7
-
-                                };
-
-                            },
-
-
-                        onEachFeature:
-                            function(
-                                feature,
-                                layer
-                            ) {
-
-                                layer.bindPopup(
-
-                                    structurePopup(
-                                        feature.properties
-                                    )
-
-                                );
-
-                            }
-
-                    }
-                );
-
-        }
-
-
-        /* =============================================
-           PERMITS
-        ============================================= */
-
-        else if (
-            layerName ===
-            "permits"
-        ) {
-
-            geoLayer =
-                L.geoJSON(
-                    data,
-                    {
-
-                        style:
-                            function() {
-
-                                return {
-
-                                    color:
-                                        "#43a047",
-
-                                    weight: 2,
-
-                                    fillColor:
-                                        "#43a047",
-
-                                    fillOpacity:
-                                        0.18
-
-                                };
-
-                            },
-
-
-                        onEachFeature:
-                            function(
-                                feature,
-                                layer
-                            ) {
-
-                                layer.bindPopup(
-
-                                    permitPopup(
-                                        feature.properties
-                                    )
-
-                                );
-
-                            }
-
-                    }
-                );
-
-        }
-
-
-        if (geoLayer) {
-
-            geoLayer.addTo(
-                layers[layerName]
-            );
-
-        }
-
-
-        setStatus(
-            layerName,
-            true
-        );
-
-
-        updateDashboard();
-
-
-    }
-
-    catch (error) {
-
-        console.warn(
-            layerName,
-            error
-        );
-
-
-        setStatus(
-            layerName,
-            false
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   16. LOAD LOCAL DATA
-===================================================== */
-
-loadGeoJSON(
-    "businesses"
-);
-
-
-loadGeoJSON(
-    "structures"
-);
-
-
-loadGeoJSON(
-    "permits"
-);
-
-
-/* =====================================================
-   17. STATUS FUNCTION
-===================================================== */
-
-function setStatus(
-    layerName,
-    success
-) {
-
-    const dot =
-        document.getElementById(
-            "status-" +
-            layerName
-        );
-
-
-    const text =
-        document.getElementById(
-            "text-" +
-            layerName
-        );
-
-
-    if (!dot || !text) {
-
-        return;
-
-    }
-
-
-    if (success) {
-
-        dot.classList.add(
-            "loaded"
-        );
-
-        dot.classList.remove(
-            "missing"
-        );
-
-        text.innerText =
-            "Loaded";
-
-
-    } else {
-
-        dot.classList.add(
-            "missing"
-        );
-
-        dot.classList.remove(
-            "loaded"
-        );
-
-        text.innerText =
-            "Not available";
-
-    }
-
-}
-
-
-/* =====================================================
-   18. DASHBOARD
-===================================================== */
-
-function updateDashboard() {
-
-    let total = 0;
-
-    let marine = 0;
-
-    let structure = 0;
-
-    let permit = 0;
-
-
-    layers.businesses.eachLayer(
-
-        function(group) {
-
-            if (
-                !group.eachLayer
-            ) {
-
-                return;
-
-            }
-
-
-            group.eachLayer(
-
-                function(featureLayer) {
-
-                    const p =
-                        featureLayer
-                            .feature
-                            ?.properties
-                        || {};
-
-
-                    total++;
-
-
-                    if (
-                        String(
-                            p.marine_use
-                        )
-                        .toUpperCase()
-                        === "YES"
-                    ) {
-
-                        marine++;
-
-                    }
-
-
-                    if (
-                        String(
-                            p.marine_structure
-                        )
-                        .toUpperCase()
-                        === "YES"
-                    ) {
-
-                        structure++;
-
-                    }
-
-
-                    if (
-                        String(
-                            p.permit_match
-                        )
-                        .toUpperCase()
-                        === "YES"
-
-                        ||
-
-                        String(
-                            p.permit_match
-                        )
-                        .toUpperCase()
-                        === "MATCHED"
-                    ) {
-
-                        permit++;
-
-                    }
-
-                }
-
-            );
-
-        }
-
-    );
-
-
-    document.getElementById(
-        "totalBusiness"
-    ).innerText =
-        total;
-
-
-    document.getElementById(
-        "marineBusiness"
-    ).innerText =
-        marine;
-
-
-    document.getElementById(
-        "structureBusiness"
-    ).innerText =
-        structure;
-
-
-    document.getElementById(
-        "permitBusiness"
-    ).innerText =
-        permit;
-
-}
-
-
-/* =====================================================
-   19. TOGGLE LAYER
-===================================================== */
-
-function toggleLayer(
-    layerName,
-    button
-) {
-
-    if (
-        map.hasLayer(
-            layers[layerName]
-        )
-    ) {
-
-        map.removeLayer(
-            layers[layerName]
-        );
-
-
-        button.classList.remove(
-            "active"
-        );
-
-
-    } else {
-
-        map.addLayer(
-            layers[layerName]
-        );
-
-
-        button.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   20. SEARCH
-===================================================== */
-
-document
-    .getElementById(
-        "searchBox"
-    )
-    .addEventListener(
-
-        "input",
-
-        function() {
-
-            const query =
-                this.value
-                    .toLowerCase()
-                    .trim();
-
-
-            if (!query) {
-
-                return;
-
-            }
-
-
-            let found =
-                false;
-
-
-            /* =========================================
-               SEARCH BUSINESS
-            ========================================= */
-
-            layers.businesses.eachLayer(
-
-                function(group) {
-
-                    if (
-                        !group.eachLayer
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    group.eachLayer(
-
-                        function(layer) {
-
-                            if (found) {
-
-                                return;
-
-                            }
-
-
-                            const p =
-                                layer
-                                    .feature
-                                    ?.properties
-                                || {};
-
-
-                            const name =
-                                String(
-                                    p.name ||
-                                    ""
-                                )
-                                .toLowerCase();
-
-
-                            const type =
-                                String(
-                                    p.business_type ||
-                                    ""
-                                )
-                                .toLowerCase();
-
-
-                            const category =
-                                String(
-                                    p.tourism ||
-                                    p.amenity ||
-                                    p.leisure ||
-                                    ""
-                                )
-                                .toLowerCase();
-
-
-                            const address =
-                                String(
-                                    p.address ||
-                                    ""
-                                )
-                                .toLowerCase();
-
-
-                            if (
-
-                                name.includes(
-                                    query
-                                )
-
-                                ||
-
-                                type.includes(
-                                    query
-                                )
-
-                                ||
-
-                                category.includes(
-                                    query
-                                )
-
-                                ||
-
-                                address.includes(
-                                    query
-                                )
-
-                            ) {
-
-                                found =
-                                    true;
-
-
-                                if (
-                                    layer.getLatLng
-                                ) {
-
-                                    map.setView(
-
-                                        layer.getLatLng(),
-
-                                        16
-
-                                    );
-
-                                }
-
-
-                                layer.openPopup();
-
-                            }
-
-                        }
-
-                    );
-
-                }
-
-            );
-
-
-            /* =========================================
-               SEARCH STRUCTURE
-            ========================================= */
-
-            if (!found) {
-
-                layers.structures.eachLayer(
-
-                    function(group) {
-
-                        if (
-                            !group.eachLayer
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        group.eachLayer(
-
-                            function(layer) {
-
-                                if (found) {
-
-                                    return;
-
-                                }
-
-
-                                const p =
-                                    layer
-                                        .feature
-                                        ?.properties
-                                    || {};
-
-
-                                const name =
-                                    String(
-                                        p.name ||
-                                        ""
-                                    )
-                                    .toLowerCase();
-
-
-                                const type =
-                                    String(
-                                        p.type ||
-                                        ""
-                                    )
-                                    .toLowerCase();
-
-
-                                if (
-
-                                    name.includes(
-                                        query
-                                    )
-
-                                    ||
-
-                                    type.includes(
-                                        query
-                                    )
-
-                                ) {
-
-                                    found =
-                                        true;
-
-
-                                    if (
-                                        layer.getLatLng
-                                    ) {
-
-                                        map.setView(
-
-                                            layer.getLatLng(),
-
-                                            16
-
-                                        );
-
-                                    }
-
-
-                                    layer.openPopup();
-
-                                }
-
-                            }
-
-                        );
-
-                    }
-
-                );
-
-            }
-
-        }
-
-    );
-
-
-/* =====================================================
-   21. BASEMAP CONTROL
-===================================================== */
-
-L.control.layers(
-
-    {
-
-        "Satellite":
-            satellite,
-
-        "OpenStreetMap":
-            osm
-
-    },
-
-    null,
-
-    {
-
-        position:
-            "topright"
-
-    }
-
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {attribution:"Tiles © Esri"}
 ).addTo(map);
 
-
-/* =====================================================
-   22. SCALE
-===================================================== */
-
-L.control.scale({
-
-    imperial:
-        false
-
-}).addTo(map);
-
-
-/* =====================================================
-   23. INITIAL VIEW
-===================================================== */
-
-setTimeout(
-    function() {
-
-        map.invalidateSize();
-
-    },
-    500
+const osm = L.tileLayer(
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {attribution:"© OpenStreetMap contributors"}
 );
 
+const layers = {
+  businesses:L.layerGroup().addTo(map),
+  structures:L.layerGroup().addTo(map),
+  permits:L.layerGroup().addTo(map),
+  coastline:L.layerGroup().addTo(map),
+  administrative:L.layerGroup().addTo(map)
+};
 
+const bigCoastline = L.esri.dynamicMapLayer({
+  url:BIG_RBI,layers:[21],opacity:1,
+  attribution:"Garis Pantai © Badan Informasi Geospasial"
+}).addTo(layers.coastline);
+
+const bigAdministrative = L.esri.dynamicMapLayer({
+  url:BIG_RBI,layers:[12],opacity:.8,
+  attribution:"Batas Administrasi © Badan Informasi Geospasial"
+}).addTo(layers.administrative);
+
+function esc(v){
+  return String(v ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function display(v,label="Data belum tercantum pada sumber tersedia"){
+  return (v!==undefined && v!==null && String(v).trim()!=="")
+    ? esc(v)
+    : `<span style="color:#84969c">${label}</span>`;
+}
+
+function googleMapsUrl(p){
+  const q = encodeURIComponent(
+    `${p.name || "coastal business"} ${p.village || ""} Bali`
+  );
+  return `https://www.google.com/maps/search/?api=1&query=${q}`;
+}
+
+function osmUrl(p){
+  if(!p.osm_id || !p.osm_type) return "";
+  const type = p.osm_type === "node" ? "node" :
+               p.osm_type === "way" ? "way" : "relation";
+  return `https://www.openstreetmap.org/${type}/${p.osm_id}`;
+}
+
+function websiteUrl(v){
+  if(!v) return "";
+  if(/^https?:\/\//i.test(v)) return v;
+  return "https://" + v;
+}
+
+function sourceLinks(p){
+  const osm = osmUrl(p);
+  const google = googleMapsUrl(p);
+  const web = p.website ? websiteUrl(p.website) : "";
+
+  return `
+    <div class="source-box">
+      <b>Sumber informasi</b><br>
+      Data spasial usaha: <b>OpenStreetMap</b><br>
+      ${osm ? `<a href="${osm}" target="_blank" rel="noopener">Buka objek OpenStreetMap ↗</a><br>` : ""}
+      <a href="${google}" target="_blank" rel="noopener">Cek lokasi di Google Maps ↗</a>
+      ${web ? `<br><a href="${esc(web)}" target="_blank" rel="noopener">Website usaha ↗</a>` : ""}
+      <br><span style="color:#71848a">Google Maps dan website digunakan sebagai tautan verifikasi lokasi/informasi, bukan hasil scraping.</span>
+    </div>
+  `;
+}
+
+function marineActivity(p){
+  const tags = [
+    p.marine_use_type,p.tourism,p.leisure,p.amenity,p.shop
+  ].filter(Boolean).map(x=>String(x).toLowerCase());
+
+  const keywords = [
+    "diving","dive","snorkel","surf","surfing","sailing","boat",
+    "marina","fishing","water","beach","sea","marine","resort"
+  ];
+
+  return keywords.some(k=>tags.some(t=>t.includes(k)));
+}
+
+function badge(text, cls="gray"){
+  return `<span class="badge ${cls}">${esc(text)}</span>`;
+}
+
+function businessPopup(p){
+  const activity = p.marine_use
+    ? String(p.marine_use).toUpperCase()==="YES"
+    : marineActivity(p);
+
+  const distance = p.coastal_distance_m ?? p.distance_coast_m;
+
+  return `
+    <div class="section-title">Identitas usaha</div>
+    <div class="info-row"><span>Jenis usaha</span><span>${display(p.business_type)}</span></div>
+    <div class="info-row"><span>Kategori</span><span>${display(p.tourism || p.amenity || p.leisure || p.shop)}</span></div>
+    <div class="info-row"><span>Alamat</span><span>${display(p.address)}</span></div>
+    <div class="info-row"><span>Desa / lokasi</span><span>${display(p.village)}</span></div>
+    <div class="info-row"><span>Telepon</span><span>${display(p.phone)}</span></div>
+    <div class="info-row"><span>Jam buka</span><span>${display(p.opening_hours)}</span></div>
+
+    <div class="section-title">Konteks pesisir & laut</div>
+    <div class="info-row"><span>Jarak ke pantai</span><span>${distance !== undefined && distance !== null ? esc(distance)+" m" : "Tidak tercantum pada data spasial"}</span></div>
+    <div class="info-row"><span>Indikasi aktivitas laut</span><span>${activity ? badge("Terindikasi","blue") : badge("Tidak teridentifikasi","gray")}</span></div>
+    <div class="info-row"><span>Marine use</span><span>${p.marine_use ? badge(p.marine_use,"blue") : badge("Perlu verifikasi","orange")}</span></div>
+    <div class="info-row"><span>Marine structure</span><span>${p.marine_structure ? badge(p.marine_structure,"blue") : badge("Perlu verifikasi","orange")}</span></div>
+
+    <div class="section-title">Perizinan</div>
+    <div class="info-row"><span>Spatial permit match</span><span>${p.permit_match ? badge(p.permit_match,"green") : badge("Data izin belum tersedia","orange")}</span></div>
+    <div class="info-row"><span>Permit ID</span><span>${display(p.permit_id,"Belum tercantum pada data izin")}</span></div>
+    <div class="info-row"><span>Permit type</span><span>${display(p.permit_type,"Belum tercantum pada data izin")}</span></div>
+    <div class="info-row"><span>Permit status</span><span>${display(p.permit_status,"Belum tercantum pada data izin")}</span></div>
+
+    ${sourceLinks(p)}
+
+    <div class="notice">
+      <b>Interpretasi:</b> “Terindikasi” berarti kategori/atribut sumber menunjukkan
+      kemungkinan keterkaitan dengan aktivitas laut. Status izin tetap perlu diverifikasi
+      terhadap data pemerintah yang berlaku.
+    </div>
+  `;
+}
+
+function structurePopup(p){
+  return `
+    <div class="section-title">Struktur</div>
+    <div class="info-row"><span>Nama</span><span>${display(p.name)}</span></div>
+    <div class="info-row"><span>Tipe</span><span>${display(p.type)}</span></div>
+    <div class="info-row"><span>Luas</span><span>${p.area_m2!=null ? esc(p.area_m2)+" m²" : "Data luas belum tercantum"}</span></div>
+    <div class="info-row"><span>Tanggal deteksi</span><span>${display(p.detection_date)}</span></div>
+    <div class="info-row"><span>Screening</span><span>${display(p.screening_status)}</span></div>
+    <div class="info-row"><span>Prioritas</span><span>${display(p.priority)}</span></div>
+    <div class="source-box">Sumber struktur mengikuti atribut pada <b>marine_structures.geojson</b>.</div>
+  `;
+}
+
+function permitPopup(p){
+  return `
+    <div class="section-title">Area perizinan</div>
+    <div class="info-row"><span>Permit ID</span><span>${display(p.permit_id)}</span></div>
+    <div class="info-row"><span>Jenis</span><span>${display(p.permit_type)}</span></div>
+    <div class="info-row"><span>Pemegang</span><span>${display(p.holder_name)}</span></div>
+    <div class="info-row"><span>Status</span><span>${display(p.permit_status)}</span></div>
+    <div class="source-box">Sumber area mengikuti atribut pada <b>permit_areas.geojson</b>. Pencocokan spasial bukan bukti legalitas perizinan.</div>
+  `;
+}
+
+function openBusiness(p,layer){
+  document.getElementById("drawerTitle").textContent =
+    p.name || "Usaha Pesisir";
+  document.getElementById("drawerSubtitle").textContent =
+    p.business_type || "Coastal business";
+  document.getElementById("drawerBody").innerHTML = businessPopup(p);
+  document.getElementById("infoDrawer").style.display="block";
+  if(layer && layer.getLatLng) map.setView(layer.getLatLng(),16);
+}
+
+function openStructure(p,layer){
+  document.getElementById("drawerTitle").textContent =
+    p.name || "Marine Structure";
+  document.getElementById("drawerSubtitle").textContent =
+    p.type || "Marine structure";
+  document.getElementById("drawerBody").innerHTML = structurePopup(p);
+  document.getElementById("infoDrawer").style.display="block";
+  if(layer && layer.getLatLng) map.setView(layer.getLatLng(),16);
+}
+
+function openPermit(p){
+  document.getElementById("drawerTitle").textContent="Permit Area";
+  document.getElementById("drawerSubtitle").textContent=p.permit_type || "Spatial permit";
+  document.getElementById("drawerBody").innerHTML=permitPopup(p);
+  document.getElementById("infoDrawer").style.display="block";
+}
+function closeDrawer(){document.getElementById("infoDrawer").style.display="none"}
+
+async function loadGeoJSON(name){
+  try{
+    const res=await fetch(DATA[name]+"?v="+Date.now());
+    if(!res.ok) throw new Error("File not found");
+    const data=await res.json();
+
+    let layer;
+
+    if(name==="businesses"){
+      layer=L.geoJSON(data,{
+        pointToLayer:(f,ll)=>L.circleMarker(ll,{
+          radius:7,fillColor:"#1565c0",color:"#fff",weight:2,fillOpacity:.9
+        }),
+        onEachFeature:(f,l)=>{
+          l.on("click",()=>openBusiness(f.properties,l));
+        }
+      });
+      document.getElementById("totalBusiness").textContent=data.features?.length || 0;
+      document.getElementById("status-businesses").textContent="Loaded";
+      document.getElementById("dot-businesses").classList.add("ok");
+    }
+
+    if(name==="structures"){
+      layer=L.geoJSON(data,{
+        pointToLayer:(f,ll)=>L.circleMarker(ll,{
+          radius:7,fillColor:"#ef6c00",color:"#fff",weight:2,fillOpacity:.9
+        }),
+        style:()=>({color:"#ef6c00",weight:2,fillColor:"#ef6c00",fillOpacity:.25}),
+        onEachFeature:(f,l)=>l.on("click",()=>openStructure(f.properties,l))
+      });
+      document.getElementById("status-structures").textContent="Loaded";
+      document.getElementById("dot-structures").classList.add("ok");
+    }
+
+    if(name==="permits"){
+      layer=L.geoJSON(data,{
+        style:()=>({color:"#43a047",weight:2,fillColor:"#43a047",fillOpacity:.16}),
+        onEachFeature:(f,l)=>l.on("click",()=>openPermit(f.properties))
+      });
+      document.getElementById("status-permits").textContent="Loaded";
+      document.getElementById("dot-permits").classList.add("ok");
+    }
+
+    if(layer) layer.addTo(layers[name]);
+
+    updateDashboard();
+  }catch(err){
+    console.warn(name,err);
+    const status=document.getElementById("status-"+name);
+    const dot=document.getElementById("dot-"+name);
+    if(status) status.textContent="Perlu diperbarui";
+    if(dot) dot.classList.add("bad");
+  }
+}
+
+function updateDashboard(){
+  let total=0,marine=0,structure=0,permit=0;
+
+  layers.businesses.eachLayer(group=>{
+    if(!group.eachLayer) return;
+    group.eachLayer(l=>{
+      const p=l.feature?.properties || {};
+      total++;
+      if(String(p.marine_use||"").toUpperCase()==="YES" || marineActivity(p)) marine++;
+      if(String(p.marine_structure||"").toUpperCase()==="YES") structure++;
+      if(["YES","MATCHED"].includes(String(p.permit_match||"").toUpperCase())) permit++;
+    });
+  });
+
+  document.getElementById("totalBusiness").textContent=total;
+  document.getElementById("marineBusiness").textContent=marine;
+  document.getElementById("structureBusiness").textContent=structure;
+  document.getElementById("permitBusiness").textContent=permit;
+}
+
+function toggleLayer(name,id){
+  const btn=document.getElementById(id);
+  if(map.hasLayer(layers[name])){
+    map.removeLayer(layers[name]);btn.classList.remove("on");
+  }else{
+    map.addLayer(layers[name]);btn.classList.add("on");
+  }
+}
+
+function activateMenu(btn,mode){
+  document.querySelectorAll(".nav-btn").forEach(x=>x.classList.remove("active"));
+  if(btn) btn.classList.add("active");
+
+  const titles={
+    check:"Cek Usaha Bahari di Pesisir",
+    marine:"Aktivitas & Struktur Laut",
+    permit:"Perizinan & Screening",
+    source:"Sumber Data"
+  };
+
+  const panelTitle=document.querySelector(".panel .panel-title");
+  if(mode==="check"){
+    panelTitle.textContent=titles.check;
+    document.getElementById("searchBox").placeholder="Cari nama usaha, jenis, aktivitas, desa...";
+  }
+  if(mode==="marine"){
+    panelTitle.textContent=titles.marine;
+    document.getElementById("searchBox").placeholder="Cari diving, marina, surfing, fishing, struktur...";
+    map.addLayer(layers.structures);
+  }
+  if(mode==="permit"){
+    panelTitle.textContent=titles.permit;
+    document.getElementById("searchBox").placeholder="Cari permit ID, jenis izin, pemegang...";
+    map.addLayer(layers.permits);
+  }
+  if(mode==="source"){
+    panelTitle.textContent=titles.source;
+    document.getElementById("searchBox").placeholder="Cari sumber atau nama usaha...";
+  }
+}
+
+document.getElementById("searchBox").addEventListener("input",function(){
+  const q=this.value.toLowerCase().trim();
+  if(!q) return;
+
+  let found=false;
+
+  layers.businesses.eachLayer(group=>{
+    if(!group.eachLayer || found) return;
+    group.eachLayer(l=>{
+      if(found) return;
+      const p=l.feature?.properties||{};
+      const hay=[
+        p.name,p.business_type,p.tourism,p.amenity,p.leisure,p.shop,
+        p.address,p.village,p.marine_use_type
+      ].filter(Boolean).join(" ").toLowerCase();
+
+      if(hay.includes(q)){
+        found=true;
+        openBusiness(p,l);
+      }
+    });
+  });
+
+  if(!found){
+    layers.structures.eachLayer(group=>{
+      if(!group.eachLayer || found) return;
+      group.eachLayer(l=>{
+        if(found) return;
+        const p=l.feature?.properties||{};
+        const hay=[p.name,p.type,p.object_id].filter(Boolean).join(" ").toLowerCase();
+        if(hay.includes(q)){
+          found=true;openStructure(p,l);
+        }
+      });
+    });
+  }
+});
+
+L.control.layers(
+  {"Satellite":satellite,"OpenStreetMap":osm},
+  null,{position:"topright"}
+).addTo(map);
+
+L.control.scale({imperial:false}).addTo(map);
+
+function enterApp(){
+  document.getElementById("landing").style.display="none";
+  document.getElementById("app").style.display="block";
+  setTimeout(()=>map.invalidateSize(),200);
+}
+
+function backHome(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("landing").style.display="flex";
+  closeDrawer();
+}
+
+function showAbout(){
+  alert(
+    "Marine-Check Bali adalah portal screening spasial awal untuk mengidentifikasi usaha di kawasan pesisir, konteks aktivitas laut, struktur, dan area perizinan yang tersedia. Informasi usaha berasal dari sumber spasial yang ditampilkan dan perlu diverifikasi terhadap sumber resmi."
+  );
+}
+
+loadGeoJSON("businesses");
+loadGeoJSON("structures");
+loadGeoJSON("permits");
 </script>
-
-
 </body>
 </html>
