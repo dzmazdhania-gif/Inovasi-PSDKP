@@ -1,4 +1,5 @@
 import time
+import math
 import requests
 import geopandas as gpd
 
@@ -13,21 +14,19 @@ from shapely.ops import unary_union
 OUTPUT_FILE = "coastal_businesses.geojson"
 COASTLINE_FILE = "coastline.geojson"
 
-# Usaha maksimal 1 km dari garis pantai
+# Maksimal jarak dari garis pantai
 MAX_DISTANCE_M = 1000
 
-# Bounding box Bali
+# Bali bounding box
 # south, west, north, east
 BALI_BBOX = "-9.1,114.4,-8.0,115.8"
 
-# Overpass servers
 OVERPASS_ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
 ]
 
-# Retry
 MAX_RETRIES_PER_QUERY = 3
 RETRY_DELAY_SECONDS = 8
 
@@ -46,142 +45,138 @@ HEADERS = {
 
 
 # ============================================================
-# OVERPASS QUERY BATCHES
+# OVERPASS QUERY
 # ============================================================
 
-QUERY_BATCHES = [
+QUERY = f"""
+[out:json][timeout:300];
 
-    # --------------------------------------------------------
-    # BATCH 1 — HOTELS / RESORTS / ACCOMMODATION
-    # --------------------------------------------------------
+(
+    /*
+    ============================================================
+    ACCOMMODATION
+    ============================================================
+    */
 
-    f"""
-    [out:json][timeout:120];
+    nwr["tourism"="hotel"]["name"]({BALI_BBOX});
+    nwr["tourism"="resort"]["name"]({BALI_BBOX});
+    nwr["tourism"="guest_house"]["name"]({BALI_BBOX});
+    nwr["tourism"="hostel"]["name"]({BALI_BBOX});
+    nwr["tourism"="motel"]["name"]({BALI_BBOX});
+    nwr["tourism"="apartment"]["name"]({BALI_BBOX});
+    nwr["tourism"="chalet"]["name"]({BALI_BBOX});
+    nwr["tourism"="camp_site"]["name"]({BALI_BBOX});
 
-    (
-        nwr["tourism"="hotel"]["name"]({BALI_BBOX});
-        nwr["tourism"="resort"]["name"]({BALI_BBOX});
-        nwr["tourism"="guest_house"]["name"]({BALI_BBOX});
-        nwr["tourism"="hostel"]["name"]({BALI_BBOX});
-        nwr["tourism"="motel"]["name"]({BALI_BBOX});
-        nwr["tourism"="apartment"]["name"]({BALI_BBOX});
-        nwr["tourism"="chalet"]["name"]({BALI_BBOX});
-        nwr["tourism"="camp_site"]["name"]({BALI_BBOX});
-    );
+    /*
+    ============================================================
+    MARINE TOURISM
+    ============================================================
+    */
 
-    out center tags;
-    """,
+    nwr["tourism"="attraction"]["name"]({BALI_BBOX});
+    nwr["tourism"="viewpoint"]["name"]({BALI_BBOX});
+    nwr["tourism"="theme_park"]["name"]({BALI_BBOX});
 
-    # --------------------------------------------------------
-    # BATCH 2 — RESTAURANT / CAFE / BAR
-    # --------------------------------------------------------
+    /*
+    ============================================================
+    MARINA / WATER ACTIVITIES
+    ============================================================
+    */
 
-    f"""
-    [out:json][timeout:120];
+    nwr["leisure"="marina"]["name"]({BALI_BBOX});
+    nwr["leisure"="slipway"]["name"]({BALI_BBOX});
+    nwr["leisure"="water_park"]["name"]({BALI_BBOX});
+    nwr["leisure"="sports_centre"]["name"]({BALI_BBOX});
+    nwr["leisure"="beach_resort"]["name"]({BALI_BBOX});
 
-    (
-        nwr["amenity"="restaurant"]["name"]({BALI_BBOX});
-        nwr["amenity"="cafe"]["name"]({BALI_BBOX});
-        nwr["amenity"="bar"]["name"]({BALI_BBOX});
-        nwr["amenity"="pub"]["name"]({BALI_BBOX});
-        nwr["amenity"="fast_food"]["name"]({BALI_BBOX});
-    );
+    /*
+    ============================================================
+    DIVING / SURFING / SAILING / FISHING
+    ============================================================
+    */
 
-    out center tags;
-    """,
+    nwr["sport"="diving"]["name"]({BALI_BBOX});
+    nwr["sport"="surfing"]["name"]({BALI_BBOX});
+    nwr["sport"="sailing"]["name"]({BALI_BBOX});
+    nwr["sport"="fishing"]["name"]({BALI_BBOX});
+    nwr["sport"="swimming"]["name"]({BALI_BBOX});
+    nwr["sport"="kitesurfing"]["name"]({BALI_BBOX});
+    nwr["sport"="windsurfing"]["name"]({BALI_BBOX});
 
-    # --------------------------------------------------------
-    # BATCH 3 — MARINE / DIVING / FISHING
-    # --------------------------------------------------------
+    /*
+    ============================================================
+    MARINE / OUTDOOR SHOPS
+    ============================================================
+    */
 
-    f"""
-    [out:json][timeout:120];
+    nwr["shop"="diving"]["name"]({BALI_BBOX});
+    nwr["shop"="fishing"]["name"]({BALI_BBOX});
+    nwr["shop"="sports"]["name"]({BALI_BBOX});
+    nwr["shop"="outdoor"]["name"]({BALI_BBOX});
+    nwr["shop"="boat"]["name"]({BALI_BBOX});
 
-    (
-        nwr["leisure"="marina"]["name"]({BALI_BBOX});
-        nwr["leisure"="water_park"]["name"]({BALI_BBOX});
-        nwr["leisure"="sports_centre"]["name"]({BALI_BBOX});
+    /*
+    ============================================================
+    BOAT / WATER RENTAL
+    ============================================================
+    */
 
-        nwr["shop"="diving"]["name"]({BALI_BBOX});
-        nwr["shop"="fishing"]["name"]({BALI_BBOX});
-        nwr["shop"="sports"]["name"]({BALI_BBOX});
-        nwr["shop"="outdoor"]["name"]({BALI_BBOX});
-    );
+    nwr["amenity"="boat_rental"]["name"]({BALI_BBOX});
+    nwr["amenity"="boat_storage"]["name"]({BALI_BBOX});
 
-    out center tags;
-    """,
+    /*
+    ============================================================
+    COASTAL FOOD / HOSPITALITY
+    ============================================================
+    */
 
-    # --------------------------------------------------------
-    # BATCH 4 — TOURISM / ATTRACTIONS
-    # --------------------------------------------------------
+    nwr["amenity"="restaurant"]["name"]({BALI_BBOX});
+    nwr["amenity"="cafe"]["name"]({BALI_BBOX});
+    nwr["amenity"="bar"]["name"]({BALI_BBOX});
+    nwr["amenity"="pub"]["name"]({BALI_BBOX});
 
-    f"""
-    [out:json][timeout:120];
+    /*
+    ============================================================
+    BEACH / RECREATION
+    ============================================================
+    */
 
-    (
-        nwr["tourism"="attraction"]["name"]({BALI_BBOX});
-        nwr["tourism"="theme_park"]["name"]({BALI_BBOX});
-        nwr["tourism"="museum"]["name"]({BALI_BBOX});
-        nwr["tourism"="viewpoint"]["name"]({BALI_BBOX});
-    );
+    nwr["leisure"="beach"]["name"]({BALI_BBOX});
+    nwr["leisure"="golf_course"]["name"]({BALI_BBOX});
+);
 
-    out center tags;
-    """,
-
-    # --------------------------------------------------------
-    # BATCH 5 — OTHER COASTAL RECREATION
-    # --------------------------------------------------------
-
-    f"""
-    [out:json][timeout:120];
-
-    (
-        nwr["leisure"="beach_resort"]["name"]({BALI_BBOX});
-        nwr["leisure"="golf_course"]["name"]({BALI_BBOX});
-        nwr["sport"="surfing"]["name"]({BALI_BBOX});
-        nwr["sport"="diving"]["name"]({BALI_BBOX});
-        nwr["sport"="sailing"]["name"]({BALI_BBOX});
-    );
-
-    out center tags;
-    """
-]
+out center tags;
+"""
 
 
 # ============================================================
-# DOWNLOAD ONE OVERPASS QUERY
+# DOWNLOAD OSM
 # ============================================================
 
-def download_query(query, batch_number):
+def download_osm_data():
 
     print()
     print("=" * 70)
-    print(f"OVERPASS BATCH {batch_number}")
+    print("DOWNLOADING OSM DATA")
     print("=" * 70)
 
-    endpoint_order = list(OVERPASS_ENDPOINTS)
-
-    for attempt in range(MAX_RETRIES_PER_QUERY):
+    for attempt in range(1, MAX_RETRIES_PER_QUERY + 1):
 
         print()
-        print(
-            f"Attempt {attempt + 1}/"
-            f"{MAX_RETRIES_PER_QUERY}"
-        )
+        print(f"Attempt {attempt}/{MAX_RETRIES_PER_QUERY}")
 
-        for endpoint in endpoint_order:
+        for endpoint in OVERPASS_ENDPOINTS:
 
             print()
-            print("Trying:")
-            print(endpoint)
+            print("Trying:", endpoint)
 
             try:
 
                 response = requests.post(
                     endpoint,
-                    data={"data": query},
+                    data={"data": QUERY},
                     headers=HEADERS,
-                    timeout=180
+                    timeout=360
                 )
 
                 print(
@@ -189,35 +184,29 @@ def download_query(query, batch_number):
                     response.status_code
                 )
 
-                if response.status_code == 200:
-
-                    data = response.json()
-
-                    elements = data.get(
-                        "elements",
-                        []
-                    )
+                if response.status_code != 200:
 
                     print(
-                        "Downloaded elements:",
-                        len(elements)
-                    )
-
-                    if elements:
-
-                        return data
-
-                    print(
-                        "WARNING: Server returned "
-                        "zero elements."
-                    )
-
-                else:
-
-                    print(
-                        "Server response:",
                         response.text[:500]
                     )
+
+                    continue
+
+                data = response.json()
+
+                elements = data.get(
+                    "elements",
+                    []
+                )
+
+                print(
+                    "Downloaded elements:",
+                    len(elements)
+                )
+
+                if elements:
+
+                    return data
 
             except Exception as error:
 
@@ -228,13 +217,9 @@ def download_query(query, batch_number):
 
             time.sleep(3)
 
-        print()
-        print(
-            "All endpoints failed for this attempt."
-        )
+        if attempt < MAX_RETRIES_PER_QUERY:
 
-        if attempt < MAX_RETRIES_PER_QUERY - 1:
-
+            print()
             print(
                 f"Waiting {RETRY_DELAY_SECONDS} seconds..."
             )
@@ -243,98 +228,35 @@ def download_query(query, batch_number):
                 RETRY_DELAY_SECONDS
             )
 
-    print()
-    print(
-        f"WARNING: Batch {batch_number} failed."
+    raise RuntimeError(
+        "All Overpass servers failed."
     )
 
-    return {
-        "elements": []
-    }
-
 
 # ============================================================
-# DOWNLOAD ALL BATCHES
-# ============================================================
-
-def download_osm_data():
-
-    all_elements = []
-
-    for index, query in enumerate(
-        QUERY_BATCHES,
-        start=1
-    ):
-
-        data = download_query(
-            query,
-            index
-        )
-
-        elements = data.get(
-            "elements",
-            []
-        )
-
-        all_elements.extend(
-            elements
-        )
-
-        print()
-        print(
-            f"Batch {index} contributed:",
-            len(elements),
-            "elements"
-        )
-
-        # Give Overpass a short break
-        time.sleep(5)
-
-    print()
-    print("=" * 70)
-    print("OVERPASS DOWNLOAD COMPLETE")
-    print("=" * 70)
-
-    print(
-        "Total raw elements:",
-        len(all_elements)
-    )
-
-    return {
-        "elements": all_elements
-    }
-
-
-# ============================================================
-# GET COORDINATES
+# COORDINATES
 # ============================================================
 
 def get_coordinates(element):
 
     # Node
-    if (
-        "lat" in element
-        and "lon" in element
-    ):
+    if "lat" in element and "lon" in element:
 
         return (
-            element["lon"],
-            element["lat"]
+            float(element["lon"]),
+            float(element["lat"])
         )
 
-    # Way / Relation
+    # Way / relation
     if "center" in element:
 
         center = element["center"]
 
-        if (
-            "lat" in center
-            and "lon" in center
-        ):
+        if "lat" in center and "lon" in center:
 
             return (
-                center["lon"],
-                center["lat"]
+                float(center["lon"]),
+                float(center["lat"])
             )
 
     return None
@@ -346,65 +268,24 @@ def get_coordinates(element):
 
 def determine_business_type(tags):
 
-    tourism = tags.get(
-        "tourism",
-        ""
-    )
-
-    amenity = tags.get(
-        "amenity",
-        ""
-    )
-
-    leisure = tags.get(
-        "leisure",
-        ""
-    )
-
-    shop = tags.get(
-        "shop",
-        ""
-    )
-
-    sport = tags.get(
+    priority = [
         "sport",
-        ""
-    )
+        "shop",
+        "leisure",
+        "tourism",
+        "amenity"
+    ]
 
-    if tourism:
+    for key in priority:
 
-        return tourism.replace(
-            "_",
-            " "
-        ).title()
+        value = tags.get(key, "")
 
-    if amenity:
+        if value:
 
-        return amenity.replace(
-            "_",
-            " "
-        ).title()
-
-    if leisure:
-
-        return leisure.replace(
-            "_",
-            " "
-        ).title()
-
-    if shop:
-
-        return shop.replace(
-            "_",
-            " "
-        ).title()
-
-    if sport:
-
-        return sport.replace(
-            "_",
-            " "
-        ).title()
+            return value.replace(
+                "_",
+                " "
+            ).title()
 
     return "Other"
 
@@ -415,28 +296,34 @@ def determine_business_type(tags):
 
 def determine_marine_relevance(tags):
 
-    values = {
+    marine_values = {
 
-        tags.get("tourism", ""),
-        tags.get("amenity", ""),
-        tags.get("leisure", ""),
-        tags.get("shop", ""),
-        tags.get("sport", "")
+        "diving",
+        "surfing",
+        "sailing",
+        "fishing",
+        "swimming",
+        "kitesurfing",
+        "windsurfing",
+        "marina",
+        "slipway",
+        "boat_rental",
+        "boat_storage",
+        "beach_resort",
+        "water_park"
     }
 
-    marine_types = {
+    values = {
 
-        "marina",
-        "diving",
-        "fishing",
-        "water_park",
-        "beach_resort",
-        "surfing",
-        "sailing"
+        tags.get("sport", ""),
+        tags.get("shop", ""),
+        tags.get("leisure", ""),
+        tags.get("amenity", ""),
+        tags.get("tourism", "")
     }
 
     if values.intersection(
-        marine_types
+        marine_values
     ):
 
         return "Marine-related"
@@ -452,10 +339,18 @@ def create_features(data):
 
     features = []
 
-    for element in data.get(
+    elements = data.get(
         "elements",
         []
-    ):
+    )
+
+    print()
+    print(
+        "Processing OSM elements:",
+        len(elements)
+    )
+
+    for element in elements:
 
         tags = element.get(
             "tags",
@@ -468,6 +363,7 @@ def create_features(data):
         ).strip()
 
         if not name:
+
             continue
 
         coordinates = get_coordinates(
@@ -475,142 +371,123 @@ def create_features(data):
         )
 
         if not coordinates:
-            continue
-
-        try:
-
-            lon = float(
-                coordinates[0]
-            )
-
-            lat = float(
-                coordinates[1]
-            )
-
-        except Exception:
 
             continue
 
-        # Bali coordinate validation
+        lon, lat = coordinates
+
+        # Bali validation
         if not (
+            114.4 <= lon <= 115.8
+            and
             -9.1 <= lat <= -8.0
         ):
 
             continue
 
-        if not (
-            114.4 <= lon <= 115.8
-        ):
-
-            continue
-
-        business_type = (
-            determine_business_type(
-                tags
-            )
-        )
-
-        marine_relevance = (
-            determine_marine_relevance(
-                tags
-            )
-        )
-
-        properties = {
-
-            "osm_id":
-                element.get("id"),
-
-            "osm_type":
-                element.get("type"),
-
-            "name":
-                name,
-
-            "business_type":
-                business_type,
-
-            "marine_relevance":
-                marine_relevance,
-
-            "tourism":
-                tags.get(
-                    "tourism",
-                    ""
-                ),
-
-            "amenity":
-                tags.get(
-                    "amenity",
-                    ""
-                ),
-
-            "leisure":
-                tags.get(
-                    "leisure",
-                    ""
-                ),
-
-            "shop":
-                tags.get(
-                    "shop",
-                    ""
-                ),
-
-            "sport":
-                tags.get(
-                    "sport",
-                    ""
-                ),
-
-            "address":
-                (
-                    tags.get("addr:full")
-                    or tags.get("addr:street")
-                    or ""
-                ),
-
-            "village":
-                (
-                    tags.get("addr:place")
-                    or tags.get("addr:village")
-                    or ""
-                ),
-
-            "phone":
-                (
-                    tags.get("phone")
-                    or tags.get("contact:phone")
-                    or ""
-                ),
-
-            "website":
-                (
-                    tags.get("website")
-                    or tags.get("contact:website")
-                    or ""
-                ),
-
-            "opening_hours":
-                tags.get(
-                    "opening_hours",
-                    ""
-                ),
-
-            "source":
-                "OpenStreetMap",
-
-            "coastal_distance_m":
-                None
-        }
-
         feature = {
 
-            "type":
-                "Feature",
+            "type": "Feature",
 
-            "properties":
-                properties,
+            "properties": {
+
+                "osm_id":
+                    element.get("id"),
+
+                "osm_type":
+                    element.get("type"),
+
+                "name":
+                    name,
+
+                "business_type":
+                    determine_business_type(
+                        tags
+                    ),
+
+                "marine_relevance":
+                    determine_marine_relevance(
+                        tags
+                    ),
+
+                "tourism":
+                    tags.get(
+                        "tourism",
+                        ""
+                    ),
+
+                "amenity":
+                    tags.get(
+                        "amenity",
+                        ""
+                    ),
+
+                "leisure":
+                    tags.get(
+                        "leisure",
+                        ""
+                    ),
+
+                "shop":
+                    tags.get(
+                        "shop",
+                        ""
+                    ),
+
+                "sport":
+                    tags.get(
+                        "sport",
+                        ""
+                    ),
+
+                "address":
+                    (
+                        tags.get("addr:full")
+                        or
+                        tags.get("addr:street")
+                        or
+                        ""
+                    ),
+
+                "village":
+                    (
+                        tags.get("addr:place")
+                        or
+                        tags.get("addr:village")
+                        or
+                        ""
+                    ),
+
+                "phone":
+                    (
+                        tags.get("phone")
+                        or
+                        tags.get("contact:phone")
+                        or
+                        ""
+                    ),
+
+                "website":
+                    (
+                        tags.get("website")
+                        or
+                        tags.get("contact:website")
+                        or
+                        ""
+                    ),
+
+                "opening_hours":
+                    tags.get(
+                        "opening_hours",
+                        ""
+                    ),
+
+                "source":
+                    "OpenStreetMap",
+
+                "coastal_distance_m":
+                    None
+            },
 
             "geometry": {
 
@@ -628,7 +505,7 @@ def create_features(data):
 
     print()
     print(
-        "Named businesses extracted:",
+        "Named OSM businesses:",
         len(features)
     )
 
@@ -636,7 +513,53 @@ def create_features(data):
 
 
 # ============================================================
-# FILTER BY COASTLINE
+# HAVERSINE DISTANCE
+# ============================================================
+
+def haversine_distance(
+    lon1,
+    lat1,
+    lon2,
+    lat2
+):
+
+    R = 6371000
+
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+
+    dphi = math.radians(
+        lat2 - lat1
+    )
+
+    dlambda = math.radians(
+        lon2 - lon1
+    )
+
+    a = (
+        math.sin(dphi / 2) ** 2
+        +
+        math.cos(phi1)
+        *
+        math.cos(phi2)
+        *
+        math.sin(dlambda / 2) ** 2
+    )
+
+    return (
+        2
+        *
+        R
+        *
+        math.atan2(
+            math.sqrt(a),
+            math.sqrt(1 - a)
+        )
+    )
+
+
+# ============================================================
+# FILTER COASTAL BUSINESSES
 # ============================================================
 
 def filter_coastal_businesses(
@@ -645,7 +568,7 @@ def filter_coastal_businesses(
 
     print()
     print("=" * 70)
-    print("LOADING COASTLINE")
+    print("FILTERING COASTAL BUSINESSES")
     print("=" * 70)
 
     coastline = gpd.read_file(
@@ -658,21 +581,7 @@ def filter_coastal_businesses(
             "coastline.geojson is empty."
         )
 
-    print(
-        "Coastline features:",
-        len(coastline)
-    )
-
-    # Ensure CRS
     if coastline.crs is None:
-
-        print(
-            "WARNING: coastline has no CRS."
-        )
-
-        print(
-            "Assuming EPSG:4326."
-        )
 
         coastline = coastline.set_crs(
             "EPSG:4326"
@@ -684,19 +593,164 @@ def filter_coastal_businesses(
             "EPSG:4326"
         )
 
-    # Merge coastline
     coastline_geometry = unary_union(
         coastline.geometry
     )
 
-    if not features:
+    # --------------------------------------------------------
+    # IMPORTANT:
+    # use local UTM zones automatically
+    # --------------------------------------------------------
 
-        raise RuntimeError(
-            "No named business features "
-            "were extracted from OSM."
+    results = []
+
+    print(
+        "Input businesses:",
+        len(features)
+    )
+
+    for feature in features:
+
+        lon, lat = feature[
+            "geometry"
+        ]["coordinates"]
+
+        point = Point(
+            lon,
+            lat
         )
 
-    # Business GeoDataFrame
+        # Bali:
+        # west -> UTM 50S
+        # east -> UTM 51S
+        epsg = (
+            32750
+            if lon < 114.0
+            else 32751
+        )
+
+        point_gdf = gpd.GeoSeries(
+            [point],
+            crs="EPSG:4326"
+        ).to_crs(
+            f"EPSG:{epsg}"
+        )
+
+        coast_gdf = gpd.GeoSeries(
+            [coastline_geometry],
+            crs="EPSG:4326"
+        ).to_crs(
+            f"EPSG:{epsg}"
+        )
+
+        distance = point_gdf.iloc[0].distance(
+            coast_gdf.iloc[0]
+        )
+
+        if distance <= MAX_DISTANCE_M:
+
+            new_feature = feature.copy()
+
+            new_feature[
+                "properties"
+            ] = feature[
+                "properties"
+            ].copy()
+
+            new_feature[
+                "properties"
+            ][
+                "coastal_distance_m"
+            ] = round(
+                distance,
+                1
+            )
+
+            results.append(
+                new_feature
+            )
+
+    print()
+    print(
+        "Businesses within",
+        MAX_DISTANCE_M,
+        "m:",
+        len(results)
+    )
+
+    return results
+
+
+# ============================================================
+# REMOVE DUPLICATES
+# ============================================================
+
+def remove_duplicates(
+    features
+):
+
+    print()
+    print(
+        "Removing duplicates..."
+    )
+
+    seen = set()
+    unique = []
+
+    for feature in features:
+
+        props = feature[
+            "properties"
+        ]
+
+        osm_key = (
+            props.get("osm_type"),
+            props.get("osm_id")
+        )
+
+        if osm_key in seen:
+
+            continue
+
+        seen.add(
+            osm_key
+        )
+
+        unique.append(
+            feature
+        )
+
+    print(
+        "Before:",
+        len(features)
+    )
+
+    print(
+        "After:",
+        len(unique)
+    )
+
+    print(
+        "Duplicates removed:",
+        len(features) - len(unique)
+    )
+
+    return unique
+
+
+# ============================================================
+# EXPORT
+# ============================================================
+
+def export_geojson(
+    features
+):
+
+    print()
+    print(
+        "Exporting GeoJSON..."
+    )
+
     gdf = gpd.GeoDataFrame(
 
         [
@@ -705,239 +759,17 @@ def filter_coastal_businesses(
         ],
 
         geometry=[
-
             Point(
                 feature[
                     "geometry"
                 ]["coordinates"]
             )
-
             for feature in features
         ],
 
         crs="EPSG:4326"
     )
 
-    print(
-        "Raw businesses:",
-        len(gdf)
-    )
-
-    # --------------------------------------------------------
-    # PROJECT TO UTM 50S
-    # --------------------------------------------------------
-
-    print(
-        "Projecting to EPSG:32750..."
-    )
-
-    gdf_projected = gdf.to_crs(
-        "EPSG:32750"
-    )
-
-    coastline_projected = (
-
-        gpd.GeoSeries(
-            [coastline_geometry],
-            crs="EPSG:4326"
-        )
-
-        .to_crs(
-            "EPSG:32750"
-        )
-
-        .iloc[0]
-    )
-
-    # --------------------------------------------------------
-    # DISTANCE TO COASTLINE
-    # --------------------------------------------------------
-
-    print(
-        "Calculating distance to coastline..."
-    )
-
-    gdf_projected[
-        "coastal_distance_m"
-    ] = (
-
-        gdf_projected.geometry
-        .distance(
-            coastline_projected
-        )
-    )
-
-    # --------------------------------------------------------
-    # FILTER
-    # --------------------------------------------------------
-
-    coastal = gdf_projected[
-        gdf_projected[
-            "coastal_distance_m"
-        ]
-        <= MAX_DISTANCE_M
-    ].copy()
-
-    coastal[
-        "coastal_distance_m"
-    ] = (
-
-        coastal[
-            "coastal_distance_m"
-        ]
-
-        .round(1)
-    )
-
-    print()
-    print(
-        "Businesses within",
-        MAX_DISTANCE_M,
-        "meters:",
-        len(coastal)
-    )
-
-    # Back to WGS84
-    coastal = coastal.to_crs(
-        "EPSG:4326"
-    )
-
-    return coastal
-
-
-# ============================================================
-# REMOVE DUPLICATES
-# ============================================================
-
-def remove_duplicates(
-    gdf
-):
-
-    if gdf.empty:
-
-        return gdf
-
-    print()
-    print(
-        "Removing duplicates..."
-    )
-
-    before = len(gdf)
-
-    # OSM ID duplicates
-    gdf = gdf.drop_duplicates(
-        subset=[
-            "osm_type",
-            "osm_id"
-        ]
-    )
-
-    # Duplicate names at almost
-    # identical coordinates
-    gdf["_lon"] = (
-        gdf.geometry.x.round(5)
-    )
-
-    gdf["_lat"] = (
-        gdf.geometry.y.round(5)
-    )
-
-    gdf = gdf.drop_duplicates(
-        subset=[
-            "name",
-            "_lon",
-            "_lat"
-        ]
-    )
-
-    gdf = gdf.drop(
-        columns=[
-            "_lon",
-            "_lat"
-        ]
-    )
-
-    after = len(gdf)
-
-    print(
-        "Before:",
-        before
-    )
-
-    print(
-        "After:",
-        after
-    )
-
-    print(
-        "Duplicates removed:",
-        before - after
-    )
-
-    return gdf
-
-
-# ============================================================
-# EXPORT GEOJSON
-# ============================================================
-
-def export_geojson(
-    gdf
-):
-
-    print()
-    print(
-        "Exporting GeoJSON..."
-    )
-
-    columns = [
-
-        "osm_id",
-        "osm_type",
-
-        "name",
-        "business_type",
-        "marine_relevance",
-
-        "tourism",
-        "amenity",
-        "leisure",
-        "shop",
-        "sport",
-
-        "address",
-        "village",
-
-        "phone",
-        "website",
-        "opening_hours",
-
-        "coastal_distance_m",
-
-        "source",
-
-        "geometry"
-    ]
-
-    existing_columns = [
-
-        column
-
-        for column in columns
-
-        if column in gdf.columns
-    ]
-
-    gdf = gdf[
-        existing_columns
-    ]
-
-    # WGS84 / GeoJSON
-    gdf = gdf.to_crs(
-        "EPSG:4326"
-    )
-
-    # Export
     gdf.to_file(
         OUTPUT_FILE,
         driver="GeoJSON"
@@ -979,33 +811,10 @@ def main():
     print("Coastal Business Data Downloader")
     print("=" * 70)
 
-    # --------------------------------------------------------
-    # 1. DOWNLOAD OSM
-    # --------------------------------------------------------
-
+    # 1. Download OSM
     data = download_osm_data()
 
-    raw_elements = data.get(
-        "elements",
-        []
-    )
-
-    print()
-    print(
-        "Total downloaded OSM elements:",
-        len(raw_elements)
-    )
-
-    if not raw_elements:
-
-        raise RuntimeError(
-            "No OSM data was downloaded."
-        )
-
-    # --------------------------------------------------------
-    # 2. OSM -> FEATURES
-    # --------------------------------------------------------
-
+    # 2. OSM -> features
     features = create_features(
         data
     )
@@ -1013,41 +822,26 @@ def main():
     if not features:
 
         raise RuntimeError(
-            "OSM data was downloaded, "
-            "but no named businesses were extracted."
+            "No named businesses extracted."
         )
 
-    # --------------------------------------------------------
-    # 3. COASTAL FILTER
-    # --------------------------------------------------------
-
-    coastal = (
-        filter_coastal_businesses(
-            features
-        )
+    # 3. Coastal filter
+    coastal = filter_coastal_businesses(
+        features
     )
 
-    # --------------------------------------------------------
-    # 4. REMOVE DUPLICATES
-    # --------------------------------------------------------
-
-    coastal = (
-        remove_duplicates(
-            coastal
-        )
-    )
-
-    if coastal.empty:
+    if not coastal:
 
         raise RuntimeError(
-            "No businesses were found "
-            "within the coastline distance."
+            "No businesses within coastline distance."
         )
 
-    # --------------------------------------------------------
-    # 5. EXPORT
-    # --------------------------------------------------------
+    # 4. Remove duplicates
+    coastal = remove_duplicates(
+        coastal
+    )
 
+    # 5. Export
     export_geojson(
         coastal
     )
